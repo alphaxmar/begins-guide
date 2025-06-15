@@ -88,7 +88,7 @@ const CreateArticle = () => {
           cover_image_url: newArticle.cover_image_url || null,
           status: newArticle.status,
         }])
-        .select()
+        .select('slug, status')
         .single();
       
       if (error) {
@@ -102,8 +102,9 @@ const CreateArticle = () => {
     onSuccess: (data) => {
       toast.success("สร้างบทความสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["articles"] });
-      // Navigate to the new article if it's published
-      if (data.status === 'published') {
+      // NOTE: The auto-generated Supabase type might be outdated.
+      // We cast `data` to `any` to access the `status` property, which exists at runtime.
+      if (data && (data as any).status === 'published') {
         navigate(`/articles/${data.slug}`);
       } else {
         // Or back to the admin dashboard if it's a draft
