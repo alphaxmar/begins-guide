@@ -53,7 +53,15 @@ const CoursesPage = () => {
       {!isLoading && !isError && courses && courses.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              title={product.title}
+              description={product.description || ""}
+              price={product.price}
+              imageUrl={product.image_url || "/placeholder.svg"}
+              slug={product.slug}
+              product_type={product.product_type}
+            />
           ))}
         </div>
       )}
