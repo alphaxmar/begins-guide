@@ -352,6 +352,7 @@ export type Database = {
           price: number
           product_type: Database["public"]["Enums"]["product_type"]
           slug: string
+          template_file_path: string | null
           title: string
         }
         Insert: {
@@ -363,6 +364,7 @@ export type Database = {
           price: number
           product_type?: Database["public"]["Enums"]["product_type"]
           slug: string
+          template_file_path?: string | null
           title: string
         }
         Update: {
@@ -374,6 +376,7 @@ export type Database = {
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
           slug?: string
+          template_file_path?: string | null
           title?: string
         }
         Relationships: []
