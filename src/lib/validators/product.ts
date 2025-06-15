@@ -9,6 +9,7 @@ export const productSchema = z.object({
   price: z.coerce.number().min(0, { message: "ราคาต้องไม่ติดลบ" }),
   product_type: z.enum(["course", "template"], { required_error: "กรุณาเลือกประเภทสินค้า" }),
   image_url: z.string().url({ message: "URL รูปภาพไม่ถูกต้อง" }).optional().or(z.literal('')),
+  image_file: z.instanceof(FileList).optional(),
   template_file: z.instanceof(FileList).optional(),
   template_file_path: z.string().optional(),
 });

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
 import { useAuth } from "@/contexts/AuthContext";
+import { Tables } from "@/integrations/supabase/types";
 
 const CreateProductPage = () => {
   const queryClient = useQueryClient();
@@ -15,65 +16,94 @@ const CreateProductPage = () => {
     mutationFn: async (values: ProductFormValues) => {
       if (!user) throw new Error("User not authenticated");
 
-      // Step 1: Insert product data without file path to get the product ID
-      const { data: newProduct, error: insertError } = await supabase
-        .from("products")
-        .insert({
-          title: values.title,
-          slug: values.slug,
-          price: values.price,
-          product_type: values.product_type,
-          description: values.description || null,
-          image_url: values.image_url || null,
-          instructor_id: user.id,
-          template_file_path: null, // Initially null
-        })
-        .select()
-        .single();
-      
-      if (insertError) {
-        if (insertError.code === '23505') { // unique constraint violation
-            throw new Error("Slug นี้มีอยู่แล้วในระบบ กรุณาเปลี่ยนใหม่");
-        }
-        throw new Error(`เกิดข้อผิดพลาดในการสร้างข้อมูลสินค้า: ${insertError.message}`);
-      }
+      let newProduct: Tables<'products'> | null = null;
+      const uploadedImage = { path: '', url: '' };
+      const uploadedTemplate = { path: '' };
 
-      // Step 2: If it's a template with a file, upload it using the new product ID
-      if (values.product_type === 'template' && values.template_file && values.template_file.length > 0) {
-        const file = values.template_file[0];
-        const sanitizedFileName = file.name.replace(/\s/g, '_');
-        const filePath = `templates/${newProduct.id}/${sanitizedFileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('product_files')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          // Rollback: delete the product we just created if upload fails
-          await supabase.from('products').delete().eq('id', newProduct.id);
-          throw new Error(`ไม่สามารถอัปโหลดไฟล์เทมเพลตได้: ${uploadError.message} การสร้างสินค้าถูกยกเลิก`);
-        }
-        
-        // Step 3: Update the product record with the new file path
-        const { data: updatedProduct, error: updateError } = await supabase
-          .from('products')
-          .update({ template_file_path: filePath })
-          .eq('id', newProduct.id)
+      try {
+        // Step 1: Insert product data with null file/image paths to get the product ID
+        const { data, error: insertError } = await supabase
+          .from("products")
+          .insert({
+            title: values.title,
+            slug: values.slug,
+            price: values.price,
+            product_type: values.product_type,
+            description: values.description || null,
+            image_url: null,
+            instructor_id: user.id,
+            template_file_path: null,
+          })
           .select()
           .single();
+        
+        if (insertError) {
+          if (insertError.code === '23505') throw new Error("Slug นี้มีอยู่แล้วในระบบ กรุณาเปลี่ยนใหม่");
+          throw new Error(`เกิดข้อผิดพลาดในการสร้างข้อมูลสินค้า: ${insertError.message}`);
+        }
+        newProduct = data;
 
-        if (updateError) {
-          // Rollback: delete the uploaded file and the product record if update fails
-          await supabase.storage.from('product_files').remove([filePath]);
-          await supabase.from('products').delete().eq('id', newProduct.id);
-          throw new Error(`เกิดข้อผิดพลาดในการอัปเดตข้อมูลไฟล์: ${updateError.message} การสร้างสินค้าถูกยกเลิก`);
+        // Step 2: Upload image if it exists
+        if (values.image_file && values.image_file.length > 0) {
+          const file = values.image_file[0];
+          const sanitizedFileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+          const filePath = `${newProduct.id}/${sanitizedFileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('product_images')
+            .upload(filePath, file);
+
+          if (uploadError) throw new Error(`อัปโหลดรูปภาพไม่สำเร็จ: ${uploadError.message}`);
+          
+          uploadedImage.path = filePath;
+          const { data: urlData } = supabase.storage.from('product_images').getPublicUrl(filePath);
+          uploadedImage.url = urlData.publicUrl;
         }
 
-        return updatedProduct;
+        // Step 3: Upload template file if it's a template product
+        if (values.product_type === 'template' && values.template_file && values.template_file.length > 0) {
+          const file = values.template_file[0];
+          const sanitizedFileName = file.name.replace(/\s/g, '_');
+          const filePath = `templates/${newProduct.id}/${sanitizedFileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('product_files')
+            .upload(filePath, file);
+
+          if (uploadError) throw new Error(`ไม่สามารถอัปโหลดไฟล์เทมเพลตได้: ${uploadError.message}`);
+          uploadedTemplate.path = filePath;
+        }
+        
+        // Step 4: Update the product record with the new file paths/URLs
+        if (uploadedImage.url || uploadedTemplate.path) {
+          const { data: updatedProduct, error: updateError } = await supabase
+            .from('products')
+            .update({ 
+              image_url: uploadedImage.url || null,
+              template_file_path: uploadedTemplate.path || null,
+            })
+            .eq('id', newProduct.id)
+            .select()
+            .single();
+
+          if (updateError) throw new Error(`เกิดข้อผิดพลาดในการอัปเดตข้อมูลไฟล์: ${updateError.message}`);
+          return updatedProduct;
+        }
+
+        return newProduct;
+      } catch (error) {
+        // Rollback on any failure during the process
+        if (newProduct) {
+          if (uploadedImage.path) {
+            await supabase.storage.from('product_images').remove([uploadedImage.path]);
+          }
+          if (uploadedTemplate.path) {
+            await supabase.storage.from('product_files').remove([uploadedTemplate.path]);
+          }
+          await supabase.from('products').delete().eq('id', newProduct.id);
+        }
+        throw new Error(`${(error as Error).message} การสร้างสินค้าถูกยกเลิก`);
       }
-      
-      // If not a template or no file, return the product created in step 1
-      return newProduct;
     },
     onSuccess: (data) => {
       toast.success("สร้างสินค้าใหม่เรียบร้อยแล้ว!");

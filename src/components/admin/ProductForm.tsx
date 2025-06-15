@@ -32,8 +32,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
       price: 0,
       product_type: "course",
       image_url: "",
+      image_file: undefined,
       ...initialData,
       template_file_path: initialData?.template_file_path || undefined,
+      template_file: undefined,
     },
   });
 
@@ -47,6 +49,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
         product_type: initialData.product_type || "course",
         image_url: initialData.image_url || "",
         template_file_path: initialData.template_file_path || undefined,
+        image_file: undefined,
+        template_file: undefined,
       });
     }
   }, [initialData, form]);

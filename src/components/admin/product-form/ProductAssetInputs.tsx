@@ -3,7 +3,7 @@ import { Control } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ProductFormValues } from "../ProductForm";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
 
 interface ProductAssetInputsProps {
@@ -13,6 +13,8 @@ interface ProductAssetInputsProps {
 }
 
 const ProductAssetInputs: React.FC<ProductAssetInputsProps> = ({ control, productType, initialData }) => {
+  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
+
   return (
     <>
       {productType === 'template' && (
@@ -46,15 +48,35 @@ const ProductAssetInputs: React.FC<ProductAssetInputsProps> = ({ control, produc
       )}
       <FormField
         control={control}
-        name="image_url"
-        render={({ field }) => (
+        name="image_file"
+        render={({ field: { onChange, ...fieldProps } }) => (
           <FormItem>
-            <FormLabel>URL รูปภาพหน้าปก</FormLabel>
+            <FormLabel>รูปภาพหน้าปก</FormLabel>
+            {imagePreview && (
+              <div className="my-2">
+                <img src={imagePreview} alt="Image Preview" className="w-40 h-auto rounded-md object-cover" />
+              </div>
+            )}
             <FormControl>
-              <Input placeholder="https://example.com/image.jpg" {...field} />
+              <Input
+                {...fieldProps}
+                type="file"
+                value={undefined} // Needed for file inputs in react-hook-form
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  const files = event.target.files;
+                  if (files && files.length > 0) {
+                    setImagePreview(URL.createObjectURL(files[0]));
+                    onChange(files);
+                  } else {
+                    setImagePreview(initialData?.image_url || null);
+                    onChange(null);
+                  }
+                }}
+              />
             </FormControl>
             <FormDescription>
-              วาง URL ของรูปภาพที่ต้องการใช้เป็นหน้าปก
+              อัปโหลดไฟล์รูปภาพหน้าปก (ขนาดไม่เกิน 5MB) หากมีรูปเดิมอยู่แล้วจะถูกเขียนทับ
             </FormDescription>
             <FormMessage />
           </FormItem>

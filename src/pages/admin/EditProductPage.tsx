@@ -35,41 +35,62 @@ const EditProductPage = () => {
     mutationFn: async (values: ProductFormValues) => {
       if (!product) throw new Error("Product not found");
 
+      let newImageUrl = product.image_url;
       let newTemplateFilePath = product.template_file_path;
-      const oldTemplateFilePath = product.template_file_path;
+
+      // Handle new image upload
+      if (values.image_file && values.image_file.length > 0) {
+        const file = values.image_file[0];
+        const sanitizedFileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+        const filePath = `${product.id}/${sanitizedFileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('product_images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw new Error(`อัปโหลดรูปภาพไม่สำเร็จ: ${uploadError.message}`);
+        }
+        
+        const { data: urlData } = supabase.storage.from('product_images').getPublicUrl(filePath);
+        newImageUrl = urlData.publicUrl;
+        
+        // Attempt to delete the old image if it exists
+        if (product.image_url) {
+          try {
+            const oldPath = new URL(product.image_url).pathname.split('/product_images/')[1];
+            if (oldPath && oldPath !== filePath) {
+              await supabase.storage.from('product_images').remove([oldPath]);
+            }
+          } catch (e) {
+            console.warn("Could not parse or delete old image file:", e);
+          }
+        }
+      }
 
       // Handle template file changes
+      const oldTemplateFilePath = product.template_file_path;
       if (values.product_type === 'template' && values.template_file && values.template_file.length > 0) {
         const file = values.template_file[0];
-        // Use a predictable file path based on product ID and a sanitized filename
         const sanitizedFileName = file.name.replace(/\s/g, '_');
         const filePath = `templates/${product.id}/${sanitizedFileName}`;
 
-        // Upload the new file, overwriting if a file with the same name exists for this product
         const { error: uploadError } = await supabase.storage
           .from('product_files')
-          .upload(filePath, file, {
-            upsert: true,
-          });
+          .upload(filePath, file, { upsert: true });
 
-        if (uploadError) {
-          throw new Error(`อัปโหลดไฟล์ไม่สำเร็จ: ${uploadError.message}`);
-        }
+        if (uploadError) throw new Error(`อัปโหลดไฟล์ไม่สำเร็จ: ${uploadError.message}`);
+        newTemplateFilePath = filePath;
         
-        // If the old file had a different path (e.g., different filename), remove it to prevent orphans
         if (oldTemplateFilePath && oldTemplateFilePath !== filePath) {
             await supabase.storage.from('product_files').remove([oldTemplateFilePath]);
         }
-        
-        newTemplateFilePath = filePath;
-
       } else if (values.product_type === 'course' && oldTemplateFilePath) {
-        // If type changed to 'course', remove the associated template file
         await supabase.storage.from('product_files').remove([oldTemplateFilePath]);
         newTemplateFilePath = null;
       }
 
-      const { data, error } = await supabase
+      const { data, error: updateError } = await supabase
         .from("products")
         .update({
           title: values.title,
@@ -77,18 +98,18 @@ const EditProductPage = () => {
           price: values.price,
           product_type: values.product_type,
           description: values.description || null,
-          image_url: values.image_url || null,
+          image_url: newImageUrl,
           template_file_path: newTemplateFilePath,
         })
         .eq("id", product.id)
         .select()
         .single();
         
-      if (error) {
-        if (error.code === '23505') { // unique constraint violation for slug
+      if (updateError) {
+        if (updateError.code === '23505') {
             throw new Error("Slug นี้มีอยู่แล้วในระบบ กรุณาเปลี่ยนใหม่");
         }
-        throw new Error(error.message);
+        throw new Error(updateError.message);
       }
       return data;
     },
