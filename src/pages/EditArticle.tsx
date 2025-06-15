@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -14,64 +15,76 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tables } from "@/integrations/supabase/types";
 
 const articleSchema = z.object({
   title: z.string().min(5, { message: "หัวข้อต้องมีอย่างน้อย 5 ตัวอักษร" }),
-  slug: z.string().min(3, { message: "Slug ต้องมีอย่างน้อย 3 ตัวอักษร" }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug ต้องเป็นรูปแบบ kebab-case (เช่น your-article-slug)" }),
+  slug: z.string(), 
   content: z.string().min(50, { message: "เนื้อหาต้องมีอย่างน้อย 50 ตัวอักษร" }),
   cover_image_url: z.string().url({ message: "กรุณาใส่ URL ของรูปภาพที่ถูกต้อง" }).optional().or(z.literal('')),
   category: z.string().optional().or(z.literal('')),
   status: z.enum(["draft", "published"], { required_error: "กรุณาเลือกสถานะ" }),
 });
 
-type ArticleSubmission = z.infer<typeof articleSchema>;
-type ArticleMutationSuccess = {
-  slug: string;
-  status: "draft" | "published";
-} | null;
+type ArticleFormValues = z.infer<typeof articleSchema>;
 
-const slugify = (text: string) =>
-  text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-');
+const fetchArticleForEdit = async (slug: string) => {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("slug", slug)
+    .single();
 
-const CreateArticle = () => {
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+const EditArticle = () => {
+  const { slug } = useParams<{ slug: string }>();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const form = useForm<z.infer<typeof articleSchema>>({
+  const { data: article, isLoading: isArticleLoading } = useQuery<Tables<'articles'>>({
+    queryKey: ['article', slug],
+    queryFn: () => fetchArticleForEdit(slug!),
+    enabled: !!slug && isAdmin,
+  });
+
+  const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleSchema),
     defaultValues: {
       title: "",
-      slug: "",
+      slug: slug || "",
       content: "",
       cover_image_url: "",
       category: "",
       status: "draft",
     },
   });
-
-  const titleValue = form.watch("title");
-
-  useEffect(() => {
-    if (titleValue) {
-      form.setValue("slug", slugify(titleValue), { shouldValidate: true });
-    }
-  }, [titleValue, form]);
   
+  useEffect(() => {
+    if (article) {
+      form.reset({
+        title: article.title,
+        slug: article.slug,
+        content: article.content || '',
+        cover_image_url: article.cover_image_url || '',
+        category: article.category || '',
+        status: article.status as 'draft' | 'published',
+      });
+    }
+  }, [article, form]);
+
   useEffect(() => {
     const isLoading = authLoading || adminLoading;
     if (!isLoading && !isAdmin) {
@@ -80,60 +93,71 @@ const CreateArticle = () => {
     }
   }, [user, isAdmin, authLoading, adminLoading, navigate]);
 
-  const mutation = useMutation<ArticleMutationSuccess, Error, ArticleSubmission>({
-    mutationFn: async (newArticle) => {
-      if (!user) throw new Error("User not authenticated");
-      if (!isAdmin) throw new Error("User not authorized");
+  const mutation = useMutation({
+    mutationFn: async (updatedArticle: ArticleFormValues) => {
+        if (!user || !isAdmin) throw new Error("User not authorized");
+        if (!slug) throw new Error("Article slug not found");
 
-      const { data, error } = await supabase
-        .from("articles")
-        .insert([{
-          title: newArticle.title,
-          slug: newArticle.slug,
-          content: newArticle.content,
-          author_id: user.id,
-          cover_image_url: newArticle.cover_image_url || null,
-          status: newArticle.status,
-          category: newArticle.category || null,
-        }])
-        .select('slug, status')
-        .single();
-      
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation for slug
-          throw new Error("Slug นี้มีอยู่แล้ว กรุณาเปลี่ยนใหม่");
-        }
-        throw error;
-      }
-      return data;
+        const { data, error } = await supabase
+            .from("articles")
+            .update({
+                title: updatedArticle.title,
+                content: updatedArticle.content,
+                cover_image_url: updatedArticle.cover_image_url || null,
+                category: updatedArticle.category || null,
+                status: updatedArticle.status,
+            })
+            .eq("slug", slug)
+            .select('slug, status')
+            .single();
+
+        if (error) throw error;
+        return data;
     },
     onSuccess: (data) => {
-      toast.success("สร้างบทความสำเร็จ!");
-      queryClient.invalidateQueries({ queryKey: ["articles"] });
+        toast.success("อัปเดตบทความสำเร็จ!");
+        queryClient.invalidateQueries({ queryKey: ["articles"] });
+        queryClient.invalidateQueries({ queryKey: ["article", slug] });
       
-      if (data && data.status === 'published') {
-        navigate(`/articles/${data.slug}`);
-      } else {
-        // Or back to the admin dashboard if it's a draft
-        navigate('/admin');
-      }
+        if (data && data.status === 'published') {
+            navigate(`/articles/${data.slug}`);
+        } else {
+            navigate('/admin');
+        }
     },
     onError: (error) => {
-      toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
+        toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
     },
   });
 
-  const onSubmit = (values: z.infer<typeof articleSchema>) => {
+  const onSubmit = (values: ArticleFormValues) => {
     mutation.mutate(values);
   };
 
-  if (authLoading || adminLoading || !isAdmin) {
+  const isLoading = authLoading || adminLoading || !isAdmin;
+  if (isLoading) {
     return <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>;
+  }
+
+  if (isArticleLoading) {
+    return (
+        <div className="py-12 max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold mb-8">กำลังแก้ไขบทความ...</h1>
+            <div className="space-y-8">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-32" />
+            </div>
+        </div>
+    );
   }
 
   return (
     <div className="py-12 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">เขียนบทความใหม่</h1>
+      <h1 className="text-3xl font-bold mb-8">แก้ไขบทความ</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
@@ -156,8 +180,9 @@ const CreateArticle = () => {
               <FormItem>
                 <FormLabel>Slug (สำหรับ URL)</FormLabel>
                 <FormControl>
-                  <Input placeholder="your-article-slug" {...field} />
+                  <Input placeholder="your-article-slug" {...field} readOnly className="bg-muted/50" />
                 </FormControl>
+                <FormDescription>Slug ไม่สามารถแก้ไขได้</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -207,7 +232,7 @@ const CreateArticle = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>สถานะ</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="เลือกสถานะของบทความ" />
@@ -226,7 +251,7 @@ const CreateArticle = () => {
             )}
           />
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "กำลังสร้าง..." : "สร้างบทความ"}
+            {mutation.isPending ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
           </Button>
         </form>
       </Form>
@@ -234,4 +259,4 @@ const CreateArticle = () => {
   );
 };
 
-export default CreateArticle;
+export default EditArticle;

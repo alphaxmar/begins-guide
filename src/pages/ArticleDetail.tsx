@@ -1,10 +1,24 @@
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const fetchArticleBySlug = async (slug: string) => {
   const { data, error } = await supabase
@@ -19,11 +33,31 @@ const fetchArticleBySlug = async (slug: string) => {
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
+  const { isAdmin } = useAdmin();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: article, isLoading, isError } = useQuery<Tables<'articles'> | null>({
     queryKey: ["article", slug],
     queryFn: () => fetchArticleBySlug(slug!),
     enabled: !!slug,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!slug) throw new Error("Slug is required for deletion.");
+      const { error } = await supabase.from("articles").delete().eq("slug", slug);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("บทความถูกลบแล้ว");
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      navigate("/articles");
+    },
+    onError: (error) => {
+      toast.error(`เกิดข้อผิดพลาดในการลบบทความ: ${error.message}`);
+    },
   });
 
   if (isLoading) {
@@ -57,12 +91,50 @@ const ArticleDetail = () => {
 
   return (
     <article className="py-12 max-w-4xl mx-auto">
-      <Button variant="ghost" asChild className="mb-4 -ml-4">
-         <Link to="/articles">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            กลับไปหน้ารวมบทความ
-         </Link>
-      </Button>
+      <div className="flex justify-between items-center mb-4">
+        <Button variant="ghost" asChild className="-ml-4">
+           <Link to="/articles">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              กลับไปหน้ารวมบทความ
+           </Link>
+        </Button>
+
+        {isAdmin && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to={`/articles/${slug}/edit`}>
+                <Edit className="mr-2" />
+                แก้ไข
+              </Link>
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" disabled={deleteMutation.isPending}>
+                  <Trash2 className="mr-2" />
+                  {deleteMutation.isPending ? "กำลังลบ..." : "ลบ"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>คุณแน่ใจหรือไม่?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    การกระทำนี้ไม่สามารถย้อนกลับได้ การลบบทความนี้จะลบข้อมูลออกจากเซิร์ฟเวอร์อย่างถาวร
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteMutation.mutate()}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    ยืนยันการลบ
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
+      </div>
       <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{article.title}</h1>
       {article.cover_image_url && (
         <img
@@ -72,7 +144,7 @@ const ArticleDetail = () => {
         />
       )}
       <div
-        className="text-base"
+        className="prose prose-lg dark:prose-invert max-w-none"
         dangerouslySetInnerHTML={{ __html: article.content || "" }}
       />
     </article>

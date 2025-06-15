@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ArticleDetail from "./pages/ArticleDetail";
 import CourseDetail from "./pages/CourseDetail";
 import CreateArticle from "./pages/CreateArticle";
+import EditArticle from "./pages/EditArticle";
 import ProfilePage from "./pages/ProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
@@ -33,18 +33,19 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/articles" element={<Articles />} />
-              <Route path="/articles/create" element={<CreateArticle />} />
               <Route path="/articles/:slug" element={<ArticleDetail />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:slug" element={<CourseDetail />} />
               <Route path="/auth" element={<AuthPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/update-password" element={<UpdatePasswordPage />} />
               
-              {/* Admin Routes */}
+              {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/admin" element={<DashboardPage />} />
+                <Route path="/articles/create" element={<CreateArticle />} />
+                <Route path="/articles/:slug/edit" element={<EditArticle />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
