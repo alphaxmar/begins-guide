@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -28,6 +27,8 @@ const productSchema = z.object({
   price: z.coerce.number().min(0, { message: "ราคาต้องไม่ติดลบ" }),
   product_type: z.enum(["course", "template"], { required_error: "กรุณาเลือกประเภทสินค้า" }),
   image_url: z.string().url({ message: "URL รูปภาพไม่ถูกต้อง" }).optional().or(z.literal('')),
+  template_file: z.instanceof(FileList).optional(),
+  template_file_path: z.string().optional(),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;
@@ -50,6 +51,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
       product_type: "course",
       image_url: "",
       ...initialData,
+      template_file_path: initialData?.template_file_path || undefined,
     },
   });
 
@@ -62,9 +64,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
         price: initialData.price || 0,
         product_type: initialData.product_type || "course",
         image_url: initialData.image_url || "",
+        template_file_path: initialData.template_file_path || undefined,
       });
     }
   }, [initialData, form]);
+
+  const productType = form.watch("product_type");
 
   const generateSlug = (title: string) => {
     return title
@@ -154,7 +159,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>ประเภทสินค้า</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={(value) => {
+                      field.onChange(value);
+                      if (value === 'course') {
+                        form.setValue('template_file', undefined);
+                      }
+                    }} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="เลือกประเภท" />
@@ -170,6 +180,33 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
                 )}
               />
             </div>
+            {productType === 'template' && (
+              <FormField
+                control={form.control}
+                name="template_file"
+                render={({ field: { onChange, ...fieldProps } }) => (
+                  <FormItem>
+                    <FormLabel>ไฟล์เทมเพลต</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...fieldProps}
+                        type="file"
+                        accept=".zip,.pdf,.png,.jpg,.jpeg"
+                        onChange={(event) => {
+                          onChange(event.target.files);
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {initialData?.template_file_path 
+                        ? `มีไฟล์อยู่แล้ว: ${initialData.template_file_path.split('/').pop()}. อัปโหลดไฟล์ใหม่เพื่อทับไฟล์เดิม`
+                        : "อัปโหลดไฟล์เทมเพลต (.zip, .pdf, .png, .jpeg)"}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="image_url"

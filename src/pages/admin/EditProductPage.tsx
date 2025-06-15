@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +35,27 @@ const EditProductPage = () => {
     mutationFn: async (values: ProductFormValues) => {
       if (!product) throw new Error("Product not found");
 
+      let newTemplateFilePath = product.template_file_path;
+
+      // Handle file upload
+      if (values.product_type === 'template' && values.template_file && values.template_file.length > 0) {
+        const file = values.template_file[0];
+        const filePath = `${product.id}/${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('product_files')
+          .upload(filePath, file, {
+            upsert: true,
+          });
+
+        if (uploadError) {
+          throw new Error(`อัปโหลดไฟล์ไม่สำเร็จ: ${uploadError.message}`);
+        }
+        newTemplateFilePath = filePath;
+      } else if (values.product_type === 'course') {
+        newTemplateFilePath = null; // Clear path if it's a course
+      }
+
       const { data, error } = await supabase
         .from("products")
         .update({
@@ -43,6 +65,7 @@ const EditProductPage = () => {
           product_type: values.product_type,
           description: values.description || null,
           image_url: values.image_url || null,
+          template_file_path: newTemplateFilePath,
         })
         .eq("id", product.id)
         .select()
