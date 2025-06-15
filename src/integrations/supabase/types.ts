@@ -38,33 +38,39 @@ export type Database = {
           author_id: string | null
           category: string | null
           content: string | null
+          cover_image_url: string | null
           created_at: string
           excerpt: string | null
           id: string
           image_url: string | null
           slug: string
+          status: Database["public"]["Enums"]["article_status"]
           title: string
         }
         Insert: {
           author_id?: string | null
           category?: string | null
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
           image_url?: string | null
           slug: string
+          status?: Database["public"]["Enums"]["article_status"]
           title: string
         }
         Update: {
           author_id?: string | null
           category?: string | null
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
           image_url?: string | null
           slug?: string
+          status?: Database["public"]["Enums"]["article_status"]
           title?: string
         }
         Relationships: []
@@ -396,6 +402,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "partner"
+      article_status: "draft" | "published"
       franchise_status: "pending" | "approved" | "rejected"
       franchise_time_commitment: "full-time" | "part-time" | "flexible"
       review_status: "pending" | "approved" | "rejected"
@@ -515,6 +522,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "partner"],
+      article_status: ["draft", "published"],
       franchise_status: ["pending", "approved", "rejected"],
       franchise_time_commitment: ["full-time", "part-time", "flexible"],
       review_status: ["pending", "approved", "rejected"],

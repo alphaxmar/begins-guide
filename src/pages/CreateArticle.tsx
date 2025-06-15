@@ -31,6 +31,12 @@ const articleSchema = z.object({
   status: z.enum(["draft", "published"], { required_error: "กรุณาเลือกสถานะ" }),
 });
 
+type ArticleSubmission = z.infer<typeof articleSchema>;
+type ArticleMutationSuccess = {
+  slug: string;
+  status: "draft" | "published";
+} | null;
+
 const slugify = (text: string) =>
   text
     .toString()
@@ -73,8 +79,8 @@ const CreateArticle = () => {
     }
   }, [user, isAdmin, authLoading, adminLoading, navigate]);
 
-  const mutation = useMutation({
-    mutationFn: async (newArticle: z.infer<typeof articleSchema>) => {
+  const mutation = useMutation<ArticleMutationSuccess, Error, ArticleSubmission>({
+    mutationFn: async (newArticle) => {
       if (!user) throw new Error("User not authenticated");
       if (!isAdmin) throw new Error("User not authorized");
 
@@ -102,9 +108,8 @@ const CreateArticle = () => {
     onSuccess: (data) => {
       toast.success("สร้างบทความสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["articles"] });
-      // NOTE: The auto-generated Supabase type might be outdated.
-      // We cast `data` to `any` to access the `status` property, which exists at runtime.
-      if (data && (data as any).status === 'published') {
+      
+      if (data && data.status === 'published') {
         navigate(`/articles/${data.slug}`);
       } else {
         // Or back to the admin dashboard if it's a draft
