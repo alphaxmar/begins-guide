@@ -1,0 +1,27 @@
+
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+
+const checkAdminRole = async () => {
+  const { data, error } = await supabase.rpc('current_user_has_role', { role_to_check: 'admin' });
+  if (error) {
+    console.error('Error checking admin role:', error);
+    return false;
+  }
+  return data;
+};
+
+export const useAdmin = () => {
+  const { user, loading: authLoading } = useAuth();
+
+  const { data: isAdmin, isLoading: roleIsLoading } = useQuery({
+    queryKey: ['userRole', user?.id],
+    queryFn: checkAdminRole,
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Cache role for 5 minutes
+  });
+
+  return { isAdmin: isAdmin ?? false, isLoading: authLoading || (!!user && roleIsLoading) };
+};
+
