@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpenCheck } from "lucide-react";
 
 const fetchProductBySlug = async (slug: string) => {
   const { data, error } = await supabase
@@ -100,6 +102,16 @@ const EditProductPage = () => {
   return (
     <div className="py-8">
       <div className="max-w-4xl mx-auto">
+        {product && product.product_type === 'course' && (
+            <div className="flex justify-end mb-4">
+                <Link to={`/admin/products/${product.slug}/lessons`}>
+                    <Button variant="outline">
+                        <BookOpenCheck className="mr-2 h-4 w-4" />
+                        จัดการบทเรียน
+                    </Button>
+                </Link>
+            </div>
+        )}
         <ProductForm 
           onSubmit={handleSubmit} 
           initialData={product} 

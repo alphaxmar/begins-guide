@@ -163,6 +163,47 @@ export type Database = {
           },
         ]
       }
+      lessons: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          order: number
+          product_id: string
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          order?: number
+          product_id: string
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          order?: number
+          product_id?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_submissions: {
         Row: {
           admin_notes: string | null

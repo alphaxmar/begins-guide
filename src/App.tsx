@@ -24,6 +24,7 @@ import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import CreateProductPage from "./pages/admin/CreateProductPage";
 import EditProductPage from "./pages/admin/EditProductPage";
+import ManageLessonsPage from "./pages/admin/ManageLessonsPage";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/admin/products" element={<AdminProductsPage />} />
                 <Route path="/admin/products/create" element={<CreateProductPage />} />
                 <Route path="/admin/products/:slug/edit" element={<EditProductPage />} />
+                <Route path="/admin/products/:slug/lessons" element={<ManageLessonsPage />} />
                 <Route path="/articles/create" element={<CreateArticle />} />
                 <Route path="/articles/:slug/edit" element={<EditArticle />} />
               </Route>
