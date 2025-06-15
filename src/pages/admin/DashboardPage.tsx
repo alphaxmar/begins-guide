@@ -13,13 +13,13 @@ const DashboardPage = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+              <FileText />
               <span>จัดการเนื้อหา</span>
             </CardTitle>
             <CardDescription>สร้าง, แก้ไข, และลบบทความ</CardDescription>
           </CardHeader>
           <CardContent>
-             <Link to="/articles/create" className="text-sm font-medium text-primary hover:underline">
+             <Link to="/admin/articles" className="text-sm font-medium text-primary hover:underline">
               → ไปที่หน้าจัดการบทความ
              </Link>
           </CardContent>

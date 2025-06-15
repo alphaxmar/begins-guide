@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ArticleCard from "@/components/ArticleCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/integrations/supabase/types";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -22,6 +22,7 @@ const fetchArticles = async () => {
   const { data, error } = await supabase
     .from("articles")
     .select("*")
+    .eq("status", "published")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -33,7 +34,7 @@ const Articles = () => {
     queryKey: ["articles"],
     queryFn: fetchArticles,
   });
-  const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -64,10 +65,10 @@ const Articles = () => {
     <div className="py-12">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">บทความทั้งหมด</h1>
-        {user && (
+        {isAdmin && (
           <Button asChild>
             <Link to="/articles/create">
-              <PlusCircle className="mr-2 h-4 w-4" />
+              <PlusCircle />
               เขียนบทความใหม่
             </Link>
           </Button>

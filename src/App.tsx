@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +20,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/admin/DashboardPage";
+import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +46,7 @@ const App = () => (
               <Route element={<ProtectedRoute />}>
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/admin" element={<DashboardPage />} />
+                <Route path="/admin/articles" element={<AdminArticlesPage />} />
                 <Route path="/articles/create" element={<CreateArticle />} />
                 <Route path="/articles/:slug/edit" element={<EditArticle />} />
               </Route>
