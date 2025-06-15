@@ -21,6 +21,7 @@ import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/admin/DashboardPage";
 import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/admin" element={<DashboardPage />} />
                 <Route path="/admin/articles" element={<AdminArticlesPage />} />
+                <Route path="/admin/products" element={<AdminProductsPage />} />
                 <Route path="/articles/create" element={<CreateArticle />} />
                 <Route path="/articles/:slug/edit" element={<EditArticle />} />
               </Route>

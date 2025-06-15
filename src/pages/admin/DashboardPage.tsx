@@ -25,18 +25,18 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-muted/30">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-muted-foreground">
+            <CardTitle className="flex items-center gap-2">
               <ShoppingBag className="h-5 w-5" />
               <span>จัดการสินค้า</span>
             </CardTitle>
-            <CardDescription className="text-muted-foreground">คอร์สออนไลน์และเทมเพลต (เร็วๆ นี้)</CardDescription>
+            <CardDescription>จัดการคอร์สออนไลน์และเทมเพลต</CardDescription>
           </CardHeader>
            <CardContent>
-             <span className="text-sm font-medium text-muted-foreground/60">
-              ยังไม่เปิดใช้งาน
-             </span>
+             <Link to="/admin/products" className="text-sm font-medium text-primary hover:underline">
+              → ไปที่หน้าจัดการสินค้า
+             </Link>
           </CardContent>
         </Card>
 
