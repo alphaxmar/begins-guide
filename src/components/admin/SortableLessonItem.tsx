@@ -18,7 +18,9 @@ const SortableLessonItem = ({ lesson, children }: SortableLessonItemProps) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: lesson.id });
+  } = useSortable({
+    id: lesson.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
