@@ -3,23 +3,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
-import { ChangeEvent, useEffect } from "react";
+import { useEffect } from "react";
 import { productSchema } from "@/lib/validators/product";
+import ProductMetadataInputs from "./product-form/ProductMetadataInputs";
+import ProductPricingInputs from "./product-form/ProductPricingInputs";
+import ProductAssetInputs from "./product-form/ProductAssetInputs";
 
 export type ProductFormValues = z.infer<typeof productSchema>;
 
@@ -61,21 +53,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
 
   const productType = form.watch("product_type");
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/ /g, '-')
-      .replace(/[^\w-]+/g, '');
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const title = e.target.value;
-    form.setValue("title", title);
-    if (!form.formState.dirtyFields.slug) {
-        form.setValue("slug", generateSlug(title), { shouldValidate: true });
-    }
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -87,134 +64,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ชื่อสินค้า</FormLabel>
-                  <FormControl>
-                    <Input placeholder="เช่น คอร์สการตลาดออนไลน์ 101" {...field} onChange={handleTitleChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Slug (สำหรับ URL)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="เช่น online-marketing-101" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    ส่วนนี้จะปรากฏใน URL ของสินค้า ควรเป็นภาษาอังกฤษและไม่มีเว้นวรรค
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>คำอธิบายสินค้า</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="บอกรายละเอียดเกี่ยวกับสินค้าของคุณ..." className="min-h-[100px]" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ราคา (บาท)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="เช่น 1990" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="product_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ประเภทสินค้า</FormLabel>
-                    <Select onValueChange={(value) => {
-                      field.onChange(value);
-                      if (value === 'course') {
-                        form.setValue('template_file', undefined);
-                      }
-                    }} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกประเภท" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="course">คอร์ส</SelectItem>
-                        <SelectItem value="template">เทมเพลต</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {productType === 'template' && (
-              <FormField
-                control={form.control}
-                name="template_file"
-                render={({ field: { onChange, onBlur, name, ref } }) => (
-                  <FormItem>
-                    <FormLabel>ไฟล์เทมเพลต</FormLabel>
-                    <FormControl>
-                      <Input
-                        name={name}
-                        onBlur={onBlur}
-                        ref={ref}
-                        type="file"
-                        accept=".zip,.pdf,.png,.jpg,.jpeg"
-                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                          onChange(event.target.files);
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {initialData?.template_file_path 
-                        ? `มีไฟล์อยู่แล้ว: ${initialData.template_file_path.split('/').pop()}. อัปโหลดไฟล์ใหม่เพื่อทับไฟล์เดิม`
-                        : "อัปโหลดไฟล์เทมเพลต (.zip, .pdf, .png, .jpeg)"}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            <FormField
-              control={form.control}
-              name="image_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL รูปภาพหน้าปก</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    วาง URL ของรูปภาพที่ต้องการใช้เป็นหน้าปก
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <ProductMetadataInputs control={form.control} form={form} />
+            <ProductPricingInputs control={form.control} form={form} />
+            <ProductAssetInputs control={form.control} productType={productType} initialData={initialData} />
+            
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {submitButtonText}
