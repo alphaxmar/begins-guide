@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +8,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
+import { useCart } from "@/contexts/CartContext";
 
 const fetchProductBySlug = async (slug: string) => {
   const { data, error } = await supabase
@@ -24,6 +24,7 @@ const fetchProductBySlug = async (slug: string) => {
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
+  const { addToCart } = useCart();
 
   const { data: product, isLoading, isError } = useQuery<Tables<'products'> | null>({
     queryKey: ["product", slug],
@@ -109,14 +110,14 @@ const ProductDetail = () => {
                     </Link>
                   </Button>
                 ) : (
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto" onClick={() => addToCart(product)}>
                     <ShoppingCart className="mr-2 h-5 w-5" />
                     เพิ่มลงตะกร้า
                   </Button>
                 )}
               </>
             ) : (
-              <Button size="lg" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto" onClick={() => addToCart(product)}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 เพิ่มลงตะกร้า
               </Button>
