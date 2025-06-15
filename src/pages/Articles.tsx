@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ArticleCard from "@/components/ArticleCard";
@@ -57,7 +56,7 @@ const Articles = () => {
             <ArticleCard
               key={article.slug}
               {...article}
-              imageUrl={article.image_url || ""}
+              imageUrl={article.cover_image_url || "/placeholder.svg"}
               excerpt={article.excerpt || ""}
               category={article.category || ""}
             />

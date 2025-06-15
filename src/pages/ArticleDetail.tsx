@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,9 +64,9 @@ const ArticleDetail = () => {
          </Link>
       </Button>
       <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{article.title}</h1>
-      {article.image_url && (
+      {article.cover_image_url && (
         <img
-          src={article.image_url}
+          src={article.cover_image_url}
           alt={article.title}
           className="w-full h-auto max-h-[500px] object-cover rounded-lg my-8"
         />

@@ -1,4 +1,3 @@
-
 import ArticleCard from "@/components/ArticleCard";
 import CourseCard from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
@@ -77,7 +76,7 @@ const Index = () => {
                 <ArticleCard
                   key={article.slug}
                   {...article}
-                  imageUrl={article.image_url || ""}
+                  imageUrl={article.cover_image_url || "/placeholder.svg"}
                   excerpt={article.excerpt || ""}
                   category={article.category || ""}
                 />
