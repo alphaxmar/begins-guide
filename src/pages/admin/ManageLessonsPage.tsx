@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,9 +24,9 @@ import {
 const fetchProductBySlug = async (slug: string) => {
   const { data, error } = await supabase
     .from("products")
-    .select("id, title, slug, product_type")
+    .select("*")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return data;
 };
@@ -62,11 +61,17 @@ const ManageLessonsPage = () => {
     mutationFn: async ({ values, lessonId }: { values: LessonFormValues; lessonId?: string }) => {
       if (!product) throw new Error("Product not found");
 
+      const lessonData = {
+        title: values.title,
+        content: values.content || null,
+        video_url: values.video_url || null,
+      };
+
       if (lessonId) {
         // Update existing lesson
         const { data, error } = await supabase
           .from("lessons")
-          .update({ ...values, updated_at: new Date().toISOString() })
+          .update({ ...lessonData, updated_at: new Date().toISOString() })
           .eq("id", lessonId)
           .select()
           .single();
@@ -74,9 +79,10 @@ const ManageLessonsPage = () => {
         return data;
       } else {
         // Create new lesson
+        const newOrder = lessons?.length ?? 0;
         const { data, error } = await supabase
           .from("lessons")
-          .insert({ ...values, product_id: product.id })
+          .insert({ ...lessonData, product_id: product.id, order: newOrder })
           .select()
           .single();
         if (error) throw error;
