@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -91,7 +91,15 @@ const AuthPage = () => {
                     <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="password">รหัสผ่าน</Label>
+                    <div className="flex items-center">
+                      <Label htmlFor="password">รหัสผ่าน</Label>
+                      <Link
+                        to="/reset-password"
+                        className="ml-auto inline-block text-sm underline"
+                      >
+                        ลืมรหัสผ่าน?
+                      </Link>
+                    </div>
                     <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
