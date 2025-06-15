@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,14 +20,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { useAdmin } from "@/hooks/useAdmin";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const articleSchema = z.object({
   title: z.string().min(5, { message: "หัวข้อต้องมีอย่างน้อย 5 ตัวอักษร" }),
   slug: z.string().min(3, { message: "Slug ต้องมีอย่างน้อย 3 ตัวอักษร" }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug ต้องเป็นรูปแบบ kebab-case (เช่น your-article-slug)" }),
-  excerpt: z.string().min(10, { message: "บทคัดย่อต้องมีอย่างน้อย 10 ตัวอักษร" }).max(200, { message: "บทคัดย่อต้องไม่เกิน 200 ตัวอักษร" }),
   content: z.string().min(50, { message: "เนื้อหาต้องมีอย่างน้อย 50 ตัวอักษร" }),
-  category: z.string().optional(),
-  image_url: z.string().url({ message: "กรุณาใส่ URL ของรูปภาพที่ถูกต้อง" }).optional().or(z.literal('')),
+  cover_image_url: z.string().url({ message: "กรุณาใส่ URL ของรูปภาพที่ถูกต้อง" }).optional().or(z.literal('')),
+  status: z.enum(["draft", "published"], { required_error: "กรุณาเลือกสถานะ" }),
 });
 
 const slugify = (text: string) =>
@@ -39,6 +42,7 @@ const slugify = (text: string) =>
 
 const CreateArticle = () => {
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin, isLoading: adminLoading } = useAdmin();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -47,10 +51,9 @@ const CreateArticle = () => {
     defaultValues: {
       title: "",
       slug: "",
-      excerpt: "",
       content: "",
-      category: "",
-      image_url: "",
+      cover_image_url: "",
+      status: "draft",
     },
   });
 
@@ -63,32 +66,33 @@ const CreateArticle = () => {
   }, [titleValue, form]);
   
   useEffect(() => {
-    if (!authLoading && !user) {
-      toast.error("คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถสร้างบทความได้");
-      navigate("/auth");
+    const isLoading = authLoading || adminLoading;
+    if (!isLoading && !isAdmin) {
+      toast.error("คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
+      navigate("/");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, isAdmin, authLoading, adminLoading, navigate]);
 
   const mutation = useMutation({
     mutationFn: async (newArticle: z.infer<typeof articleSchema>) => {
       if (!user) throw new Error("User not authenticated");
+      if (!isAdmin) throw new Error("User not authorized");
 
       const { data, error } = await supabase
         .from("articles")
         .insert([{
           title: newArticle.title,
-          slug: form.getValues("slug"),
-          excerpt: newArticle.excerpt,
+          slug: newArticle.slug,
           content: newArticle.content,
           author_id: user.id,
-          category: newArticle.category || null,
-          image_url: newArticle.image_url || null,
+          cover_image_url: newArticle.cover_image_url || null,
+          status: newArticle.status,
         }])
         .select()
         .single();
       
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
+        if (error.code === '23505') { // Unique constraint violation for slug
           throw new Error("Slug นี้มีอยู่แล้ว กรุณาเปลี่ยนใหม่");
         }
         throw error;
@@ -98,8 +102,13 @@ const CreateArticle = () => {
     onSuccess: (data) => {
       toast.success("สร้างบทความสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["articles"] });
-      queryClient.invalidateQueries({ queryKey: ["featuredArticles"] });
-      navigate(`/articles/${data.slug}`);
+      // Navigate to the new article if it's published
+      if (data.status === 'published') {
+        navigate(`/articles/${data.slug}`);
+      } else {
+        // Or back to the admin dashboard if it's a draft
+        navigate('/admin');
+      }
     },
     onError: (error) => {
       toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
@@ -110,8 +119,8 @@ const CreateArticle = () => {
     mutation.mutate(values);
   };
 
-  if (authLoading || !user) {
-    return <div className="text-center py-12">กำลังโหลด...</div>;
+  if (authLoading || adminLoading || !isAdmin) {
+    return <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>;
   }
 
   return (
@@ -147,19 +156,6 @@ const CreateArticle = () => {
           />
           <FormField
             control={form.control}
-            name="excerpt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>บทคัดย่อ</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="สรุปสั้นๆ เกี่ยวกับบทความของคุณ" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
             name="content"
             render={({ field }) => (
               <FormItem>
@@ -173,12 +169,12 @@ const CreateArticle = () => {
           />
           <FormField
             control={form.control}
-            name="category"
+            name="cover_image_url"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>หมวดหมู่ (ไม่บังคับ)</FormLabel>
+                <FormLabel>URL รูปภาพปก (ไม่บังคับ)</FormLabel>
                 <FormControl>
-                  <Input placeholder="เช่น การตลาด, ธุรกิจ" {...field} />
+                  <Input placeholder="https://example.com/image.jpg" {...field} value={field.value ?? ''}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -186,13 +182,24 @@ const CreateArticle = () => {
           />
           <FormField
             control={form.control}
-            name="image_url"
+            name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL รูปภาพปก (ไม่บังคับ)</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://example.com/image.jpg" {...field} />
-                </FormControl>
+                <FormLabel>สถานะ</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="เลือกสถานะของบทความ" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="draft">แบบร่าง (Draft)</SelectItem>
+                    <SelectItem value="published">เผยแพร่ (Published)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  'แบบร่าง' จะไม่แสดงบนเว็บ, 'เผยแพร่' จะแสดงให้ทุกคนเห็น
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
