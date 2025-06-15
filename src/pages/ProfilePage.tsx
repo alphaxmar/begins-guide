@@ -23,8 +23,11 @@ const profileSchema = z.object({
   avatar_url: z.string().url({ message: "กรุณาใส่ URL ของรูปภาพที่ถูกต้อง" }).optional().or(z.literal('')),
 });
 
+// We create a temporary type because the auto-generated types might not have updated yet.
+type ProductWithTemplatePath = Tables<'products'> & { template_file_path?: string | null };
+
 type PurchasedItem = Tables<'user_purchases'> & {
-  products: Tables<'products'> | null;
+  products: ProductWithTemplatePath | null;
 }
 
 const ProfilePage = () => {
@@ -71,7 +74,8 @@ const ProfilePage = () => {
             title,
             slug,
             product_type,
-            image_url
+            image_url,
+            template_file_path
           )
         `)
         .eq('user_id', user.id)
@@ -83,6 +87,31 @@ const ProfilePage = () => {
       return data.filter(item => item.products) as PurchasedItem[];
     },
     enabled: !!user,
+  });
+
+  const downloadTemplateMutation = useMutation({
+    mutationFn: async (filePath: string) => {
+      if (!filePath) {
+        throw new Error("ไม่พบที่อยู่ไฟล์สำหรับดาวน์โหลด");
+      }
+      // Create a signed URL that is valid for 60 seconds
+      const { data, error } = await supabase
+        .storage
+        .from('product_files')
+        .createSignedUrl(filePath, 60);
+
+      if (error) {
+        throw new Error(`ไม่สามารถสร้างลิงก์ดาวน์โหลดได้: ${error.message}`);
+      }
+      return data.signedUrl;
+    },
+    onSuccess: (url) => {
+      window.open(url, '_blank');
+      toast.success("กำลังเริ่มดาวน์โหลด...");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    }
   });
 
 
@@ -235,9 +264,20 @@ const ProfilePage = () => {
                                 </Link>
                               </Button>
                             ) : (
-                              <Button size="sm" className="mt-2 self-start" disabled>
+                              <Button
+                                size="sm"
+                                className="mt-2 self-start"
+                                onClick={() => {
+                                  if (item.products?.template_file_path) {
+                                    downloadTemplateMutation.mutate(item.products.template_file_path);
+                                  } else {
+                                    toast.error("ขออภัย, ไม่พบไฟล์สำหรับสินค้านี้");
+                                  }
+                                }}
+                                disabled={!item.products?.template_file_path || (downloadTemplateMutation.isPending && downloadTemplateMutation.variables === item.products.template_file_path)}
+                              >
                                 <FileDown className="mr-2 h-4 w-4" />
-                                ดาวน์โหลด
+                                {(downloadTemplateMutation.isPending && downloadTemplateMutation.variables === item.products.template_file_path) ? "กำลังเตรียม..." : "ดาวน์โหลด"}
                               </Button>
                             )}
                           </div>
