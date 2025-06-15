@@ -168,16 +168,22 @@ const ManageLessonsPage = () => {
     const {active, over} = event;
 
     if (over && active.id !== over.id) {
-      setLocalLessons((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        const newOrder = arrayMove(items, oldIndex, newIndex);
-        
-        const orderedIds = newOrder.map((item) => item.id);
-        updateOrderMutation.mutate(orderedIds);
-        
-        return newOrder;
-      });
+      const oldIndex = localLessons.findIndex((item) => item.id === active.id);
+      const newIndex = localLessons.findIndex((item) => item.id === over.id);
+
+      // Safeguard in case item is not found
+      if (oldIndex === -1 || newIndex === -1) {
+        return;
+      }
+
+      const newOrder = arrayMove(localLessons, oldIndex, newIndex);
+      
+      // Optimistically update the UI state
+      setLocalLessons(newOrder);
+      
+      // Call the mutation to persist the change
+      const orderedIds = newOrder.map((item) => item.id);
+      updateOrderMutation.mutate(orderedIds);
     }
   }
 
