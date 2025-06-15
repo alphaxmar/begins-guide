@@ -13,6 +13,7 @@ import AuthPage from "./pages/AuthPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import ArticleDetail from "./pages/ArticleDetail";
 import CourseDetail from "./pages/CourseDetail";
+import CreateArticle from "./pages/CreateArticle";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/articles" element={<Articles />} />
+              <Route path="/articles/create" element={<CreateArticle />} />
               <Route path="/articles/:slug" element={<ArticleDetail />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:slug" element={<CourseDetail />} />
