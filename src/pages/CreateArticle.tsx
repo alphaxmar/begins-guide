@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -76,7 +75,15 @@ const CreateArticle = () => {
 
       const { data, error } = await supabase
         .from("articles")
-        .insert([{ ...newArticle, author_id: user.id, slug: form.getValues("slug") }])
+        .insert([{
+          title: newArticle.title,
+          slug: form.getValues("slug"),
+          excerpt: newArticle.excerpt,
+          content: newArticle.content,
+          author_id: user.id,
+          category: newArticle.category || null,
+          image_url: newArticle.image_url || null,
+        }])
         .select()
         .single();
       

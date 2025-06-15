@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           author_id: string | null
@@ -78,6 +102,157 @@ export type Database = {
         }
         Relationships: []
       }
+      franchise_views: {
+        Row: {
+          franchise_id: string
+          id: number
+          user_id: string | null
+          viewed_at: string
+        }
+        Insert: {
+          franchise_id: string
+          id?: number
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          franchise_id?: string
+          id?: number
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "franchise_views_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      franchises: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          investment_max: number | null
+          investment_min: number | null
+          name: string
+          status: Database["public"]["Enums"]["franchise_status"]
+          submission_id: string | null
+          submitted_by: string | null
+          time_commitment:
+            | Database["public"]["Enums"]["franchise_time_commitment"]
+            | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          investment_max?: number | null
+          investment_min?: number | null
+          name: string
+          status?: Database["public"]["Enums"]["franchise_status"]
+          submission_id?: string | null
+          submitted_by?: string | null
+          time_commitment?:
+            | Database["public"]["Enums"]["franchise_time_commitment"]
+            | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          investment_max?: number | null
+          investment_min?: number | null
+          name?: string
+          status?: Database["public"]["Enums"]["franchise_status"]
+          submission_id?: string | null
+          submitted_by?: string | null
+          time_commitment?:
+            | Database["public"]["Enums"]["franchise_time_commitment"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "franchises_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "partner_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_submissions: {
+        Row: {
+          admin_notes: string | null
+          business_plan: string | null
+          category: string | null
+          contact_info: Json | null
+          description: string | null
+          id: string
+          image_url: string | null
+          investment_max: number | null
+          investment_min: number | null
+          name: string
+          partner_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["franchise_status"]
+          submitted_at: string
+          time_commitment:
+            | Database["public"]["Enums"]["franchise_time_commitment"]
+            | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_plan?: string | null
+          category?: string | null
+          contact_info?: Json | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          investment_max?: number | null
+          investment_min?: number | null
+          name: string
+          partner_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["franchise_status"]
+          submitted_at?: string
+          time_commitment?:
+            | Database["public"]["Enums"]["franchise_time_commitment"]
+            | null
+        }
+        Update: {
+          admin_notes?: string | null
+          business_plan?: string | null
+          category?: string | null
+          contact_info?: Json | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          investment_max?: number | null
+          investment_min?: number | null
+          name?: string
+          partner_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["franchise_status"]
+          submitted_at?: string
+          time_commitment?:
+            | Database["public"]["Enums"]["franchise_time_commitment"]
+            | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -99,15 +274,131 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          franchise_id: string
+          id: string
+          rating: number
+          status: Database["public"]["Enums"]["review_status"]
+          title: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          franchise_id: string
+          id?: string
+          rating: number
+          status?: Database["public"]["Enums"]["review_status"]
+          title: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          franchise_id?: string
+          id?: string
+          rating?: number
+          status?: Database["public"]["Enums"]["review_status"]
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_franchises: {
+        Row: {
+          created_at: string
+          franchise_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          franchise_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          franchise_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_franchises_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_user_has_role: {
+        Args: { role_to_check: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
+      get_monthly_signups: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          signup_month: string
+          users_count: number
+          partners_count: number
+        }[]
+      }
+      get_partner_franchise_stats: {
+        Args: { p_partner_id: string }
+        Returns: {
+          franchise_name: string
+          view_count: number
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "partner"
+      franchise_status: "pending" | "approved" | "rejected"
+      franchise_time_commitment: "full-time" | "part-time" | "flexible"
+      review_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -222,6 +513,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "partner"],
+      franchise_status: ["pending", "approved", "rejected"],
+      franchise_time_commitment: ["full-time", "part-time", "flexible"],
+      review_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
