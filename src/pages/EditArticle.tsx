@@ -1,19 +1,4 @@
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,20 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { useAdmin } from "@/hooks/useAdmin";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/integrations/supabase/types";
-
-const articleSchema = z.object({
-  title: z.string().min(5, { message: "หัวข้อต้องมีอย่างน้อย 5 ตัวอักษร" }),
-  slug: z.string(), 
-  content: z.string().min(50, { message: "เนื้อหาต้องมีอย่างน้อย 50 ตัวอักษร" }),
-  cover_image_url: z.string().url({ message: "กรุณาใส่ URL ของรูปภาพที่ถูกต้อง" }).optional().or(z.literal('')),
-  category: z.string().optional().or(z.literal('')),
-  status: z.enum(["draft", "published"], { required_error: "กรุณาเลือกสถานะ" }),
-});
-
-type ArticleFormValues = z.infer<typeof articleSchema>;
+import ArticleForm, { ArticleFormValues } from "@/components/ArticleForm";
 
 const fetchArticleForEdit = async (slug: string) => {
   const { data, error } = await supabase
@@ -59,32 +33,7 @@ const EditArticle = () => {
     queryFn: () => fetchArticleForEdit(slug!),
     enabled: !!slug && isAdmin,
   });
-
-  const form = useForm<ArticleFormValues>({
-    resolver: zodResolver(articleSchema),
-    defaultValues: {
-      title: "",
-      slug: slug || "",
-      content: "",
-      cover_image_url: "",
-      category: "",
-      status: "draft",
-    },
-  });
   
-  useEffect(() => {
-    if (article) {
-      form.reset({
-        title: article.title,
-        slug: article.slug,
-        content: article.content || '',
-        cover_image_url: article.cover_image_url || '',
-        category: article.category || '',
-        status: article.status as 'draft' | 'published',
-      });
-    }
-  }, [article, form]);
-
   useEffect(() => {
     const isLoading = authLoading || adminLoading;
     if (!isLoading && !isAdmin) {
@@ -155,106 +104,26 @@ const EditArticle = () => {
     );
   }
 
+  // Prepare initial values for the form, ensuring no nulls are passed for controlled components
+  const initialFormValues = article ? {
+    title: article.title,
+    slug: article.slug,
+    content: article.content || '',
+    cover_image_url: article.cover_image_url || '',
+    category: article.category || '',
+    status: article.status as 'draft' | 'published',
+  } : undefined;
+
   return (
     <div className="py-12 max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">แก้ไขบทความ</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>หัวข้อบทความ</FormLabel>
-                <FormControl>
-                  <Input placeholder="หัวข้อที่น่าสนใจของคุณ" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="slug"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Slug (สำหรับ URL)</FormLabel>
-                <FormControl>
-                  <Input placeholder="your-article-slug" {...field} readOnly className="bg-muted/50" />
-                </FormControl>
-                <FormDescription>Slug ไม่สามารถแก้ไขได้</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>เนื้อหาบทความ</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="เริ่มต้นเขียนเนื้อหาของคุณที่นี่..." className="min-h-[200px]" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="cover_image_url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL รูปภาพปก (ไม่บังคับ)</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://example.com/image.jpg" {...field} value={field.value ?? ''}/>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>หมวดหมู่ (ไม่บังคับ)</FormLabel>
-                <FormControl>
-                  <Input placeholder="เช่น การตลาด, การเงิน" {...field} value={field.value ?? ''}/>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>สถานะ</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="เลือกสถานะของบทความ" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="draft">แบบร่าง (Draft)</SelectItem>
-                    <SelectItem value="published">เผยแพร่ (Published)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  'แบบร่าง' จะไม่แสดงบนเว็บ, 'เผยแพร่' จะแสดงให้ทุกคนเห็น
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
-          </Button>
-        </form>
-      </Form>
+      <ArticleForm
+        onSubmit={onSubmit}
+        isPending={mutation.isPending}
+        submitButtonText="บันทึกการเปลี่ยนแปลง"
+        initialValues={initialFormValues}
+        isSlugDisabled={true}
+      />
     </div>
   );
 };
