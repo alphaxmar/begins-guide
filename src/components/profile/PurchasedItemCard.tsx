@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, FileDown } from "lucide-react";
+import { BookOpen, Download, Loader2 } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 type ProductWithTemplatePath = Tables<'products'> & { template_file_path?: string | null };
@@ -19,7 +19,11 @@ interface PurchasedItemCardProps {
 }
 
 const PurchasedItemCard = ({ item }: PurchasedItemCardProps) => {
-  const downloadTemplateMutation = useMutation({
+  const downloadTemplateMutation = useMutation<
+    { url: string; filename: string },
+    Error,
+    string
+  >({
     mutationFn: async (filePath: string) => {
       if (!filePath) {
         throw new Error("ไม่พบที่อยู่ไฟล์สำหรับดาวน์โหลด");
@@ -27,15 +31,21 @@ const PurchasedItemCard = ({ item }: PurchasedItemCardProps) => {
       const { data, error } = await supabase
         .storage
         .from('product_files')
-        .createSignedUrl(filePath, 60);
+        .createSignedUrl(filePath, 60); // 60 seconds validity
 
       if (error) {
         throw new Error(`ไม่สามารถสร้างลิงก์ดาวน์โหลดได้: ${error.message}`);
       }
-      return data.signedUrl;
+      return { url: data.signedUrl, filename: filePath.split('/').pop() || 'template' };
     },
-    onSuccess: (url) => {
-      window.open(url, '_blank');
+    onSuccess: ({ url, filename }) => {
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      link.remove();
       toast.success("กำลังเริ่มดาวน์โหลด...");
     },
     onError: (error: Error) => {
@@ -44,6 +54,8 @@ const PurchasedItemCard = ({ item }: PurchasedItemCardProps) => {
   });
 
   if (!item.products) return null;
+
+  const isDownloading = downloadTemplateMutation.isPending && downloadTemplateMutation.variables === item.products.template_file_path;
 
   return (
     <Card className="overflow-hidden">
@@ -72,10 +84,14 @@ const PurchasedItemCard = ({ item }: PurchasedItemCardProps) => {
                   toast.error("ขออภัย, ไม่พบไฟล์สำหรับสินค้านี้");
                 }
               }}
-              disabled={!item.products?.template_file_path || (downloadTemplateMutation.isPending && downloadTemplateMutation.variables === item.products.template_file_path)}
+              disabled={!item.products?.template_file_path || isDownloading}
             >
-              <FileDown className="mr-2 h-4 w-4" />
-              {(downloadTemplateMutation.isPending && downloadTemplateMutation.variables === item.products.template_file_path) ? "กำลังเตรียม..." : "ดาวน์โหลด"}
+              {isDownloading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลด"}
             </Button>
           )}
         </div>
