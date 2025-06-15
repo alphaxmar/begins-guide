@@ -22,7 +22,7 @@ const CreateProductPage = () => {
         const file = values.template_file[0];
         const fileExtension = file.name.split('.').pop();
         // Use slug and a timestamp for a unique filename
-        const filePath = `public/${values.slug}-${Date.now()}.${fileExtension}`;
+        const filePath = `templates/${values.slug}-${Date.now()}.${fileExtension}`;
 
         const { error: uploadError } = await supabase.storage
           .from('product_files')
