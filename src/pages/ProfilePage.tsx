@@ -257,7 +257,7 @@ const ProfilePage = () => {
                             </div>
                             {item.products.product_type === 'course' ? (
                               <Button asChild size="sm" className="mt-2 self-start">
-                                <Link to={`/learn/course/${item.products.slug}`}>
+                                <Link to={`/courses/${item.products.slug}/learn`}>
                                   <BookOpen className="mr-2 h-4 w-4" />
                                   เข้าเรียน
                                 </Link>
