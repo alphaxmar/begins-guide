@@ -36,12 +36,16 @@ const EditProductPage = () => {
       if (!product) throw new Error("Product not found");
 
       let newTemplateFilePath = product.template_file_path;
+      const oldTemplateFilePath = product.template_file_path;
 
-      // Handle file upload
+      // Handle template file changes
       if (values.product_type === 'template' && values.template_file && values.template_file.length > 0) {
         const file = values.template_file[0];
-        const filePath = `${product.id}/${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+        // Use a predictable file path based on product ID and a sanitized filename
+        const sanitizedFileName = file.name.replace(/\s/g, '_');
+        const filePath = `templates/${product.id}/${sanitizedFileName}`;
 
+        // Upload the new file, overwriting if a file with the same name exists for this product
         const { error: uploadError } = await supabase.storage
           .from('product_files')
           .upload(filePath, file, {
@@ -51,9 +55,18 @@ const EditProductPage = () => {
         if (uploadError) {
           throw new Error(`อัปโหลดไฟล์ไม่สำเร็จ: ${uploadError.message}`);
         }
+        
+        // If the old file had a different path (e.g., different filename), remove it to prevent orphans
+        if (oldTemplateFilePath && oldTemplateFilePath !== filePath) {
+            await supabase.storage.from('product_files').remove([oldTemplateFilePath]);
+        }
+        
         newTemplateFilePath = filePath;
-      } else if (values.product_type === 'course') {
-        newTemplateFilePath = null; // Clear path if it's a course
+
+      } else if (values.product_type === 'course' && oldTemplateFilePath) {
+        // If type changed to 'course', remove the associated template file
+        await supabase.storage.from('product_files').remove([oldTemplateFilePath]);
+        newTemplateFilePath = null;
       }
 
       const { data, error } = await supabase
