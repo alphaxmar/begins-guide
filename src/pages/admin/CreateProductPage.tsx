@@ -15,7 +15,28 @@ const CreateProductPage = () => {
     mutationFn: async (values: ProductFormValues) => {
       if (!user) throw new Error("User not authenticated");
 
-      const { data, error } = await supabase
+      let templateFilePath: string | null = null;
+
+      // Handle template file upload if it exists
+      if (values.product_type === 'template' && values.template_file && values.template_file.length > 0) {
+        const file = values.template_file[0];
+        const fileExtension = file.name.split('.').pop();
+        // Use slug and a timestamp for a unique filename
+        const filePath = `public/${values.slug}-${Date.now()}.${fileExtension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('product_files')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw new Error(`ไม่สามารถอัปโหลดไฟล์เทมเพลตได้: ${uploadError.message}`);
+        }
+        
+        templateFilePath = filePath;
+      }
+
+      // Insert product data into the database
+      const { data, error: insertError } = await supabase
         .from("products")
         .insert({
           title: values.title,
@@ -25,15 +46,20 @@ const CreateProductPage = () => {
           description: values.description || null,
           image_url: values.image_url || null,
           instructor_id: user.id,
+          template_file_path: templateFilePath,
         })
         .select()
         .single();
       
-      if (error) {
-        if (error.code === '23505') { // unique constraint violation
+      if (insertError) {
+        // If DB insert fails, remove the orphaned file from storage
+        if (templateFilePath) {
+            await supabase.storage.from('product_files').remove([templateFilePath]);
+        }
+        if (insertError.code === '23505') { // unique constraint violation
             throw new Error("Slug นี้มีอยู่แล้วในระบบ กรุณาเปลี่ยนใหม่");
         }
-        throw new Error(error.message);
+        throw new Error(insertError.message);
       }
       return data;
     },
