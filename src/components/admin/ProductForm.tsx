@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
-import { useEffect } from "react";
+import { ChangeEvent, useEffect } from "react";
 
 const productSchema = z.object({
   title: z.string().min(3, { message: "ชื่อสินค้าต้องมีอย่างน้อย 3 ตัวอักษร" }),
