@@ -75,39 +75,6 @@ export type Database = {
         }
         Relationships: []
       }
-      courses: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          image_url: string | null
-          instructor_id: string | null
-          price: number
-          slug: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          instructor_id?: string | null
-          price: number
-          slug: string
-          title: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          instructor_id?: string | null
-          price?: number
-          slug?: string
-          title?: string
-        }
-        Relationships: []
-      }
       franchise_views: {
         Row: {
           franchise_id: string
@@ -259,6 +226,42 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          instructor_id: string | null
+          price: number
+          product_type: Database["public"]["Enums"]["product_type"]
+          slug: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instructor_id?: string | null
+          price: number
+          product_type?: Database["public"]["Enums"]["product_type"]
+          slug: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instructor_id?: string | null
+          price?: number
+          product_type?: Database["public"]["Enums"]["product_type"]
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -405,6 +408,7 @@ export type Database = {
       article_status: "draft" | "published"
       franchise_status: "pending" | "approved" | "rejected"
       franchise_time_commitment: "full-time" | "part-time" | "flexible"
+      product_type: "course" | "template"
       review_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -525,6 +529,7 @@ export const Constants = {
       article_status: ["draft", "published"],
       franchise_status: ["pending", "approved", "rejected"],
       franchise_time_commitment: ["full-time", "part-time", "flexible"],
+      product_type: ["course", "template"],
       review_status: ["pending", "approved", "rejected"],
     },
   },

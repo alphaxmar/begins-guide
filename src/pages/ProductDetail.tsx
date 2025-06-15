@@ -6,10 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
+import { Badge } from "@/components/ui/badge";
 
-const fetchCourseBySlug = async (slug: string) => {
+const fetchProductBySlug = async (slug: string) => {
   const { data, error } = await supabase
-    .from("courses")
+    .from("products")
     .select("*")
     .eq("slug", slug)
     .maybeSingle();
@@ -18,12 +19,12 @@ const fetchCourseBySlug = async (slug: string) => {
   return data;
 };
 
-const CourseDetail = () => {
+const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  const { data: course, isLoading, isError } = useQuery<Tables<'courses'> | null>({
-    queryKey: ["course", slug],
-    queryFn: () => fetchCourseBySlug(slug!),
+  const { data: product, isLoading, isError } = useQuery<Tables<'products'> | null>({
+    queryKey: ["product", slug],
+    queryFn: () => fetchProductBySlug(slug!),
     enabled: !!slug,
   });
 
@@ -43,15 +44,15 @@ const CourseDetail = () => {
     );
   }
 
-  if (isError || !course) {
+  if (isError || !product) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">ไม่พบคอร์สเรียน</h2>
-        <p className="text-muted-foreground mb-8">คอร์สที่คุณกำลังมองหาอาจไม่มีอยู่จริง</p>
+        <h2 className="text-2xl font-bold mb-4">ไม่พบสินค้า</h2>
+        <p className="text-muted-foreground mb-8">สินค้าที่คุณกำลังมองหาอาจไม่มีอยู่จริง</p>
         <Button asChild>
-          <Link to="/courses">
+          <Link to="/products">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            กลับไปหน้ารวมคอร์ส
+            กลับไปหน้ารวมสินค้า
           </Link>
         </Button>
       </div>
@@ -61,30 +62,33 @@ const CourseDetail = () => {
   return (
     <div className="py-12">
        <Button variant="ghost" asChild className="mb-4 -ml-4">
-         <Link to="/courses">
+         <Link to="/products">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            กลับไปหน้ารวมคอร์ส
+            กลับไปหน้ารวมสินค้า
          </Link>
       </Button>
       <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
         <div>
-          {course.image_url && (
+          {product.image_url && (
             <img
-              src={course.image_url}
-              alt={course.title}
+              src={product.image_url}
+              alt={product.title}
               className="w-full h-auto object-cover rounded-lg shadow-lg"
             />
           )}
         </div>
         <div className="space-y-6">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{course.title}</h1>
-          <p className="text-lg text-muted-foreground">{course.description}</p>
+          <Badge variant={product.product_type === 'course' ? 'default' : 'secondary'} className="w-fit">
+            {product.product_type === 'course' ? 'คอร์สออนไลน์' : 'เทมเพลต'}
+          </Badge>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{product.title}</h1>
+          <p className="text-lg text-muted-foreground">{product.description}</p>
           <div className="flex items-baseline gap-4">
-            <p className="text-4xl font-bold text-primary">{course.price.toLocaleString()} บาท</p>
+            <p className="text-4xl font-bold text-primary">{product.price.toLocaleString()} บาท</p>
           </div>
           <Button size="lg" className="w-full md:w-auto">
             <ShoppingCart className="mr-2 h-5 w-5" />
-            ซื้อคอร์สนี้
+            เพิ่มลงตะกร้า
           </Button>
         </div>
       </div>
@@ -92,4 +96,4 @@ const CourseDetail = () => {
   );
 };
 
-export default CourseDetail;
+export default ProductDetail;

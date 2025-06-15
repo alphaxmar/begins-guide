@@ -6,13 +6,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Articles from "./pages/Articles";
-import Courses from "./pages/Courses";
+import Products from "./pages/Products";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import AuthPage from "./pages/AuthPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import ArticleDetail from "./pages/ArticleDetail";
-import CourseDetail from "./pages/CourseDetail";
+import ProductDetail from "./pages/ProductDetail";
 import CreateArticle from "./pages/CreateArticle";
 import EditArticle from "./pages/EditArticle";
 import ProfilePage from "./pages/ProfilePage";
@@ -36,8 +36,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/articles" element={<Articles />} />
               <Route path="/articles/:slug" element={<ArticleDetail />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/courses/:slug" element={<CourseDetail />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:slug" element={<ProductDetail />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/update-password" element={<UpdatePasswordPage />} />

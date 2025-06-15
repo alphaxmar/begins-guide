@@ -1,5 +1,6 @@
+
 import ArticleCard from "@/components/ArticleCard";
-import CourseCard from "@/components/CourseCard";
+import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -19,8 +20,9 @@ const fetchFeaturedArticles = async () => {
 
 const fetchFeaturedCourses = async () => {
   const { data, error } = await supabase
-    .from("courses")
+    .from("products")
     .select("*")
+    .eq("product_type", "course")
     .limit(2)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
@@ -33,7 +35,7 @@ const Index = () => {
     queryFn: fetchFeaturedArticles,
   });
 
-  const { data: courses, isLoading: isLoadingCourses } = useQuery<Tables<'courses'>[]>({
+  const { data: courses, isLoading: isLoadingCourses } = useQuery<Tables<'products'>[]>({
     queryKey: ["featuredCourses"],
     queryFn: fetchFeaturedCourses,
   });
@@ -50,7 +52,7 @@ const Index = () => {
         </p>
         <div className="mt-8 flex justify-center gap-4">
           <Button size="lg" asChild>
-            <Link to="/courses">ดูคอร์สทั้งหมด</Link>
+            <Link to="/products">ดูคอร์สและสินค้า</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
             <Link to="/articles">อ่านบทความฟรี</Link>
@@ -103,19 +105,19 @@ const Index = () => {
                 </div>
               ))
             : courses && courses.length > 0
-            ? courses.map((course) => (
-                <CourseCard
-                  key={course.slug}
-                  {...course}
-                  imageUrl={course.image_url || ""}
-                  description={course.description || ""}
+            ? courses.map((product) => (
+                <ProductCard
+                  key={product.slug}
+                  {...product}
+                  imageUrl={product.image_url || ""}
+                  description={product.description || ""}
                 />
               ))
             : <p className="text-center text-muted-foreground md:col-span-2">ยังไม่มีคอร์สในขณะนี้</p>}
         </div>
         <div className="text-center mt-8">
           <Button variant="ghost" asChild>
-            <Link to="/courses">ดูคอร์สทั้งหมด &rarr;</Link>
+            <Link to="/products">ดูสินค้าทั้งหมด &rarr;</Link>
           </Button>
         </div>
       </section>
