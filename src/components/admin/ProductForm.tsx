@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -86,7 +85,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
         form.setValue("slug", generateSlug(title), { shouldValidate: true });
     }
   };
-
 
   return (
     <Card>
@@ -186,15 +184,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, initialData, isLoad
               <FormField
                 control={form.control}
                 name="template_file"
-                render={({ field: { value, onChange, ...fieldProps } }) => (
+                render={({ field: { onChange, onBlur, name, ref } }) => (
                   <FormItem>
                     <FormLabel>ไฟล์เทมเพลต</FormLabel>
                     <FormControl>
                       <Input
-                        {...fieldProps}
+                        name={name}
+                        onBlur={onBlur}
+                        ref={ref}
                         type="file"
                         accept=".zip,.pdf,.png,.jpg,.jpeg"
-                        onChange={(event) => {
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
                           onChange(event.target.files);
                         }}
                       />
