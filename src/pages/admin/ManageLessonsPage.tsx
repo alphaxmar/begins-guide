@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,7 +6,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Edit, Trash2, ArrowLeft, GripVertical } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ArrowLeft } from "lucide-react";
 import LessonDialog from "@/components/admin/LessonDialog";
 import { LessonFormValues } from "@/components/admin/LessonForm";
 import { Tables } from "@/integrations/supabase/types";
@@ -19,7 +20,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import SortableLessonItem from "@/components/admin/SortableLessonItem";
 
 const fetchProductBySlug = async (slug: string) => {
   const { data, error } = await supabase
@@ -51,11 +66,19 @@ const ManageLessonsPage = () => {
     enabled: !!slug,
   });
 
-  const { data: lessons, isLoading: areLessonsLoading } = useQuery({
+  const { data: lessons, isLoading: areLessonsLoading } = useQuery<Tables<'lessons'>[]>({
     queryKey: ["lessons", product?.id],
     queryFn: () => fetchLessonsByProductId(product!.id),
     enabled: !!product,
   });
+  
+  const [localLessons, setLocalLessons] = useState<Tables<'lessons'>[]>([]);
+
+  useEffect(() => {
+    if (lessons) {
+      setLocalLessons(lessons);
+    }
+  }, [lessons]);
 
   const lessonMutation = useMutation({
     mutationFn: async ({ values, lessonId }: { values: LessonFormValues; lessonId?: string }) => {
@@ -116,6 +139,48 @@ const ManageLessonsPage = () => {
     },
   });
 
+  const updateOrderMutation = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      const { error } = await supabase.rpc('update_lessons_order', {
+        p_lesson_ids: orderedIds,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("บันทึกลำดับบทเรียนเรียบร้อยแล้ว");
+      queryClient.invalidateQueries({ queryKey: ["lessons", product?.id] });
+    },
+    onError: (error) => {
+      toast.error(`เกิดข้อผิดพลาดในการบันทึกลำดับ: ${error.message}`);
+      if (lessons) setLocalLessons(lessons);
+    },
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const {active, over} = event;
+
+    if (over && active.id !== over.id) {
+      setLocalLessons((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        
+        const orderedIds = newOrder.map((item) => item.id);
+        updateOrderMutation.mutate(orderedIds);
+        
+        return newOrder;
+      });
+    }
+  }
+
   if (isProductLoading || areLessonsLoading) {
     return (
       <div className="py-8 max-w-4xl mx-auto">
@@ -159,58 +224,61 @@ const ManageLessonsPage = () => {
         <CardHeader>
           <CardTitle>{product.title}</CardTitle>
           <CardDescription>
-            จัดการบทเรียนทั้งหมดสำหรับคอร์สนี้
+            จัดการบทเรียนทั้งหมดสำหรับคอร์สนี้ (ลากเพื่อจัดลำดับ)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {lessons && lessons.length > 0 ? (
-            <div className="space-y-2">
-              {lessons.map((lesson) => (
-                <div key={lesson.id} className="flex items-center p-2 border rounded-md bg-background hover:bg-muted/50 transition-colors group">
-                  <GripVertical className="h-5 w-5 text-muted-foreground mr-2 cursor-grab" />
-                  <div className="flex-grow">
-                    <p className="font-medium">{lesson.title}</p>
-                    <p className="text-sm text-muted-foreground">{lesson.video_url || 'ไม่มีวิดีโอ'}</p>
-                  </div>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <LessonDialog
-                      product={product}
-                      lesson={lesson}
-                      onSave={(values, lessonId) => lessonMutation.mutate({ values, lessonId })}
-                      isSaving={lessonMutation.isPending}
-                    >
-                      <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                    </LessonDialog>
+          {localLessons && localLessons.length > 0 ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={localLessons.map((l) => l.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {localLessons.map((lesson) => (
+                    <SortableLessonItem key={lesson.id} lesson={lesson}>
+                      <LessonDialog
+                        product={product}
+                        lesson={lesson}
+                        onSave={(values, lessonId) => lessonMutation.mutate({ values, lessonId })}
+                        isSaving={lessonMutation.isPending}
+                      >
+                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                      </LessonDialog>
 
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>คุณแน่ใจหรือไม่?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            การกระทำนี้ไม่สามารถย้อนกลับได้ บทเรียน "{lesson.title}" จะถูกลบอย่างถาวร
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => deleteLessonMutation.mutate(lesson.id)}
-                            className="bg-destructive hover:bg-destructive/90"
-                          >
-                            ลบ
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
-                  </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>คุณแน่ใจหรือไม่?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              การกระทำนี้ไม่สามารถย้อนกลับได้ บทเรียน "{lesson.title}" จะถูกลบอย่างถาวร
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteLessonMutation.mutate(lesson.id)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              ลบ
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </SortableLessonItem>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           ) : (
             <div className="text-center py-12 border-2 border-dashed rounded-lg">
                 <h3 className="text-lg font-semibold">ยังไม่มีบทเรียน</h3>

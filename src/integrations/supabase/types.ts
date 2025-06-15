@@ -443,6 +443,10 @@ export type Database = {
           view_count: number
         }[]
       }
+      update_lessons_order: {
+        Args: { p_lesson_ids: string[] }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "partner"
