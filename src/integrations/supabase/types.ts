@@ -528,6 +528,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_order_for_current_user: {
+        Args: { product_ids: string[] }
+        Returns: string
+      }
       current_user_has_role: {
         Args: { role_to_check: Database["public"]["Enums"]["app_role"] }
         Returns: boolean

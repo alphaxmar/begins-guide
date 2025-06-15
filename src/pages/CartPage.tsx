@@ -1,12 +1,74 @@
 
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { X, ShoppingCart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { X, ShoppingCart, Loader2 } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
+
+const createOrder = async (productIds: string[]) => {
+  if (!productIds || productIds.length === 0) {
+    throw new Error("ไม่มีสินค้าในตะกร้า");
+  }
+  const { data, error } = await supabase.rpc("create_order_for_current_user", {
+    product_ids: productIds,
+  });
+
+  if (error) {
+    console.error("Error creating order:", error);
+    // แปลข้อความ error ที่ผู้ใช้พอจะเข้าใจได้
+    if (error.message.includes("User must be authenticated")) {
+      throw new Error("กรุณาเข้าสู่ระบบเพื่อดำเนินการสั่งซื้อ");
+    }
+    throw new Error("เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ");
+  }
+
+  return data;
+};
+
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, cartTotal, itemCount } = useCart();
+  const { cartItems, removeFromCart, cartTotal, itemCount, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const mutation = useMutation({
+    mutationFn: createOrder,
+    onSuccess: () => {
+      toast({
+        title: "สั่งซื้อสำเร็จ!",
+        description: "คุณสามารถเข้าดูสินค้าของคุณได้ที่หน้าโปรไฟล์",
+      });
+      clearCart();
+      navigate("/profile");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message || "ไม่สามารถดำเนินการสั่งซื้อได้",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCheckout = () => {
+    if (!user) {
+      toast({
+        title: "กรุณาเข้าสู่ระบบ",
+        description: "คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถชำระเงินได้",
+        variant: "destructive",
+      });
+      navigate("/auth", { state: { from: location } });
+      return;
+    }
+
+    const productIds = cartItems.map((item) => item.id);
+    mutation.mutate(productIds);
+  };
 
   if (itemCount === 0) {
     return (
@@ -57,7 +119,10 @@ const CartPage = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button size="lg" className="w-full">
+              <Button size="lg" className="w-full" onClick={handleCheckout} disabled={mutation.isPending}>
+                {mutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 ดำเนินการชำระเงิน
               </Button>
             </CardFooter>
