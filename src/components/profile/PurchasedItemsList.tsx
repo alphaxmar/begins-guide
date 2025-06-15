@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import PurchasedItemCard from "./PurchasedItemCard";
 import { Tables } from "@/integrations/supabase/types";
 import { User } from "@supabase/supabase-js";
-import { Package } from "lucide-react";
+import { Package, Download, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 
 type ProductWithTemplatePath = Tables<'products'> & { template_file_path?: string | null };
 type PurchasedItem = Tables<'user_purchases'> & {
@@ -18,6 +21,8 @@ interface PurchasedItemsListProps {
 }
 
 const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
   const { data: purchasedItems, isLoading, isError, error } = useQuery<PurchasedItem[]>({
     queryKey: ['purchased_products', user?.id],
     queryFn: async () => {
@@ -46,6 +51,41 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
     },
     enabled: !!user,
   });
+
+  const handleDownload = async (item: PurchasedItem) => {
+    const filePath = item.products?.template_file_path;
+    const productId = item.products?.id;
+
+    if (!filePath || !productId) {
+      toast.error("ไม่พบไฟล์สำหรับดาวน์โหลด");
+      return;
+    }
+
+    setDownloadingId(productId);
+    try {
+      const { data, error } = await supabase.storage
+        .from("product_files")
+        .createSignedUrl(filePath, 60); // 60 seconds validity
+
+      if (error) {
+        throw error;
+      }
+      
+      const link = document.createElement('a');
+      link.href = data.signedUrl;
+      link.setAttribute('download', filePath.split('/').pop() || 'template');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      link.remove();
+      toast.success("กำลังเริ่มดาวน์โหลด...");
+
+    } catch (err: any) {
+      toast.error(`เกิดข้อผิดพลาดในการดาวน์โหลด: ${err.message}`);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -104,7 +144,31 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
             {templates.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
                 {templates.map((item) => (
-                  <PurchasedItemCard key={item.id} item={item} />
+                   item.products && (
+                    <Card key={item.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div className="flex items-center gap-4">
+                        {item.products.image_url ? (
+                            <img src={item.products.image_url} alt={item.products.title} className="h-16 w-16 object-cover rounded-md" />
+                        ) : (
+                            <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center">
+                                <Package className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                        )}
+                        <div>
+                          <p className="font-semibold">{item.products.title}</p>
+                          <p className="text-sm text-muted-foreground">เทมเพลตธุรกิจ</p>
+                        </div>
+                      </div>
+                      <Button onClick={() => handleDownload(item)} disabled={downloadingId === item.products?.id} className="w-full sm:w-auto">
+                        {downloadingId === item.products?.id ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Download className="mr-2 h-4 w-4" />
+                        )}
+                        ดาวน์โหลด
+                      </Button>
+                    </Card>
+                   )
                 ))}
               </div>
             ) : (
