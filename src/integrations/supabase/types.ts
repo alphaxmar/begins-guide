@@ -204,6 +204,81 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          price: number
+          product_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          price: number
+          product_id: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          price?: number
+          product_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          id: string
+          payment_provider: string | null
+          provider_payment_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_provider?: string | null
+          provider_payment_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_provider?: string | null
+          provider_payment_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       partner_submissions: {
         Row: {
           admin_notes: string | null
@@ -482,6 +557,12 @@ export type Database = {
       article_status: "draft" | "published"
       franchise_status: "pending" | "approved" | "rejected"
       franchise_time_commitment: "full-time" | "part-time" | "flexible"
+      order_status:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "refunded"
       product_type: "course" | "template"
       review_status: "pending" | "approved" | "rejected"
     }
@@ -603,6 +684,13 @@ export const Constants = {
       article_status: ["draft", "published"],
       franchise_status: ["pending", "approved", "rejected"],
       franchise_time_commitment: ["full-time", "part-time", "flexible"],
+      order_status: [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "refunded",
+      ],
       product_type: ["course", "template"],
       review_status: ["pending", "approved", "rejected"],
     },
