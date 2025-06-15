@@ -35,7 +35,11 @@ const EditProductPage = () => {
 
       const { data, error } = await supabase
         .from("products")
-        .update(values)
+        .update({
+          ...values,
+          description: values.description || null,
+          image_url: values.image_url || null,
+        })
         .eq("id", product.id)
         .select()
         .single();
