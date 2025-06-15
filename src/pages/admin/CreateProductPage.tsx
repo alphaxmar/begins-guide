@@ -17,12 +17,15 @@ const CreateProductPage = () => {
 
       const { data, error } = await supabase
         .from("products")
-        .insert({ 
-            ...values,
-            description: values.description || null,
-            image_url: values.image_url || null,
-            instructor_id: user.id,
-         })
+        .insert({
+          title: values.title,
+          slug: values.slug,
+          price: values.price,
+          product_type: values.product_type,
+          description: values.description || null,
+          image_url: values.image_url || null,
+          instructor_id: user.id,
+        })
         .select()
         .single();
       
@@ -58,4 +61,3 @@ const CreateProductPage = () => {
 };
 
 export default CreateProductPage;
-

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +35,10 @@ const EditProductPage = () => {
       const { data, error } = await supabase
         .from("products")
         .update({
-          ...values,
+          title: values.title,
+          slug: values.slug,
+          price: values.price,
+          product_type: values.product_type,
           description: values.description || null,
           image_url: values.image_url || null,
         })
