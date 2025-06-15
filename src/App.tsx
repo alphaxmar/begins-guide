@@ -22,6 +22,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/admin/DashboardPage";
 import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import CreateProductPage from "./pages/admin/CreateProductPage";
+import EditProductPage from "./pages/admin/EditProductPage";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,8 @@ const App = () => (
                 <Route path="/admin" element={<DashboardPage />} />
                 <Route path="/admin/articles" element={<AdminArticlesPage />} />
                 <Route path="/admin/products" element={<AdminProductsPage />} />
+                <Route path="/admin/products/create" element={<CreateProductPage />} />
+                <Route path="/admin/products/:slug/edit" element={<EditProductPage />} />
                 <Route path="/articles/create" element={<CreateArticle />} />
                 <Route path="/articles/:slug/edit" element={<EditArticle />} />
               </Route>
