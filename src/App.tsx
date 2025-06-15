@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,8 @@ import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import CreateProductPage from "./pages/admin/CreateProductPage";
 import EditProductPage from "./pages/admin/EditProductPage";
 import ManageLessonsPage from "./pages/admin/ManageLessonsPage";
+import CoursePage from "./pages/CoursePage";
+import UserProtectedRoute from "./components/UserProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -46,9 +47,14 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/update-password" element={<UpdatePasswordPage />} />
               
-              {/* Protected Routes */}
-              <Route element={<ProtectedRoute />}>
+              {/* User Protected Routes */}
+              <Route element={<UserProtectedRoute />}>
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/courses/:slug/learn" element={<CoursePage />} />
+              </Route>
+
+              {/* Admin Protected Routes */}
+              <Route element={<ProtectedRoute />}>
                 <Route path="/admin" element={<DashboardPage />} />
                 <Route path="/admin/articles" element={<AdminArticlesPage />} />
                 <Route path="/admin/products" element={<AdminProductsPage />} />

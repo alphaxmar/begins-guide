@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { ArrowLeft, ShoppingCart, BookOpen } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { Badge } from "@/components/ui/badge";
 
@@ -86,10 +86,20 @@ const ProductDetail = () => {
           <div className="flex items-baseline gap-4">
             <p className="text-4xl font-bold text-primary">{product.price.toLocaleString()} บาท</p>
           </div>
-          <Button size="lg" className="w-full md:w-auto">
-            <ShoppingCart className="mr-2 h-5 w-5" />
-            เพิ่มลงตะกร้า
-          </Button>
+          <div className="flex flex-wrap gap-4 items-center">
+            <Button size="lg" className="w-full sm:w-auto">
+              <ShoppingCart className="mr-2 h-5 w-5" />
+              เพิ่มลงตะกร้า
+            </Button>
+            {product.product_type === 'course' && (
+              <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
+                <Link to={`/courses/${product.slug}/learn`}>
+                  <BookOpen className="mr-2 h-5 w-5" />
+                  เข้าสู่บทเรียน
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
