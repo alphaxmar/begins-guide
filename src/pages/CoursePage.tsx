@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useCourseData } from "@/hooks/useCourseData";
@@ -7,14 +6,16 @@ import LessonSidebar from "@/components/learn/LessonSidebar";
 import LessonContent from "@/components/learn/LessonContent";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock, ShoppingCart } from "lucide-react";
+import { useCourseAccess } from "@/hooks/useCourseAccess";
 
 const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { product, lessons, isLoading } = useCourseData(slug);
+  const { product, lessons, isLoading: isCourseDataLoading } = useCourseData(slug);
+  const { hasAccess, isLoading: isAccessLoading, isError: isAccessError } = useCourseAccess(product?.id);
   const [activeLesson, setActiveLesson] = useState<Tables<'lessons'> | null>(null);
 
   const queryParams = new URLSearchParams(location.search);
@@ -62,15 +63,35 @@ const CoursePage = () => {
     }
   };
 
+  const isLoading = isCourseDataLoading || (product && isAccessLoading);
+
   if (isLoading) {
     return <CoursePageSkeleton />;
   }
 
-  if (!product) {
+  if (product && (!hasAccess || isAccessError)) {
+    return (
+      <div className="text-center py-12 flex flex-col items-center">
+        <Lock className="h-16 w-16 text-destructive mb-4" />
+        <h2 className="text-2xl font-bold mb-4">คุณยังไม่มีสิทธิ์เข้าถึงคอร์สนี้</h2>
+        <p className="text-muted-foreground mb-8">
+          {isAccessError ? 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์' : 'กรุณาซื้อคอร์สเพื่อเข้าถึงบทเรียนทั้งหมด'}
+        </p>
+        <Button asChild>
+          <Link to={`/products/${product.slug}`}>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            ไปที่หน้าคอร์ส
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (!product || !lessons) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold mb-4">ไม่พบคอร์สเรียน</h2>
-        <p className="text-muted-foreground mb-8">คอร์สที่คุณกำลังมองหาอาจไม่มีอยู่จริง</p>
+        <p className="text-muted-foreground mb-8">คอร์สที่คุณกำลังมองหาอาจไม่มีอยู่จริง หรือคุณไม่มีสิทธิ์เข้าถึง</p>
         <Button asChild>
           <Link to="/products">
             <ArrowLeft className="mr-2 h-4 w-4" />

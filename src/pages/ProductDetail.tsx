@@ -4,9 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart, BookOpen } from "lucide-react";
+import { ArrowLeft, ShoppingCart, BookOpen, Loader2 } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCourseAccess } from "@/hooks/useCourseAccess";
 
 const fetchProductBySlug = async (slug: string) => {
   const { data, error } = await supabase
@@ -21,12 +23,17 @@ const fetchProductBySlug = async (slug: string) => {
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
 
   const { data: product, isLoading, isError } = useQuery<Tables<'products'> | null>({
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug!),
     enabled: !!slug,
   });
+
+  const { hasAccess, isLoading: isAccessLoading, isError: isAccessError } = useCourseAccess(
+    product?.product_type === 'course' ? product.id : undefined
+  );
 
   if (isLoading) {
     return (
@@ -87,16 +94,31 @@ const ProductDetail = () => {
             <p className="text-4xl font-bold text-primary">{product.price.toLocaleString()} บาท</p>
           </div>
           <div className="flex flex-wrap gap-4 items-center">
-            <Button size="lg" className="w-full sm:w-auto">
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              เพิ่มลงตะกร้า
-            </Button>
-            {product.product_type === 'course' && (
-              <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
-                <Link to={`/courses/${product.slug}/learn`}>
-                  <BookOpen className="mr-2 h-5 w-5" />
-                  เข้าสู่บทเรียน
-                </Link>
+            {product.product_type === 'course' ? (
+              <>
+                {isAccessLoading ? (
+                  <Button size="lg" className="w-full sm:w-auto" disabled>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    กำลังตรวจสอบ...
+                  </Button>
+                ) : hasAccess && !isAccessError ? (
+                  <Button size="lg" asChild className="w-full sm:w-auto">
+                    <Link to={`/courses/${product.slug}/learn`}>
+                      <BookOpen className="mr-2 h-5 w-5" />
+                      เข้าสู่บทเรียน
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="lg" className="w-full sm:w-auto">
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    เพิ่มลงตะกร้า
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button size="lg" className="w-full sm:w-auto">
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                เพิ่มลงตะกร้า
               </Button>
             )}
           </div>
