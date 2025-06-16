@@ -1,24 +1,13 @@
-
 import React from 'react';
-import Header from './Header';
-import Footer from './Footer';
-import FloatingCartButton from './FloatingCartButton';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
+// This component is no longer needed since we moved the layout directly to App.tsx
+// But keeping it for backward compatibility
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8">
-        {children}
-      </main>
-      <Footer />
-      <FloatingCartButton />
-    </div>
-  );
+  return <>{children}</>;
 };
 
 export default Layout;
