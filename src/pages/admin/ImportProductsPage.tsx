@@ -50,12 +50,42 @@ const ImportProductsPage = () => {
     }
   };
 
-  const generateSlug = (title: string): string => {
-    return title
+  const generateUniqueSlug = async (baseTitle: string): Promise<string> => {
+    let slug = baseTitle
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
       .trim();
+
+    // Check if slug exists
+    const { data: existingProduct } = await supabase
+      .from("products")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (!existingProduct) {
+      return slug;
+    }
+
+    // If slug exists, append number
+    let counter = 1;
+    let uniqueSlug = `${slug}-${counter}`;
+
+    while (true) {
+      const { data: conflictProduct } = await supabase
+        .from("products")
+        .select("id")
+        .eq("slug", uniqueSlug)
+        .maybeSingle();
+
+      if (!conflictProduct) {
+        return uniqueSlug;
+      }
+
+      counter++;
+      uniqueSlug = `${slug}-${counter}`;
+    }
   };
 
   const parseCSV = (text: string): any[] => {
@@ -113,32 +143,22 @@ const ImportProductsPage = () => {
         try {
           // Validate required fields
           if (!product.title || !product.price) {
-            throw new Error(`แถวที่ ${i + 2}: ต้องมี title และ price`);
+            throw new Error(`ต้องมี title และ price`);
           }
 
           // Validate product_type
           if (product.product_type && !['course', 'template'].includes(product.product_type)) {
-            throw new Error(`แถวที่ ${i + 2}: product_type ต้องเป็น 'course' หรือ 'template'`);
+            throw new Error(`product_type ต้องเป็น 'course' หรือ 'template'`);
           }
 
           // Validate price
           const price = parseFloat(product.price);
           if (isNaN(price) || price < 0) {
-            throw new Error(`แถวที่ ${i + 2}: ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0`);
+            throw new Error(`ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0`);
           }
 
-          const slug = generateSlug(product.title);
-          
-          // Check if product with same slug exists
-          const { data: existingProduct } = await supabase
-            .from("products")
-            .select("id")
-            .eq("slug", slug)
-            .single();
-
-          if (existingProduct) {
-            throw new Error(`สินค้าที่มี slug "${slug}" มีอยู่แล้ว`);
-          }
+          // Generate unique slug
+          const slug = await generateUniqueSlug(product.title);
 
           // Insert product
           const { error } = await supabase
@@ -225,7 +245,7 @@ const ImportProductsPage = () => {
                 <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">3</div>
                 <div>
                   <p className="font-medium">อัปโหลดและนำเข้า</p>
-                  <p className="text-sm text-muted-foreground">เลือกไฟล์ที่เตรียมไว้และกดปุ่มนำเข้าข้อมูล</p>
+                  <p className="text-sm text-muted-foreground">เลือกไฟล์ที่เตรียมไว้และกดปุ่มนำเข้าข้อมูล (ระบบจะสร้าง slug ที่ไม่ซ้ำกันให้อัตโนมัติ)</p>
                 </div>
               </div>
             </div>
