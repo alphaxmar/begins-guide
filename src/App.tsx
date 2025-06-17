@@ -23,6 +23,7 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
 import ImportArticlesPage from "./pages/admin/ImportArticlesPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import ImportProductsPage from "./pages/admin/ImportProductsPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import CreateProductPage from "./pages/admin/CreateProductPage";
 import EditProductPage from "./pages/admin/EditProductPage";
@@ -72,6 +73,7 @@ const App = () => (
                     <Route path="/admin/articles" element={<AdminArticlesPage />} />
                     <Route path="/admin/articles/import" element={<ImportArticlesPage />} />
                     <Route path="/admin/products" element={<AdminProductsPage />} />
+                    <Route path="/admin/products/import" element={<ImportProductsPage />} />
                     <Route path="/admin/users" element={<AdminUsersPage />} />
                     <Route path="/admin/products/create" element={<CreateProductPage />} />
                     <Route path="/admin/products/:slug/edit" element={<EditProductPage />} />
