@@ -89,27 +89,59 @@ const ImportProductsPage = () => {
   };
 
   const parseCSV = (text: string): any[] => {
-    const lines = text.split('\n');
-    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length === 0) return [];
+
+    // Parse header line
+    const headerLine = lines[0];
+    let headers: string[] = [];
+    
+    // Handle CSV parsing with proper quote handling
+    if (headerLine.includes('"')) {
+      headers = headerLine.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)?.map(h => h.replace(/^"|"$/g, '').trim()) || [];
+    } else {
+      headers = headerLine.split(',').map(h => h.trim());
+    }
+
+    console.log('Parsed headers:', headers);
+
     const data = [];
 
     for (let i = 1; i < lines.length; i++) {
-      if (lines[i].trim()) {
-        const values = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-        const row: any = {};
-        
-        headers.forEach((header, index) => {
-          if (values[index]) {
-            row[header] = values[index].replace(/"/g, '').trim();
-          }
-        });
-        
-        if (row.title) {
-          data.push(row);
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      let values: string[] = [];
+      
+      // Handle CSV parsing with proper quote handling
+      if (line.includes('"')) {
+        // Use regex to properly parse CSV with quotes
+        const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+        values = matches.map(val => val.replace(/^"|"$/g, '').trim());
+      } else {
+        values = line.split(',').map(val => val.trim());
+      }
+
+      console.log(`Row ${i + 1} values:`, values);
+
+      const row: any = {};
+      
+      headers.forEach((header, index) => {
+        if (values[index] !== undefined) {
+          row[header] = values[index];
         }
+      });
+      
+      // Only add rows that have at least a title
+      if (row.title && row.title.trim()) {
+        data.push(row);
+        console.log(`Added row ${i + 1}:`, row);
+      } else {
+        console.log(`Skipped row ${i + 1} - no title:`, row);
       }
     }
     
+    console.log('Final parsed data:', data);
     return data;
   };
 
@@ -122,7 +154,10 @@ const ImportProductsPage = () => {
 
     try {
       const text = await file.text();
+      console.log('Raw CSV text:', text.substring(0, 500)); // Log first 500 chars
+      
       const products = parseCSV(text);
+      console.log('Parsed products:', products);
       
       if (products.length === 0) {
         toast.error("ไม่พบข้อมูลสินค้าในไฟล์ CSV");
@@ -141,9 +176,15 @@ const ImportProductsPage = () => {
         setProgress(((i + 1) / products.length) * 100);
 
         try {
+          console.log(`Processing product ${i + 1}:`, product);
+
           // Validate required fields
-          if (!product.title || !product.price) {
-            throw new Error(`ต้องมี title และ price`);
+          if (!product.title || !product.title.trim()) {
+            throw new Error(`ต้องมี title`);
+          }
+
+          if (!product.price || product.price.trim() === '') {
+            throw new Error(`ต้องมี price`);
           }
 
           // Validate product_type
@@ -164,20 +205,27 @@ const ImportProductsPage = () => {
           const { error } = await supabase
             .from("products")
             .insert({
-              title: product.title,
-              description: product.description || null,
+              title: product.title.trim(),
+              description: product.description?.trim() || null,
               price: price,
               product_type: product.product_type || 'course',
-              image_url: product.image_url || null,
+              image_url: product.image_url?.trim() || null,
               slug: slug
             });
 
-          if (error) throw error;
+          if (error) {
+            console.error(`Database error for product ${i + 1}:`, error);
+            throw error;
+          }
+          
           results.success++;
+          console.log(`Successfully imported product ${i + 1}`);
 
         } catch (error) {
           results.failed++;
-          results.errors.push(`แถวที่ ${i + 2}: ${error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}`);
+          const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาด';
+          results.errors.push(`แถวที่ ${i + 2}: ${errorMessage}`);
+          console.error(`Failed to import product ${i + 1}:`, error);
         }
       }
 
@@ -193,7 +241,7 @@ const ImportProductsPage = () => {
 
     } catch (error) {
       toast.error("เกิดข้อผิดพลาดในการอ่านไฟล์ CSV");
-      console.error(error);
+      console.error('CSV parsing error:', error);
     } finally {
       setImporting(false);
     }
@@ -248,6 +296,16 @@ const ImportProductsPage = () => {
                   <p className="text-sm text-muted-foreground">เลือกไฟล์ที่เตรียมไว้และกดปุ่มนำเข้าข้อมูล (ระบบจะสร้าง slug ที่ไม่ซ้ำกันให้อัตโนมัติ)</p>
                 </div>
               </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <h4 className="font-medium text-blue-900 mb-2">เคล็ดลับการเตรียมไฟล์ CSV:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• ใช้ UTF-8 encoding เพื่อรองรับภาษาไทย</li>
+                <li>• ครอบข้อความด้วยเครื่องหมาย " หากมีคอมม่าในข้อความ</li>
+                <li>• ตรวจสอบให้แน่ใจว่าทุกแถวมี title และ price</li>
+                <li>• product_type ให้ใส่เป็น 'course' หรือ 'template' เท่านั้น</li>
+              </ul>
             </div>
             
             <Button variant="outline" onClick={downloadTemplate} className="w-full">
