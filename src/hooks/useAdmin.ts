@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 
 const checkAdminRole = async () => {
-  const { data, error } = await supabase.rpc('current_user_has_role', { role_to_check: 'admin' });
+  const { data, error } = await supabase.rpc('current_user_has_role', { role_name: 'admin' });
   if (error) {
     console.error('Error checking admin role:', error);
     return false;
@@ -24,4 +24,3 @@ export const useAdmin = () => {
 
   return { isAdmin: isAdmin ?? false, isLoading: authLoading || (!!user && roleIsLoading) };
 };
-
