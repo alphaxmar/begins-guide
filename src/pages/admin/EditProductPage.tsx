@@ -96,7 +96,7 @@ const EditProductPage = () => {
           title: values.title,
           slug: values.slug,
           price: values.price,
-          product_type: values.product_type,
+          product_type: values.product_type as any,
           description: values.description || null,
           image_url: newImageUrl,
           template_file_path: newTemplateFilePath,
@@ -171,7 +171,7 @@ const EditProductPage = () => {
         )}
         <ProductForm 
           onSubmit={handleSubmit} 
-          initialData={product} 
+          defaultValues={product} 
           isLoading={updateProductMutation.isPending} 
           submitButtonText="อัปเดตสินค้า"
         />

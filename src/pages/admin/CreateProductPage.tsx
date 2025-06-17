@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
 import { useAuth } from "@/contexts/AuthContext";
-import { Tables } from "@/integrations/supabase/types";
 
 const CreateProductPage = () => {
   const queryClient = useQueryClient();
@@ -16,7 +15,7 @@ const CreateProductPage = () => {
     mutationFn: async (values: ProductFormValues) => {
       if (!user) throw new Error("User not authenticated");
 
-      let newProduct: Tables<'products'> | null = null;
+      let newProduct: any = null;
       const uploadedImage = { path: '', url: '' };
       const uploadedTemplate = { path: '' };
 
@@ -28,7 +27,7 @@ const CreateProductPage = () => {
             title: values.title,
             slug: values.slug,
             price: values.price,
-            product_type: values.product_type,
+            product_type: values.product_type as any,
             description: values.description || null,
             image_url: null,
             instructor_id: user.id,

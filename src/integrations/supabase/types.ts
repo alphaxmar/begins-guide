@@ -310,7 +310,14 @@ export type Database = {
         | "completed"
         | "failed"
         | "refunded"
-      product_type: "course" | "template"
+      product_type:
+        | "course"
+        | "template"
+        | "ebook"
+        | "video"
+        | "software"
+        | "service"
+        | "membership"
       user_role: "user" | "admin" | "partner"
     }
     CompositeTypes: {
@@ -435,7 +442,15 @@ export const Constants = {
         "failed",
         "refunded",
       ],
-      product_type: ["course", "template"],
+      product_type: [
+        "course",
+        "template",
+        "ebook",
+        "video",
+        "software",
+        "service",
+        "membership",
+      ],
       user_role: ["user", "admin", "partner"],
     },
   },
