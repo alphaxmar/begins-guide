@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, MoreHorizontal, Search, Filter, Edit, Eye, Trash2, Book, Upload, DownloadCloud, Archive, Copy } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Search, Filter, Edit, Eye, Trash2, Book, Upload, DownloadCloud, Archive, Copy, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -24,14 +24,17 @@ interface ProductWithStats extends Tables<'products'> {
   total_revenue?: number;
 }
 
+type SortField = 'title' | 'price' | 'created_at' | 'updated_at' | 'total_revenue' | 'total_buyers';
+type SortOrder = 'asc' | 'desc';
+
 const fetchProducts = async (
   page: number,
   searchQuery?: string, 
   typeFilter?: "course" | "template", 
   statusFilter?: string,
   ownerFilter?: string,
-  sortBy?: string,
-  sortOrder?: "asc" | "desc"
+  sortBy?: SortField,
+  sortOrder?: SortOrder
 ) => {
   const offset = (page - 1) * PRODUCTS_PER_PAGE;
   
@@ -45,17 +48,12 @@ const fetchProducts = async (
     .range(offset, offset + PRODUCTS_PER_PAGE - 1);
 
   if (searchQuery) {
-    query = query.ilike("title", `%${searchQuery}%`);
+    query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
   }
 
   if (typeFilter) {
     query = query.eq("product_type", typeFilter);
   }
-
-  // Note: status filter will be implemented when status field is added
-  // if (statusFilter && statusFilter !== "all") {
-  //   query = query.eq("status", statusFilter);
-  // }
 
   if (ownerFilter && ownerFilter !== "all") {
     if (ownerFilter === "admin") {
@@ -65,9 +63,17 @@ const fetchProducts = async (
     }
   }
 
-  // Sorting
+  // Improved sorting
   if (sortBy) {
-    query = query.order(sortBy, { ascending: sortOrder === "asc" });
+    const ascending = sortOrder === "asc";
+    switch (sortBy) {
+      case 'total_revenue':
+      case 'total_buyers':
+        // We'll sort these after processing the data
+        break;
+      default:
+        query = query.order(sortBy, { ascending });
+    }
   } else {
     query = query.order("created_at", { ascending: false });
   }
@@ -84,6 +90,15 @@ const fetchProducts = async (
     total_revenue: product.order_items?.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0) || 0
   })) || [];
 
+  // Sort by calculated fields if needed
+  if (sortBy === 'total_revenue' || sortBy === 'total_buyers') {
+    productsWithStats.sort((a, b) => {
+      const aVal = a[sortBy] || 0;
+      const bVal = b[sortBy] || 0;
+      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+  }
+
   return { products: productsWithStats, totalCount: count || 0 };
 };
 
@@ -94,8 +109,8 @@ const AdminProductsPage = () => {
   const [typeFilter, setTypeFilter] = useState<"all" | "course" | "template">("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
-  const [sortBy, setSortBy] = useState<string>("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<SortField>('created_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
   const { data, isLoading, isError, error } = useQuery({
@@ -164,6 +179,34 @@ const AdminProductsPage = () => {
     }
   });
 
+  const duplicateProductMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const product = products?.find(p => p.id === productId);
+      if (!product) throw new Error("ไม่พบสินค้า");
+
+      const duplicatedData = {
+        title: `${product.title} (สำเนา)`,
+        description: product.description,
+        price: product.price,
+        product_type: product.product_type,
+        slug: `${product.slug}-copy-${Date.now()}`,
+        image_url: product.image_url,
+        template_file_path: product.template_file_path,
+        instructor_id: product.instructor_id
+      };
+
+      const { error } = await supabase.from('products').insert(duplicatedData);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("สำเนาสินค้าสำเร็จ");
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+    onError: (error) => {
+      toast.error(`เกิดข้อผิดพลาดในการสำเนาสินค้า: ${error.message}`);
+    }
+  });
+
   const handleDelete = (id: string, title: string) => {
     if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า "${title}"?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) {
       deleteProductMutation.mutate(id);
@@ -177,12 +220,7 @@ const AdminProductsPage = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPage(1);
-  };
-
-  const handleSort = (column: string) => {
+  const handleSort = (column: SortField) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -244,6 +282,40 @@ const AdminProductsPage = () => {
     toast.success("ส่งออกข้อมูลเรียบร้อยแล้ว");
   };
 
+  const getSortIcon = (column: SortField) => {
+    if (sortBy !== column) return <ArrowUpDown className="h-4 w-4" />;
+    return sortOrder === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+  };
+
+  const getPaginationItems = () => {
+    const items = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) items.push(i);
+        items.push('...');
+        items.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        items.push(1);
+        items.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) items.push(i);
+      } else {
+        items.push(1);
+        items.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
+        items.push('...');
+        items.push(totalPages);
+      }
+    }
+    
+    return items;
+  };
+
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
@@ -274,17 +346,20 @@ const AdminProductsPage = () => {
       {/* Search and Filter Section */}
       <div className="mb-6 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          <form onSubmit={handleSearch} className="flex-1">
+          <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="ค้นหาจากชื่อสินค้า..."
+                placeholder="ค้นหาจากชื่อสินค้าหรือรายละเอียด..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="pl-10"
               />
             </div>
-          </form>
+          </div>
           
           <div className="flex gap-2">
             <Select value={typeFilter} onValueChange={(value: "all" | "course" | "template") => {
@@ -387,38 +462,38 @@ const AdminProductsPage = () => {
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort("title")}
                   >
-                    ชื่อสินค้า / เจ้าของ
-                    {sortBy === "title" && (
-                      <span className="ml-2">{sortOrder === "asc" ? "↑" : "↓"}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      ชื่อสินค้า / เจ้าของ
+                      {getSortIcon("title")}
+                    </div>
                   </TableHead>
                   <TableHead>ประเภท</TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort("total_revenue")}
                   >
-                    ยอดขาย / ผู้ซื้อ
-                    {sortBy === "total_revenue" && (
-                      <span className="ml-2">{sortOrder === "asc" ? "↑" : "↓"}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      ยอดขาย / ผู้ซื้อ
+                      {getSortIcon("total_revenue")}
+                    </div>
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort("price")}
                   >
-                    ราคา
-                    {sortBy === "price" && (
-                      <span className="ml-2">{sortOrder === "asc" ? "↑" : "↓"}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      ราคา
+                      {getSortIcon("price")}
+                    </div>
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort("updated_at")}
                   >
-                    วันที่อัปเดต
-                    {sortBy === "updated_at" && (
-                      <span className="ml-2">{sortOrder === "asc" ? "↑" : "↓"}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      วันที่อัปเดต
+                      {getSortIcon("updated_at")}
+                    </div>
                   </TableHead>
                   <TableHead>
                     <span className="sr-only">Actions</span>
@@ -530,7 +605,7 @@ const AdminProductsPage = () => {
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => duplicateProductMutation.mutate(product.id)}>
                                 <Copy className="h-4 w-4 mr-2" />
                                 สร้างสำเนา
                               </DropdownMenuItem>
@@ -566,9 +641,13 @@ const AdminProductsPage = () => {
             </Table>
           </div>
 
-          {/* Pagination */}
+          {/* Enhanced Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center mt-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+              <div className="text-sm text-muted-foreground">
+                แสดง {((currentPage - 1) * PRODUCTS_PER_PAGE) + 1} - {Math.min(currentPage * PRODUCTS_PER_PAGE, totalCount)} จาก {totalCount} รายการ
+              </div>
+              
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
@@ -578,20 +657,21 @@ const AdminProductsPage = () => {
                     />
                   </PaginationItem>
                   
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const page = i + 1;
-                    return (
-                      <PaginationItem key={page}>
+                  {getPaginationItems().map((item, index) => (
+                    <PaginationItem key={index}>
+                      {item === '...' ? (
+                        <span className="px-3 py-2">...</span>
+                      ) : (
                         <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={currentPage === page}
+                          onClick={() => setCurrentPage(item as number)}
+                          isActive={currentPage === item}
                           className="cursor-pointer"
                         >
-                          {page}
+                          {item}
                         </PaginationLink>
-                      </PaginationItem>
-                    );
-                  })}
+                      )}
+                    </PaginationItem>
+                  ))}
                   
                   <PaginationItem>
                     <PaginationNext 
@@ -608,11 +688,17 @@ const AdminProductsPage = () => {
 
       {/* Summary Information */}
       {products && products.length > 0 && (
-        <div className="mt-4 text-sm text-muted-foreground">
-          แสดง {products.length} จาก {totalCount} รายการ
-          {searchQuery && ` จากการค้นหา "${searchQuery}"`}
-          {typeFilter !== "all" && ` ประเภท "${typeFilter === 'course' ? 'คอร์ส' : 'เทมเพลต'}"`}
-          {ownerFilter !== "all" && ` เจ้าของ "${ownerFilter === 'admin' ? 'Admin' : 'Partner'}"`}
+        <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm text-muted-foreground">
+          <div>
+            แสดง {products.length} จาก {totalCount} รายการ
+            {searchQuery && ` จากการค้นหา "${searchQuery}"`}
+            {typeFilter !== "all" && ` ประเภท "${typeFilter === 'course' ? 'คอร์ส' : 'เทมเพลต'}"`}
+            {ownerFilter !== "all" && ` เจ้าของ "${ownerFilter === 'admin' ? 'Admin' : 'Partner'}"`}
+          </div>
+          <div className="flex gap-4">
+            <span>รายได้รวม: {products.reduce((sum, p) => sum + (p.total_revenue || 0), 0).toLocaleString()} บาท</span>
+            <span>ผู้ซื้อรวม: {products.reduce((sum, p) => sum + (p.total_buyers || 0), 0)} คน</span>
+          </div>
         </div>
       )}
     </div>
