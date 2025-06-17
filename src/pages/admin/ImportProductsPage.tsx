@@ -89,18 +89,28 @@ const ImportProductsPage = () => {
   };
 
   const parseCSV = (text: string): any[] => {
+    console.log('Raw CSV text (first 1000 chars):', text.substring(0, 1000));
+    
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length === 0) return [];
 
-    // Parse header line
+    // Parse header line with better quote handling
     const headerLine = lines[0];
     let headers: string[] = [];
     
-    // Handle CSV parsing with proper quote handling
-    if (headerLine.includes('"')) {
-      headers = headerLine.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)?.map(h => h.replace(/^"|"$/g, '').trim()) || [];
-    } else {
-      headers = headerLine.split(',').map(h => h.trim());
+    try {
+      // More robust CSV header parsing
+      if (headerLine.includes('"')) {
+        // Handle quoted headers
+        const headerMatches = headerLine.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+        headers = headerMatches.map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+      } else {
+        headers = headerLine.split(',').map(h => h.trim().toLowerCase());
+      }
+    } catch (error) {
+      console.error('Error parsing headers:', error);
+      // Fallback to simple split
+      headers = headerLine.split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
     }
 
     console.log('Parsed headers:', headers);
@@ -111,15 +121,33 @@ const ImportProductsPage = () => {
       const line = lines[i].trim();
       if (!line) continue;
 
+      console.log(`Processing line ${i + 1}:`, line);
+
       let values: string[] = [];
       
-      // Handle CSV parsing with proper quote handling
-      if (line.includes('"')) {
-        // Use regex to properly parse CSV with quotes
-        const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-        values = matches.map(val => val.replace(/^"|"$/g, '').trim());
-      } else {
-        values = line.split(',').map(val => val.trim());
+      try {
+        // More robust CSV value parsing
+        if (line.includes('"')) {
+          // Handle quoted values with proper CSV parsing
+          const regex = /("(?:[^"]|"")*"|[^",]*?)(?=\s*,|\s*$)/g;
+          const matches = line.match(regex) || [];
+          values = matches.map(val => {
+            // Remove outer quotes and handle escaped quotes
+            let cleaned = val.trim();
+            if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+              cleaned = cleaned.slice(1, -1);
+              // Handle escaped quotes
+              cleaned = cleaned.replace(/""/g, '"');
+            }
+            return cleaned;
+          });
+        } else {
+          values = line.split(',').map(val => val.trim());
+        }
+      } catch (error) {
+        console.error(`Error parsing line ${i + 1}:`, error);
+        // Fallback to simple split
+        values = line.split(',').map(val => val.replace(/"/g, '').trim());
       }
 
       console.log(`Row ${i + 1} values:`, values);
@@ -128,16 +156,26 @@ const ImportProductsPage = () => {
       
       headers.forEach((header, index) => {
         if (values[index] !== undefined) {
-          row[header] = values[index];
+          const value = values[index].trim();
+          // Store the value only if it's not empty
+          if (value) {
+            row[header] = value;
+          }
         }
       });
       
-      // Only add rows that have at least a title
-      if (row.title && row.title.trim()) {
+      console.log(`Processed row ${i + 1}:`, row);
+      
+      // Only add rows that have meaningful data (at least title or some content)
+      if (Object.keys(row).length > 0 && (row.title || row.name)) {
+        // Normalize common field variations
+        if (row.name && !row.title) {
+          row.title = row.name;
+        }
         data.push(row);
-        console.log(`Added row ${i + 1}:`, row);
+        console.log(`Added row ${i + 1} to data:`, row);
       } else {
-        console.log(`Skipped row ${i + 1} - no title:`, row);
+        console.log(`Skipped row ${i + 1} - insufficient data:`, row);
       }
     }
     
@@ -154,13 +192,15 @@ const ImportProductsPage = () => {
 
     try {
       const text = await file.text();
-      console.log('Raw CSV text:', text.substring(0, 500)); // Log first 500 chars
+      console.log('Raw CSV text length:', text.length);
+      console.log('Raw CSV text sample:', text.substring(0, 500));
       
       const products = parseCSV(text);
+      console.log('Parsed products count:', products.length);
       console.log('Parsed products:', products);
       
       if (products.length === 0) {
-        toast.error("ไม่พบข้อมูลสินค้าในไฟล์ CSV");
+        toast.error("ไม่พบข้อมูลสินค้าในไฟล์ CSV หรือข้อมูลไม่ถูกต้อง");
         setImporting(false);
         return;
       }
@@ -178,40 +218,56 @@ const ImportProductsPage = () => {
         try {
           console.log(`Processing product ${i + 1}:`, product);
 
-          // Validate required fields
-          if (!product.title || !product.title.trim()) {
+          // Validate required fields - title is mandatory
+          if (!product.title || !product.title.toString().trim()) {
             throw new Error(`ต้องมี title`);
           }
 
-          if (!product.price || product.price.trim() === '') {
-            throw new Error(`ต้องมี price`);
+          // Validate and clean price
+          let price = 0;
+          if (product.price) {
+            const priceStr = product.price.toString().trim();
+            if (priceStr) {
+              // Remove any non-numeric characters except decimal point
+              const cleanPrice = priceStr.replace(/[^\d.-]/g, '');
+              price = parseFloat(cleanPrice);
+              
+              if (isNaN(price) || price < 0) {
+                throw new Error(`ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0 (ได้รับ: "${priceStr}")`);
+              }
+            }
           }
 
-          // Validate product_type
-          if (product.product_type && !['course', 'template'].includes(product.product_type)) {
-            throw new Error(`product_type ต้องเป็น 'course' หรือ 'template'`);
-          }
-
-          // Validate price
-          const price = parseFloat(product.price);
-          if (isNaN(price) || price < 0) {
-            throw new Error(`ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0`);
+          // Validate and clean product_type
+          let productType = 'course'; // default value
+          if (product.product_type) {
+            const typeStr = product.product_type.toString().trim().toLowerCase();
+            if (typeStr === 'course' || typeStr === 'template') {
+              productType = typeStr;
+            } else if (typeStr) {
+              throw new Error(`product_type ต้องเป็น 'course' หรือ 'template' (ได้รับ: "${typeStr}")`);
+            }
           }
 
           // Generate unique slug
-          const slug = await generateUniqueSlug(product.title);
+          const slug = await generateUniqueSlug(product.title.toString().trim());
+
+          // Prepare insert data
+          const insertData = {
+            title: product.title.toString().trim(),
+            description: product.description ? product.description.toString().trim() : null,
+            price: price,
+            product_type: productType as 'course' | 'template',
+            image_url: product.image_url ? product.image_url.toString().trim() : null,
+            slug: slug
+          };
+
+          console.log(`Inserting product ${i + 1}:`, insertData);
 
           // Insert product
           const { error } = await supabase
             .from("products")
-            .insert({
-              title: product.title.trim(),
-              description: product.description?.trim() || null,
-              price: price,
-              product_type: product.product_type || 'course',
-              image_url: product.image_url?.trim() || null,
-              slug: slug
-            });
+            .insert(insertData);
 
           if (error) {
             console.error(`Database error for product ${i + 1}:`, error);
@@ -223,8 +279,9 @@ const ImportProductsPage = () => {
 
         } catch (error) {
           results.failed++;
-          const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาด';
-          results.errors.push(`แถวที่ ${i + 2}: ${errorMessage}`);
+          const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ';
+          const errorText = `แถวที่ ${i + 2}: ${errorMessage}`;
+          results.errors.push(errorText);
           console.error(`Failed to import product ${i + 1}:`, error);
         }
       }
@@ -240,7 +297,8 @@ const ImportProductsPage = () => {
       }
 
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการอ่านไฟล์ CSV");
+      const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ';
+      toast.error(`เกิดข้อผิดพลาดในการอ่านไฟล์ CSV: ${errorMessage}`);
       console.error('CSV parsing error:', error);
     } finally {
       setImporting(false);
@@ -286,7 +344,7 @@ const ImportProductsPage = () => {
                 <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">2</div>
                 <div>
                   <p className="font-medium">เตรียมข้อมูลของคุณ</p>
-                  <p className="text-sm text-muted-foreground">แก้ไขไฟล์ CSV ให้มีข้อมูลสินค้าของคุณ (title และ price จำเป็น)</p>
+                  <p className="text-sm text-muted-foreground">แก้ไขไฟล์ CSV ให้มีข้อมูลสินค้าของคุณ (title จำเป็น, price ถ้าไม่ใส่จะเป็น 0)</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -303,8 +361,10 @@ const ImportProductsPage = () => {
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• ใช้ UTF-8 encoding เพื่อรองรับภาษาไทย</li>
                 <li>• ครอบข้อความด้วยเครื่องหมาย " หากมีคอมม่าในข้อความ</li>
-                <li>• ตรวจสอบให้แน่ใจว่าทุกแถวมี title และ price</li>
-                <li>• product_type ให้ใส่เป็น 'course' หรือ 'template' เท่านั้น</li>
+                <li>• title เป็นฟิลด์ที่จำเป็น (บังคับ)</li>
+                <li>• price ถ้าไม่ใส่หรือเป็นค่าว่างจะกำหนดเป็น 0</li>
+                <li>• product_type ให้ใส่เป็น 'course' หรือ 'template' (ถ้าไม่ใส่จะเป็น 'course')</li>
+                <li>• ถ้าแถวไหนไม่มี title จะข้ามแถวนั้น</li>
               </ul>
             </div>
             
