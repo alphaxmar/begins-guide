@@ -40,18 +40,18 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-muted/30">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-muted-foreground">
+            <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               <span>จัดการผู้ใช้</span>
             </CardTitle>
-            <CardDescription className="text-muted-foreground">ดูและจัดการข้อมูลผู้ใช้งาน (เร็วๆ นี้)</CardDescription>
+            <CardDescription>ดูและจัดการข้อมูลผู้ใช้งาน</CardDescription>
           </CardHeader>
            <CardContent>
-             <span className="text-sm font-medium text-muted-foreground/60">
-              ยังไม่เปิดใช้งาน
-             </span>
+             <Link to="/admin/users" className="text-sm font-medium text-primary hover:underline">
+              → ไปที่หน้าจัดการผู้ใช้
+             </Link>
           </CardContent>
         </Card>
       </div>

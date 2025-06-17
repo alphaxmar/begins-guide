@@ -270,6 +270,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_user_role: {
+        Args: {
+          target_user_id: string
+          new_role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: undefined
+      }
       create_order_for_current_user: {
         Args: { product_ids: string[] }
         Returns: string
@@ -277,6 +284,18 @@ export type Database = {
       current_user_has_role: {
         Args: { role_name: string }
         Returns: boolean
+      }
+      get_users_with_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          email: string
+          full_name: string
+          role: Database["public"]["Enums"]["user_role"]
+          created_at: string
+          total_purchases: number
+          total_spent: number
+        }[]
       }
       update_lessons_order: {
         Args: { p_lesson_ids: string[] }
