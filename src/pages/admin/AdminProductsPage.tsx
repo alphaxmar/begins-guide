@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -14,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useState } from "react";
 
-const fetchProducts = async (searchQuery?: string, typeFilter?: string, statusFilter?: string) => {
+const fetchProducts = async (searchQuery?: string, typeFilter?: "course" | "template", statusFilter?: string) => {
   let query = supabase
     .from("products")
     .select("*")
@@ -24,7 +23,7 @@ const fetchProducts = async (searchQuery?: string, typeFilter?: string, statusFi
     query = query.ilike("title", `%${searchQuery}%`);
   }
 
-  if (typeFilter && typeFilter !== "all") {
+  if (typeFilter) {
     query = query.eq("product_type", typeFilter);
   }
 
@@ -43,12 +42,16 @@ const fetchProducts = async (searchQuery?: string, typeFilter?: string, statusFi
 const AdminProductsPage = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "course" | "template">("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const { data: products, isLoading, isError, error } = useQuery<Tables<'products'>[]>({
     queryKey: ["admin-products", searchQuery, typeFilter, statusFilter],
-    queryFn: () => fetchProducts(searchQuery, typeFilter, statusFilter),
+    queryFn: () => fetchProducts(
+      searchQuery, 
+      typeFilter === "all" ? undefined : typeFilter, 
+      statusFilter
+    ),
   });
 
   const deleteProductMutation = useMutation({
@@ -128,7 +131,7 @@ const AdminProductsPage = () => {
         </form>
         
         <div className="flex gap-2">
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select value={typeFilter} onValueChange={(value: "all" | "course" | "template") => setTypeFilter(value)}>
             <SelectTrigger className="w-[150px]">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="ประเภท" />
