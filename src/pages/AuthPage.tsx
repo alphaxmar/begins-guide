@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Chrome } from 'lucide-react'; // Assuming Google icon
+import { Chrome, Loader2 } from 'lucide-react';
+import { cleanupAuthState } from '@/utils/authCleanup';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
@@ -27,48 +28,104 @@ const AuthPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success('เข้าสู่ระบบสำเร็จ!');
-      navigate('/');
+    
+    try {
+      // Clean up existing state first
+      cleanupAuthState();
+      
+      // Attempt global sign out to clear any existing sessions
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log('Cleanup signout attempt:', err);
+      }
+
+      // Sign in with email/password
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง');
+        } else {
+          toast.error(error.message);
+        }
+      } else if (data.user) {
+        toast.success('เข้าสู่ระบบสำเร็จ!');
+        // Force page reload for clean state
+        window.location.href = '/';
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-      },
-    });
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success('สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยัน');
+    
+    try {
+      // Clean up existing state first
+      cleanupAuthState();
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        },
+      });
+      
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          toast.error('อีเมลนี้ได้ลงทะเบียนแล้ว กรุณาเข้าสู่ระบบหรือใช้อีเมลอื่น');
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success('สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยัน');
+        // Clear form
+        setEmail('');
+        setPassword('');
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   
   const handleOAuthLogin = async (provider: 'google') => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
-    });
-    if (error) {
-      toast.error(`Something went wrong: ${error.message}`);
+    
+    try {
+      // Clean up existing state first
+      cleanupAuthState();
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+      
+      if (error) {
+        toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
+      }
+    } catch (error: any) {
+      console.error('OAuth error:', error);
+      toast.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
 
   return (
     <div className="flex justify-center items-center py-12">
@@ -88,7 +145,15 @@ const AuthPage = () => {
                 <div className="grid gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="email">อีเมล</Label>
-                    <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="m@example.com" 
+                      required 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={loading}
+                    />
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
@@ -100,10 +165,24 @@ const AuthPage = () => {
                         ลืมรหัสผ่าน?
                       </Link>
                     </div>
-                    <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      required 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
+                    />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'กำลังโหลด...' : 'เข้าสู่ระบบ'}
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        กำลังเข้าสู่ระบบ...
+                      </>
+                    ) : (
+                      'เข้าสู่ระบบ'
+                    )}
                   </Button>
                 </div>
               </form>
@@ -117,7 +196,12 @@ const AuthPage = () => {
                   </span>
                 </div>
               </div>
-              <Button variant="outline" className="w-full" onClick={() => handleOAuthLogin('google')} disabled={loading}>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => handleOAuthLogin('google')} 
+                disabled={loading}
+              >
                 <Chrome className="mr-2 h-4 w-4" />
                 Google
               </Button>
@@ -135,14 +219,40 @@ const AuthPage = () => {
                 <div className="grid gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="signup-email">อีเมล</Label>
-                    <Input id="signup-email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Input 
+                      id="signup-email" 
+                      type="email" 
+                      placeholder="m@example.com" 
+                      required 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={loading}
+                    />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="signup-password">รหัสผ่าน</Label>
-                    <Input id="signup-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Input 
+                      id="signup-password" 
+                      type="password" 
+                      required 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
+                      minLength={6}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร
+                    </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                     {loading ? 'กำลังโหลด...' : 'สร้างบัญชี'}
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        กำลังสร้างบัญชี...
+                      </>
+                    ) : (
+                      'สร้างบัญชี'
+                    )}
                   </Button>
                 </div>
               </form>
