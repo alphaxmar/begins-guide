@@ -21,6 +21,7 @@ import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/admin/DashboardPage";
 import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
+import ImportArticlesPage from "./pages/admin/ImportArticlesPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import CreateProductPage from "./pages/admin/CreateProductPage";
@@ -69,6 +70,7 @@ const App = () => (
                   <Route element={<ProtectedRoute />}>
                     <Route path="/admin" element={<DashboardPage />} />
                     <Route path="/admin/articles" element={<AdminArticlesPage />} />
+                    <Route path="/admin/articles/import" element={<ImportArticlesPage />} />
                     <Route path="/admin/products" element={<AdminProductsPage />} />
                     <Route path="/admin/users" element={<AdminUsersPage />} />
                     <Route path="/admin/products/create" element={<CreateProductPage />} />
