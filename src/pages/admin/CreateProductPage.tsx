@@ -114,22 +114,27 @@ const CreateProductPage = () => {
       toast.success("สร้างสินค้าใหม่เรียบร้อยแล้ว!");
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
 
+      console.log("Product created successfully:", data);
+      console.log("Product type:", data?.product_type);
+      console.log("Product slug:", data?.slug);
+
       if (data && data.product_type === 'course') {
-        // Wait a bit for the product to be fully created before navigating
-        setTimeout(() => {
-          console.log("Navigating to lessons page with slug:", data.slug);
-          navigate(`/admin/products/${data.slug}/lessons`);
-        }, 100);
+        console.log("Navigating to lessons page for course:", data.slug);
+        // นำทางไปหน้าจัดการบทเรียนทันทีสำหรับคอร์ส
+        navigate(`/admin/products/${data.slug}/lessons`);
       } else {
+        console.log("Navigating to products list for non-course product");
         navigate("/admin/products");
       }
     },
     onError: (error) => {
+      console.error("Product creation error:", error);
       toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
     },
   });
 
   const handleSubmit = (values: ProductFormValues) => {
+    console.log("Submitting product with values:", values);
     createProductMutation.mutate(values);
   };
 
