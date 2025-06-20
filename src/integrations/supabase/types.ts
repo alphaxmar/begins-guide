@@ -54,6 +54,84 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          recipient_email: string
+          sent_by: string | null
+          status: string
+          subject: string
+          template_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          sent_by?: string | null
+          status?: string
+          subject: string
+          template_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          sent_by?: string | null
+          status?: string
+          subject?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          name: string
+          subject: string
+          updated_at: string | null
+          variables: string[] | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string | null
+          variables?: string[] | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string | null
+          variables?: string[] | null
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           content: string | null
@@ -270,6 +348,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_order_status: {
+        Args: {
+          order_id: string
+          new_status: Database["public"]["Enums"]["order_status"]
+        }
+        Returns: undefined
+      }
       admin_update_user_role: {
         Args: {
           target_user_id: string
@@ -284,6 +369,54 @@ export type Database = {
       current_user_has_role: {
         Args: { role_name: string }
         Returns: boolean
+      }
+      get_admin_dashboard_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_users: number
+          new_users_this_month: number
+          total_revenue: number
+          revenue_this_month: number
+          total_orders: number
+          pending_orders: number
+          completed_orders: number
+          failed_orders: number
+        }[]
+      }
+      get_admin_orders: {
+        Args: {
+          status_filter?: string
+          limit_count?: number
+          offset_count?: number
+        }
+        Returns: {
+          order_id: string
+          user_email: string
+          user_full_name: string
+          total_amount: number
+          status: Database["public"]["Enums"]["order_status"]
+          payment_provider: string
+          created_at: string
+          items_count: number
+        }[]
+      }
+      get_daily_sales_stats: {
+        Args: { days_back?: number }
+        Returns: {
+          sale_date: string
+          daily_revenue: number
+          daily_orders: number
+        }[]
+      }
+      get_top_selling_products: {
+        Args: { limit_count?: number }
+        Returns: {
+          product_id: string
+          product_title: string
+          product_price: number
+          total_sales: number
+          total_revenue: number
+        }[]
       }
       get_users_with_stats: {
         Args: Record<PropertyKey, never>

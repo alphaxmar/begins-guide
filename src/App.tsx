@@ -1,56 +1,46 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
-import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-
-// Import pages
+import Layout from "@/components/Layout";
 import Index from "@/pages/Index";
-import AuthPage from "@/pages/AuthPage";
-import ResetPasswordPage from "@/pages/ResetPasswordPage";
-import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
-import ProfilePage from "@/pages/ProfilePage";
 import Articles from "@/pages/Articles";
 import ArticleDetail from "@/pages/ArticleDetail";
 import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
-import CartPage from "@/pages/CartPage";
-import CheckoutPage from "@/pages/CheckoutPage";
 import CoursePage from "@/pages/CoursePage";
 import CoursesPage from "@/pages/CoursesPage";
+import CartPage from "@/pages/CartPage";
+import CheckoutPage from "@/pages/CheckoutPage";
+import AuthPage from "@/pages/AuthPage";
+import ProfilePage from "@/pages/ProfilePage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
 import NotFound from "@/pages/NotFound";
 
-// Admin pages
+// Admin Pages
 import ProtectedRoute from "@/components/ProtectedRoute";
-import UserProtectedRoute from "@/components/UserProtectedRoute";
 import DashboardPage from "@/pages/admin/DashboardPage";
+import AdminArticlesPage from "@/pages/admin/AdminArticlesPage";
+import CreateArticle from "@/pages/CreateArticle";
+import EditArticle from "@/pages/EditArticle";
 import AdminProductsPage from "@/pages/admin/AdminProductsPage";
 import CreateProductPage from "@/pages/admin/CreateProductPage";
 import EditProductPage from "@/pages/admin/EditProductPage";
 import ManageLessonsPage from "@/pages/admin/ManageLessonsPage";
-import AdminArticlesPage from "@/pages/admin/AdminArticlesPage";
-import CreateArticle from "@/pages/CreateArticle";
-import EditArticle from "@/pages/EditArticle";
-import ImportProductsPage from "@/pages/admin/ImportProductsPage";
-import ImportArticlesPage from "@/pages/admin/ImportArticlesPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import ImportArticlesPage from "@/pages/admin/ImportArticlesPage";
+import ImportProductsPage from "@/pages/admin/ImportProductsPage";
+import AdminOrdersPage from "@/pages/admin/AdminOrdersPage";
+import AdminEmailPage from "@/pages/admin/AdminEmailPage";
+import AdminReportsPage from "@/pages/admin/AdminReportsPage";
 
-// Layout
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import FloatingCartButton from "@/components/FloatingCartButton";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -58,52 +48,49 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <CartProvider>
-            <Router>
-              <div className="min-h-screen flex flex-col bg-background">
-                <Header />
-                <main className="flex-1 container mx-auto px-4">
-                  <ErrorBoundary>
-                    <Routes>
-                      {/* Public routes */}
-                      <Route path="/" element={<Index />} />
-                      <Route path="/auth" element={<AuthPage />} />
-                      <Route path="/reset-password" element={<ResetPasswordPage />} />
-                      <Route path="/update-password" element={<UpdatePasswordPage />} />
-                      <Route path="/articles" element={<Articles />} />
-                      <Route path="/articles/:slug" element={<ArticleDetail />} />
-                      <Route path="/products" element={<Products />} />
-                      <Route path="/products/:slug" element={<ProductDetail />} />
-                      <Route path="/cart" element={<CartPage />} />
-                      <Route path="/courses" element={<CoursesPage />} />
-
-                      {/* User protected routes */}
-                      <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
-                      <Route path="/checkout" element={<UserProtectedRoute><CheckoutPage /></UserProtectedRoute>} />
-                      <Route path="/courses/:slug/learn" element={<UserProtectedRoute><CoursePage /></UserProtectedRoute>} />
-
-                      {/* Admin routes */}
-                      <Route path="/admin" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                      <Route path="/admin/products" element={<ProtectedRoute><AdminProductsPage /></ProtectedRoute>} />
-                      <Route path="/admin/products/new" element={<ProtectedRoute><CreateProductPage /></ProtectedRoute>} />
-                      <Route path="/admin/products/:slug/edit" element={<ProtectedRoute><EditProductPage /></ProtectedRoute>} />
-                      <Route path="/admin/products/:slug/lessons" element={<ProtectedRoute><ManageLessonsPage /></ProtectedRoute>} />
-                      <Route path="/admin/products/import" element={<ProtectedRoute><ImportProductsPage /></ProtectedRoute>} />
-                      <Route path="/admin/articles" element={<ProtectedRoute><AdminArticlesPage /></ProtectedRoute>} />
-                      <Route path="/admin/articles/new" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>} />
-                      <Route path="/admin/articles/:id/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>} />
-                      <Route path="/admin/articles/import" element={<ProtectedRoute><ImportArticlesPage /></ProtectedRoute>} />
-                      <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
-
-                      {/* 404 */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </ErrorBoundary>
-                </main>
-                <Footer />
-                <FloatingCartButton />
-              </div>
+            <TooltipProvider>
               <Toaster />
-            </Router>
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Index />} />
+                    <Route path="articles" element={<Articles />} />
+                    <Route path="articles/:slug" element={<ArticleDetail />} />
+                    <Route path="products" element={<Products />} />
+                    <Route path="products/:slug" element={<ProductDetail />} />
+                    <Route path="courses" element={<CoursesPage />} />
+                    <Route path="courses/:slug" element={<CoursePage />} />
+                    <Route path="cart" element={<CartPage />} />
+                    <Route path="checkout" element={<CheckoutPage />} />
+                    <Route path="auth" element={<AuthPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="reset-password" element={<ResetPasswordPage />} />
+                    <Route path="update-password" element={<UpdatePasswordPage />} />
+                    
+                    {/* Admin Routes */}
+                    <Route path="admin" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                    <Route path="admin/articles" element={<ProtectedRoute><AdminArticlesPage /></ProtectedRoute>} />
+                    <Route path="admin/articles/create" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>} />
+                    <Route path="admin/articles/:id/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>} />
+                    <Route path="admin/articles/import" element={<ProtectedRoute><ImportArticlesPage /></ProtectedRoute>} />
+                    
+                    <Route path="admin/products" element={<ProtectedRoute><AdminProductsPage /></ProtectedRoute>} />
+                    <Route path="admin/products/create" element={<ProtectedRoute><CreateProductPage /></ProtectedRoute>} />
+                    <Route path="admin/products/:id/edit" element={<ProtectedRoute><EditProductPage /></ProtectedRoute>} />
+                    <Route path="admin/products/:id/lessons" element={<ProtectedRoute><ManageLessonsPage /></ProtectedRoute>} />
+                    <Route path="admin/products/import" element={<ProtectedRoute><ImportProductsPage /></ProtectedRoute>} />
+                    
+                    <Route path="admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
+                    <Route path="admin/orders" element={<ProtectedRoute><AdminOrdersPage /></ProtectedRoute>} />
+                    <Route path="admin/email" element={<ProtectedRoute><AdminEmailPage /></ProtectedRoute>} />
+                    <Route path="admin/reports" element={<ProtectedRoute><AdminReportsPage /></ProtectedRoute>} />
+                    
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
           </CartProvider>
         </AuthProvider>
       </QueryClientProvider>
