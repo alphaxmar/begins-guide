@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,9 @@ import { productSchema } from "@/lib/validators/product";
 import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Package, FileText, Video, Download, Users, Wrench } from "lucide-react";
+import { Package, FileText, Video, Download, Users, Wrench, GraduationCap } from "lucide-react";
 import ProductAssetInputs from "./product-form/ProductAssetInputs";
+import CourseDetailsInputs from "./product-form/CourseDetailsInputs";
 import { useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -87,6 +89,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
       price: 0,
       product_type: "course",
       image_url: "",
+      difficulty_level: "beginner",
+      duration_hours: 0,
+      duration_minutes: 0,
+      what_you_learn: "",
+      prerequisites: "",
       ...defaultValues,
     },
   });
@@ -110,7 +117,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   const handleSubmit = (values: ProductFormValues) => {
-    // เพิ่ม template_file_path เข้าไปใน values หากมี
     const finalValues = {
       ...values,
       template_file_path: templateFilePath || undefined
@@ -259,6 +265,24 @@ const ProductForm: React.FC<ProductFormProps> = ({
               />
             </CardContent>
           </Card>
+
+          {/* Course-specific details */}
+          {watchedProductType === 'course' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  รายละเอียดคอร์ส
+                </CardTitle>
+                <CardDescription>
+                  ข้อมูลเพิ่มเติมเฉพาะสำหรับคอร์สเรียน
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CourseDetailsInputs control={form.control} />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Pricing */}
           <Card>

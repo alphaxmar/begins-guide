@@ -14,4 +14,11 @@ export const productSchema = z.object({
   image_file: z.instanceof(FileList).optional(),
   template_file: z.instanceof(FileList).optional(),
   template_file_path: z.string().optional(),
+  
+  // ฟิลด์เพิ่มเติมสำหรับคอร์ส
+  difficulty_level: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+  duration_hours: z.coerce.number().min(0).optional(),
+  duration_minutes: z.coerce.number().min(0).max(59).optional(),
+  what_you_learn: z.string().optional(),
+  prerequisites: z.string().optional(),
 });
