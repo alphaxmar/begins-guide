@@ -1,16 +1,15 @@
 
+import React, { PropsWithChildren } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
   adminOnly?: boolean;
 }
 
-const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
+const ProtectedRoute: React.FC<PropsWithChildren<ProtectedRouteProps>> = ({ children, adminOnly = false }) => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
   const location = useLocation();

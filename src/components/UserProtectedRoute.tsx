@@ -1,14 +1,10 @@
 
-import { ReactNode } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-interface UserProtectedRouteProps {
-  children: ReactNode;
-}
-
-const UserProtectedRoute = ({ children }: UserProtectedRouteProps) => {
+const UserProtectedRoute: React.FC<PropsWithChildren> = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
