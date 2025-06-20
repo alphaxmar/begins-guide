@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
   adminOnly?: boolean;
 }
 
-export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
   const location = useLocation();
