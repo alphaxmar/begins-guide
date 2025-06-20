@@ -5,8 +5,15 @@ import { toast } from "sonner";
 
 type Product = Tables<'products'>;
 
+interface CartItem {
+  id: string;
+  quantity: number;
+  product: Product;
+}
+
 interface CartContextType {
   cartItems: Product[];
+  items: CartItem[]; // เพิ่ม property นี้เพื่อให้ตรงกับ Header
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
@@ -72,8 +79,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const itemCount = cartItems.length;
 
+  // แปลง cartItems เป็น items format ที่ Header ต้องการ
+  const items = useMemo(() => {
+    return cartItems.map(product => ({
+      id: product.id,
+      quantity: 1, // สำหรับระบบปัจจุบันที่ไม่มี quantity system
+      product
+    }));
+  }, [cartItems]);
+
   const value = {
     cartItems,
+    items, // เพิ่ม property นี้
     addToCart,
     removeFromCart,
     clearCart,

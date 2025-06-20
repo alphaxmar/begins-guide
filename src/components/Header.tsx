@@ -33,7 +33,8 @@ const Header = () => {
     }
   };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  // เพิ่ม safety check เพื่อป้องกัน undefined error
+  const totalItems = (items || []).reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <header className="bg-background/80 backdrop-blur-sm sticky top-0 z-40 border-b">
