@@ -10,9 +10,10 @@ import { productSchema } from "@/lib/validators/product";
 import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Package, FileText, Video, Download, Users, Wrench, GraduationCap } from "lucide-react";
+import { Package, FileText, Video, Download, Users, Wrench, GraduationCap, Settings, Calendar } from "lucide-react";
 import ProductAssetInputs from "./product-form/ProductAssetInputs";
 import CourseDetailsInputs from "./product-form/CourseDetailsInputs";
+import ProductMetadataInputs from "./product-form/ProductMetadataInputs";
 import { useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -89,6 +90,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
       price: 0,
       product_type: "course",
       image_url: "",
+      category: "",
+      start_date: "",
+      end_date: "",
+      certificate_enabled: false,
+      download_limit: undefined,
+      download_expiry_hours: 24,
       difficulty_level: "beginner",
       duration_hours: 0,
       duration_minutes: 0,
@@ -263,6 +270,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   </FormItem>
                 )}
               />
+            </CardContent>
+          </Card>
+
+          {/* Product Metadata */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                การตั้งค่าเพิ่มเติม
+              </CardTitle>
+              <CardDescription>
+                ตั้งค่าหมวดหมู่ วันที่ และการดาวน์โหลดสำหรับสินค้า
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProductMetadataInputs control={form.control} productType={watchedProductType} />
             </CardContent>
           </Card>
 

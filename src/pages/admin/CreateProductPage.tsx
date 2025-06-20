@@ -32,6 +32,12 @@ const CreateProductPage = () => {
             image_url: null,
             instructor_id: user.id,
             template_file_path: null,
+            category: values.category || null,
+            start_date: values.start_date ? new Date(values.start_date).toISOString() : null,
+            end_date: values.end_date ? new Date(values.end_date).toISOString() : null,
+            certificate_enabled: values.certificate_enabled || false,
+            download_limit: values.download_limit || null,
+            download_expiry_hours: values.download_expiry_hours || 24,
           })
           .select()
           .single();

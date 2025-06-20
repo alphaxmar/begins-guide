@@ -54,6 +54,89 @@ export type Database = {
         }
         Relationships: []
       }
+      certificates: {
+        Row: {
+          certificate_number: string
+          completion_date: string | null
+          created_at: string
+          id: string
+          issued_date: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          certificate_number: string
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          issued_date?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          certificate_number?: string
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          issued_date?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      download_logs: {
+        Row: {
+          created_at: string
+          download_count: number | null
+          id: string
+          last_downloaded: string
+          lesson_attachment_id: string | null
+          product_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_count?: number | null
+          id?: string
+          last_downloaded?: string
+          lesson_attachment_id?: string | null
+          product_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          download_count?: number | null
+          id?: string
+          last_downloaded?: string
+          lesson_attachment_id?: string | null
+          product_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "download_logs_lesson_attachment_id_fkey"
+            columns: ["lesson_attachment_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_attachments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "download_logs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_logs: {
         Row: {
           created_at: string | null
@@ -132,14 +215,58 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          id: string
+          lesson_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          lesson_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          lesson_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_attachments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           content: string | null
           created_at: string
           id: string
+          is_locked: boolean | null
           order: number
           product_id: string
           title: string
+          unlock_date: string | null
+          unlock_type: string | null
           updated_at: string
           video_url: string | null
         }
@@ -147,9 +274,12 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_locked?: boolean | null
           order?: number
           product_id: string
           title: string
+          unlock_date?: string | null
+          unlock_type?: string | null
           updated_at?: string
           video_url?: string | null
         }
@@ -157,9 +287,12 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_locked?: boolean | null
           order?: number
           product_id?: string
           title?: string
+          unlock_date?: string | null
+          unlock_type?: string | null
           updated_at?: string
           video_url?: string | null
         }
@@ -256,40 +389,58 @@ export type Database = {
       }
       products: {
         Row: {
+          category: string | null
+          certificate_enabled: boolean | null
           created_at: string
           description: string | null
+          download_expiry_hours: number | null
+          download_limit: number | null
+          end_date: string | null
           id: string
           image_url: string | null
           instructor_id: string | null
           price: number
           product_type: Database["public"]["Enums"]["product_type"]
           slug: string
+          start_date: string | null
           template_file_path: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          category?: string | null
+          certificate_enabled?: boolean | null
           created_at?: string
           description?: string | null
+          download_expiry_hours?: number | null
+          download_limit?: number | null
+          end_date?: string | null
           id?: string
           image_url?: string | null
           instructor_id?: string | null
           price: number
           product_type?: Database["public"]["Enums"]["product_type"]
           slug: string
+          start_date?: string | null
           template_file_path?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          category?: string | null
+          certificate_enabled?: boolean | null
           created_at?: string
           description?: string | null
+          download_expiry_hours?: number | null
+          download_limit?: number | null
+          end_date?: string | null
           id?: string
           image_url?: string | null
           instructor_id?: string | null
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
           slug?: string
+          start_date?: string | null
           template_file_path?: string | null
           title?: string
           updated_at?: string
@@ -319,6 +470,183 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          answers: Json | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          quiz_id: string
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          quiz_id: string
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          correct_answer: string | null
+          created_at: string
+          id: string
+          options: Json | null
+          order_index: number | null
+          points: number | null
+          question: string
+          question_type: string
+          quiz_id: string
+        }
+        Insert: {
+          correct_answer?: string | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index?: number | null
+          points?: number | null
+          question: string
+          question_type: string
+          quiz_id: string
+        }
+        Update: {
+          correct_answer?: string | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index?: number | null
+          points?: number | null
+          question?: string
+          question_type?: string
+          quiz_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          lesson_id: string | null
+          max_attempts: number | null
+          passing_score: number | null
+          product_id: string | null
+          time_limit_minutes: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lesson_id?: string | null
+          max_attempts?: number | null
+          passing_score?: number | null
+          product_id?: string | null
+          time_limit_minutes?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lesson_id?: string | null
+          max_attempts?: number | null
+          passing_score?: number | null
+          product_id?: string | null
+          time_limit_minutes?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quizzes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_lesson_progress: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          lesson_id: string
+          updated_at: string
+          user_id: string
+          watch_time_seconds: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          updated_at?: string
+          user_id: string
+          watch_time_seconds?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          updated_at?: string
+          user_id?: string
+          watch_time_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_purchases: {
         Row: {
