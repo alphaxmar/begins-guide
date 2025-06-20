@@ -1,104 +1,49 @@
 
-import { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useUpdateUserRole } from '@/hooks/useUsers';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 interface UserRoleDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  user: {
-    id: string;
-    email: string;
-    full_name: string | null;
-    role: 'user' | 'admin' | 'partner';
-  } | null;
+  user: any;
+  isOpen: boolean;
+  onClose: () => void;
+  onRoleChange: (userId: string, newRole: 'user' | 'admin' | 'partner') => void;
 }
 
-const getRoleBadgeVariant = (role: string) => {
-  switch (role) {
-    case 'admin':
-      return 'destructive';
-    case 'partner':
-      return 'default';
-    default:
-      return 'secondary';
-  }
-};
-
-const getRoleDisplayName = (role: string) => {
-  switch (role) {
-    case 'admin':
-      return 'ผู้ดูแลระบบ';
-    case 'partner':
-      return 'พาร์ทเนอร์';
-    default:
-      return 'ผู้ใช้ทั่วไป';
-  }
-};
-
-const UserRoleDialog = ({ open, onOpenChange, user }: UserRoleDialogProps) => {
-  const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'partner'>(user?.role || 'user');
-  const updateUserRoleMutation = useUpdateUserRole();
+const UserRoleDialog = ({ user, isOpen, onClose, onRoleChange }: UserRoleDialogProps) => {
+  const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'partner'>('user');
 
   const handleSave = () => {
-    if (!user || selectedRole === user.role) {
-      onOpenChange(false);
-      return;
+    if (user && selectedRole) {
+      onRoleChange(user.id, selectedRole);
+      onClose();
     }
-
-    updateUserRoleMutation.mutate(
-      { userId: user.id, newRole: selectedRole },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-      }
-    );
   };
 
   if (!user) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>เปลี่ยนสิทธิ์ผู้ใช้</DialogTitle>
+          <DialogTitle>เปลี่ยนสิทธิ์ผู้ใช้งาน</DialogTitle>
           <DialogDescription>
-            เปลี่ยนระดับสิทธิ์การเข้าถึงระบบสำหรับผู้ใช้รายนี้
+            เปลี่ยนสิทธิ์สำหรับ {user.full_name || user.email}
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">ข้อมูลผู้ใช้</h4>
-            <div className="text-sm text-muted-foreground">
-              <p><strong>ชื่อ:</strong> {user.full_name || 'ไม่ระบุ'}</p>
-              <p><strong>อีเมล:</strong> {user.email}</p>
-              <p><strong>สิทธิ์ปัจจุบัน:</strong> <Badge variant={getRoleBadgeVariant(user.role)}>{getRoleDisplayName(user.role)}</Badge></p>
-            </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">สิทธิ์ปัจจุบัน:</label>
+            <p className="text-sm text-muted-foreground">{user.role}</p>
           </div>
           
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">เปลี่ยนเป็นสิทธิ์</h4>
+          <div>
+            <label className="text-sm font-medium">สิทธิ์ใหม่:</label>
             <Select value={selectedRole} onValueChange={(value: 'user' | 'admin' | 'partner') => setSelectedRole(value)}>
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="เลือกสิทธิ์" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="user">ผู้ใช้ทั่วไป</SelectItem>
@@ -110,14 +55,11 @@ const UserRoleDialog = ({ open, onOpenChange, user }: UserRoleDialogProps) => {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={updateUserRoleMutation.isPending || selectedRole === user.role}
-          >
-            {updateUserRoleMutation.isPending ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
+          <Button onClick={handleSave}>
+            บันทึก
           </Button>
         </DialogFooter>
       </DialogContent>

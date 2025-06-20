@@ -1,89 +1,99 @@
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEmailNotification } from '@/hooks/useEmailNotification';
-import { toast } from 'sonner';
-import { Mail, Send } from 'lucide-react';
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { TestTube, Loader2 } from "lucide-react";
 
 const EmailTester = () => {
-  const [emailType, setEmailType] = useState<'welcome' | 'purchase_confirmation' | 'password_reset'>('welcome');
   const [testEmail, setTestEmail] = useState('');
-  const { mutate: sendEmail, isPending } = useEmailNotification();
+  const [testSubject, setTestSubject] = useState('ทดสอบระบบอีเมล');
+  const [testMessage, setTestMessage] = useState('นี่คือการทดสอบระบบส่งอีเมลของ Begins Guide');
+  const [testing, setTesting] = useState(false);
 
-  const handleSendTestEmail = () => {
+  const sendTestEmail = async () => {
     if (!testEmail) {
-      toast.error('กรุณากรอกอีเมลทดสอบ');
+      toast.error('กรุณากรอกอีเมลผู้รับ');
       return;
     }
 
-    const emailData = {
-      type: emailType,
-      to: testEmail,
-      data: {
-        user_name: 'ผู้ทดสอบระบบ',
-        order_id: 'TEST-001',
-        products: [
-          { title: 'คอร์สทดสอบ', price: 1990 },
-          { title: 'เทมเพลตทดสอบ', price: 590 }
-        ],
-        total_amount: 2580,
-        reset_link: `${window.location.origin}/reset-password?token=test-token`
-      }
-    };
+    setTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email-notifications', {
+        body: {
+          type: 'test_email',
+          to: testEmail,
+          subject: testSubject,
+          body: testMessage,
+        }
+      });
 
-    sendEmail(emailData, {
-      onSuccess: () => {
-        toast.success(`ส่งอีเมลทดสอบประเภท ${emailType} สำเร็จ!`);
-      },
-      onError: (error: any) => {
-        toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
+      if (error) {
+        throw error;
       }
-    });
+
+      toast.success('ส่งอีเมลทดสอบสำเร็จ!');
+      setTestEmail('');
+    } catch (error: any) {
+      console.error('Test email error:', error);
+      toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
+    } finally {
+      setTesting(false);
+    }
   };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Mail className="h-5 w-5" />
+          <TestTube className="h-5 w-5" />
           ทดสอบระบบอีเมล
         </CardTitle>
+        <CardDescription>ทดสอบการส่งอีเมลผ่านระบบ</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <label className="text-sm font-medium">ประเภทอีเมล</label>
-          <Select value={emailType} onValueChange={(value: any) => setEmailType(value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="welcome">Welcome Email</SelectItem>
-              <SelectItem value="purchase_confirmation">Purchase Confirmation</SelectItem>
-              <SelectItem value="password_reset">Password Reset</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <label className="text-sm font-medium">อีเมลทดสอบ</label>
+        <div className="grid gap-2">
+          <Label htmlFor="test-email">อีเมลผู้รับ</Label>
           <Input
+            id="test-email"
             type="email"
             placeholder="test@example.com"
             value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}
           />
         </div>
-
-        <Button 
-          onClick={handleSendTestEmail} 
-          disabled={isPending}
-          className="w-full"
-        >
-          <Send className="mr-2 h-4 w-4" />
-          {isPending ? 'กำลังส่ง...' : 'ส่งอีเมลทดสอบ'}
+        <div className="grid gap-2">
+          <Label htmlFor="test-subject">หัวข้อ</Label>
+          <Input
+            id="test-subject"
+            value={testSubject}
+            onChange={(e) => setTestSubject(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="test-message">ข้อความ</Label>
+          <Textarea
+            id="test-message"
+            value={testMessage}
+            onChange={(e) => setTestMessage(e.target.value)}
+          />
+        </div>
+        <Button onClick={sendTestEmail} disabled={testing} className="w-full">
+          {testing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              กำลังส่ง...
+            </>
+          ) : (
+            <>
+              <TestTube className="mr-2 h-4 w-4" />
+              ส่งอีเมลทดสอบ
+            </>
+          )}
         </Button>
       </CardContent>
     </Card>

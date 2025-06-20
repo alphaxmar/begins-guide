@@ -1,17 +1,23 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, ExternalLink, Webhook } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Webhook, Copy, ExternalLink } from "lucide-react";
 
 const WebhookConfig = () => {
-  const webhookUrl = `${window.location.origin.replace('localhost:8080', 'suemonabwttspbmxaxbi.supabase.co')}/functions/v1/stripe-webhook`;
+  const [webhookUrl] = useState('https://suemonabwttspbmxaxbi.supabase.co/functions/v1/stripe-webhook');
+  
+  const copyWebhookUrl = () => {
+    navigator.clipboard.writeText(webhookUrl);
+    toast.success('คัดลอก Webhook URL แล้ว');
+  };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('คัดลอกลิงก์แล้ว!');
+  const openStripeWebhooks = () => {
+    window.open('https://dashboard.stripe.com/webhooks', '_blank');
   };
 
   return (
@@ -19,63 +25,52 @@ const WebhookConfig = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Webhook className="h-5 w-5" />
-          การตั้งค่า Stripe Webhook
+          ตั้งค่า Stripe Webhooks
         </CardTitle>
         <CardDescription>
-          ตั้งค่า Webhook ใน Stripe Dashboard เพื่อให้ระบบทำงานอัตโนมัติ
+          กำหนดค่า Webhooks สำหรับการชำระเงินอัตโนมัติ
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <Label>Webhook URL</Label>
-          <div className="flex gap-2 mt-1">
-            <Input 
-              value={webhookUrl} 
-              readOnly 
+        <div className="space-y-2">
+          <Label>Webhook Endpoint URL</Label>
+          <div className="flex gap-2">
+            <Input
+              value={webhookUrl}
+              readOnly
               className="font-mono text-sm"
             />
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => copyToClipboard(webhookUrl)}
-            >
+            <Button variant="outline" size="icon" onClick={copyWebhookUrl}>
               <Copy className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <div>
-          <Label>Events ที่ต้องเลือกใน Stripe</Label>
-          <div className="mt-2 p-3 bg-muted rounded-md">
-            <ul className="text-sm space-y-1">
-              <li>• <code>checkout.session.completed</code></li>
-              <li>• <code>payment_intent.payment_failed</code></li>
-            </ul>
+        <div className="space-y-2">
+          <Label>Events ที่ต้อง Subscribe</Label>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary">checkout.session.completed</Badge>
+            <Badge variant="secondary">payment_intent.succeeded</Badge>
+            <Badge variant="secondary">payment_intent.payment_failed</Badge>
           </div>
         </div>
 
-        <div className="pt-4 border-t">
-          <h4 className="font-medium mb-2">ขั้นตอนการตั้งค่า:</h4>
-          <ol className="text-sm space-y-2 list-decimal list-inside text-muted-foreground">
-            <li>เข้าไปที่ Stripe Dashboard &gt; Webhooks</li>
-            <li>คลิก "Add endpoint"</li>
-            <li>ใส่ Webhook URL ข้างต้น</li>
-            <li>เลือก Events ที่ระบุไว้</li>
-            <li>คัดลอก Webhook Secret และตั้งค่าใน Supabase Edge Functions</li>
-          </ol>
+        <div className="pt-4">
+          <Button onClick={openStripeWebhooks} className="w-full">
+            <ExternalLink className="mr-2 h-4 w-4" />
+            เปิด Stripe Dashboard
+          </Button>
         </div>
 
-        <Button variant="outline" className="w-full" asChild>
-          <a 
-            href="https://dashboard.stripe.com/webhooks" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            <ExternalLink className="h-4 w-4" />
-            เปิด Stripe Dashboard
-          </a>
-        </Button>
+        <div className="text-sm text-muted-foreground">
+          <p><strong>วิธีตั้งค่า:</strong></p>
+          <ol className="list-decimal list-inside space-y-1 mt-2">
+            <li>คลิกปุ่มเปิด Stripe Dashboard</li>
+            <li>เพิ่ม Webhook Endpoint ใหม่</li>
+            <li>ใส่ URL ข้างบนและเลือก Events ที่กำหนด</li>
+            <li>คัดลอก Webhook Secret ไปใส่ใน Supabase Secrets</li>
+          </ol>
+        </div>
       </CardContent>
     </Card>
   );
