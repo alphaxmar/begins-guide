@@ -1,12 +1,15 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NewsletterSignup from '@/components/NewsletterSignup';
-import { ArrowRight, BookOpen, Download, Users, Star, CheckCircle, Target, Lightbulb, TrendingUp } from 'lucide-react';
+import VipPackageCard from '@/components/VipPackageCard';
+import { useVipPackages } from '@/hooks/useVipPackages';
+import { ArrowRight, BookOpen, Download, Users, Star, CheckCircle, Target, Lightbulb, TrendingUp, Crown, Sparkles } from 'lucide-react';
 
 const Index = () => {
+  const { data: vipPackages, isLoading } = useVipPackages();
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -24,7 +27,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
                 <Link to="/products">
-                  <Star className="mr-2 h-5 w-5" />
+                  <Crown className="mr-2 h-5 w-5" />
                   เริ่มต้นด้วย VIP Package
                 </Link>
               </Button>
@@ -58,6 +61,84 @@ const Index = () => {
                 <h3 className="font-semibold mb-2">ลงมือทำ</h3>
                 <p className="text-sm text-blue-100">เครื่องมือสำหรับเริ่มต้น</p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* VIP Package Highlight - Moved up and made more prominent */}
+      <section className="py-20 bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge className="mb-6 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg px-6 py-2">
+                <Crown className="mr-2 h-5 w-5" />
+                แนะนำพิเศษ
+              </Badge>
+              <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                VIP Package - ทางลัดสู่ความสำเร็จ
+              </h2>
+              <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
+                เข้าถึงคอร์สและเครื่องมือทั้งหมดได้ไม่จำกัด ในราคาเดียว 
+                พร้อมอัปเดตเนื้อหาใหม่ตลอดชีวิต
+              </p>
+            </div>
+
+            {/* VIP Package Display */}
+            {!isLoading && vipPackages && vipPackages.length > 0 && (
+              <div className="max-w-lg mx-auto mb-12">
+                <VipPackageCard package={vipPackages[0]} />
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <Card className="border-2 border-yellow-200 bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold mb-4 flex items-center text-blue-600">
+                    <BookOpen className="h-6 w-6 mr-3" />
+                    คอร์สออนไลน์ทั้งหมด
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3 text-gray-700">
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />การตลาดออนไลน์เชิงลึก</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />การวางแผนทางการเงิน</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />การพัฒนาผลิตภัณฑ์</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />กลยุทธ์การขายออนไลน์</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />และอื่นๆ อีกมากมาย</li>
+                  </ul>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-2 border-yellow-200 bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold mb-4 flex items-center text-purple-600">
+                    <Download className="h-6 w-6 mr-3" />
+                    เครื่องมือและเทมเพลต
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3 text-gray-700">
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />Business Model Canvas</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />แผนธุรกิจ Template</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />Marketing Plan Template</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />เครื่องมือคำนวณการเงิน</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-3" />แบบฟอร์มต่างๆ ที่จำเป็น</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="text-center">
+              <Button asChild size="lg" className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all">
+                <Link to="/products">
+                  <Sparkles className="mr-2 h-6 w-6" />
+                  สั่งซื้อ VIP Package ตอนนี้
+                </Link>
+              </Button>
+              <p className="text-sm text-gray-600 mt-4">
+                ⭐ ชำระครั้งเดียว เข้าถึงได้ตลอดชีวิต ⭐
+              </p>
             </div>
           </div>
         </div>
@@ -207,54 +288,6 @@ const Index = () => {
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* VIP Package Highlight */}
-      <section className="py-16 bg-gradient-to-r from-yellow-50 to-orange-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-4 bg-yellow-500 text-black">แนะนำ</Badge>
-            <h2 className="text-3xl font-bold mb-6">VIP Package - ทางลัดสู่ความสำเร็จ</h2>
-            <p className="text-lg text-gray-600 mb-8">
-              เข้าถึงคอร์สและเครื่องมือทั้งหมดได้ไม่จำกัด ในราคาเดียว
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="text-left">
-                <h3 className="text-xl font-semibold mb-4 flex items-center">
-                  <BookOpen className="h-5 w-5 mr-2 text-blue-500" />
-                  คอร์สออนไลน์ทั้งหมด
-                </h3>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />การตลาดออนไลน์</li>
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />การวางแผนทางการเงิน</li>
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />การพัฒนาผลิตภัณฑ์</li>
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />และอื่นๆ อีกมากมาย</li>
-                </ul>
-              </div>
-              
-              <div className="text-left">
-                <h3 className="text-xl font-semibold mb-4 flex items-center">
-                  <Download className="h-5 w-5 mr-2 text-purple-500" />
-                  เครื่องมือและเทมเพลต
-                </h3>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />Business Model Canvas</li>
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />แผนธุรกิจ Template</li>
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />Marketing Plan Template</li>
-                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />เครื่องมือคำนวณการเงิน</li>
-                </ul>
-              </div>
-            </div>
-
-            <Button asChild size="lg" className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold">
-              <Link to="/products">
-                <Star className="mr-2 h-5 w-5" />
-                ดู VIP Package
-              </Link>
-            </Button>
           </div>
         </div>
       </section>
