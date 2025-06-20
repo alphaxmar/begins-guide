@@ -7,7 +7,7 @@ interface UserWithStats {
   id: string;
   email: string;
   full_name: string | null;
-  role: 'user' | 'admin' | 'partner';
+  role: 'user' | 'admin' | 'partner' | 'vip';
   created_at: string;
   total_purchases: number;
   total_spent: number;
@@ -37,7 +37,7 @@ export const useUpdateUserRole = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'user' | 'admin' | 'partner' }) => {
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'user' | 'admin' | 'partner' | 'vip' }) => {
       try {
         const { error } = await supabase.rpc('admin_update_user_role', {
           target_user_id: userId,

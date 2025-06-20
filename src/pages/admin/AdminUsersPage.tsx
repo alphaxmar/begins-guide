@@ -37,6 +37,7 @@ const AdminUsersPage = () => {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800';
       case 'partner': return 'bg-blue-100 text-blue-800';
+      case 'vip': return 'bg-purple-100 text-purple-800';
       case 'user': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -46,6 +47,7 @@ const AdminUsersPage = () => {
     switch (role) {
       case 'admin': return <Crown className="h-4 w-4" />;
       case 'partner': return <Shield className="h-4 w-4" />;
+      case 'vip': return <Crown className="h-4 w-4" />;
       case 'user': return <UserCheck className="h-4 w-4" />;
       default: return <UserCheck className="h-4 w-4" />;
     }
@@ -55,12 +57,13 @@ const AdminUsersPage = () => {
     switch (role) {
       case 'admin': return 'ผู้ดูแลระบบ';
       case 'partner': return 'พาร์ทเนอร์';
+      case 'vip': return 'สมาชิก VIP';
       case 'user': return 'ผู้ใช้ทั่วไป';
       default: return role;
     }
   };
 
-  const handleRoleChange = (userId: string, newRole: 'user' | 'admin' | 'partner') => {
+  const handleRoleChange = (userId: string, newRole: 'user' | 'admin' | 'partner' | 'vip') => {
     updateUserRole.mutate({ userId, newRole });
   };
 
@@ -96,6 +99,7 @@ const AdminUsersPage = () => {
             <SelectItem value="all">ทุกสิทธิ์</SelectItem>
             <SelectItem value="user">ผู้ใช้ทั่วไป</SelectItem>
             <SelectItem value="partner">พาร์ทเนอร์</SelectItem>
+            <SelectItem value="vip">สมาชิก VIP</SelectItem>
             <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
           </SelectContent>
         </Select>
