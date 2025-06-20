@@ -7,12 +7,18 @@ const checkAdminRole = async (userId: string | undefined) => {
   if (!userId) return false;
   
   try {
-    const { data, error } = await supabase.rpc('current_user_has_role', { role_name: 'admin' });
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+    
     if (error) {
       console.error('Error checking admin role:', error);
       return false;
     }
-    return data || false;
+    
+    return data?.role === 'admin';
   } catch (error) {
     console.error('Admin role check error:', error);
     return false;

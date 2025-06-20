@@ -2,7 +2,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface UserRoleDialogProps {
   user: any;
@@ -13,6 +13,12 @@ interface UserRoleDialogProps {
 
 const UserRoleDialog = ({ user, isOpen, onClose, onRoleChange }: UserRoleDialogProps) => {
   const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'partner' | 'vip'>('user');
+
+  useEffect(() => {
+    if (user && isOpen) {
+      setSelectedRole(user.role || 'user');
+    }
+  }, [user, isOpen]);
 
   const handleSave = () => {
     if (user && selectedRole) {
