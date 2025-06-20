@@ -38,6 +38,7 @@ import AdminPaymentSettingsPage from "@/pages/admin/AdminPaymentSettingsPage";
 import ManageLessonsPage from "@/pages/admin/ManageLessonsPage";
 import ImportProductsPage from "@/pages/admin/ImportProductsPage";
 import ImportArticlesPage from "@/pages/admin/ImportArticlesPage";
+import VipManagementPage from "@/pages/admin/VipManagementPage";
 
 // Protected route components
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -136,6 +137,11 @@ function App() {
                 <Route path="/admin/users" element={
                   <ProtectedRoute adminOnly>
                     <AdminUsersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/vip" element={
+                  <ProtectedRoute adminOnly>
+                    <VipManagementPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/reports" element={

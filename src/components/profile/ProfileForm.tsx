@@ -66,7 +66,7 @@ const ProfileForm = ({ user, profile }: ProfileFormProps) => {
     onSuccess: (data) => {
       toast.success("อัปเดตโปรไฟล์สำเร็จ!");
       queryClient.setQueryData(['profile', user?.id], data);
-      queryClient.invalidateQueries({ queryKey: ['user'] }); // To update avatar in header
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
     onError: (error) => {
       toast.error(`เกิดข้อผิดพลาด: ${error.message}`);

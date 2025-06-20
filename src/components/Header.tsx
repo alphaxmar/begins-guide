@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { LogIn, User, LogOut, ShieldCheck, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useVipStatus } from '@/hooks/useVipStatus';
 import { useCart } from '@/contexts/CartContext';
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import { toast } from 'sonner';
 const Header = () => {
   const { user, signOut, loading } = useAuth();
   const { isAdmin } = useAdmin();
+  const { isVip } = useVipStatus();
   const { items } = useCart();
   const navigate = useNavigate();
 
@@ -33,7 +35,6 @@ const Header = () => {
     }
   };
 
-  // เพิ่ม safety check เพื่อป้องกัน undefined error
   const totalItems = (items || []).reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -91,6 +92,11 @@ const Header = () => {
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
+                    {isVip && (
+                      <Badge className="bg-yellow-500 hover:bg-yellow-600 mt-1 w-fit">
+                        VIP
+                      </Badge>
+                    )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

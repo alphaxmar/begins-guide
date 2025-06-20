@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ProfileForm from "@/components/profile/ProfileForm";
 import PurchasedItemsList from "@/components/profile/PurchasedItemsList";
+import VipStatusCard from "@/components/profile/VipStatusCard";
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -31,7 +32,7 @@ const ProfilePage = () => {
         .eq('id', user.id)
         .single();
       
-      if (error && error.code !== 'PGRST116') { // PGRST116: The result contains 0 rows
+      if (error && error.code !== 'PGRST116') {
         throw new Error(error.message);
       }
       return data;
@@ -50,17 +51,28 @@ const ProfilePage = () => {
   if (!user) return null;
 
   return (
-    <div className="py-12 max-w-4xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>โปรไฟล์ของคุณ</CardTitle>
-          <CardDescription>จัดการข้อมูลส่วนตัวและดูสินค้าของคุณ</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ProfileForm user={user} profile={profile} />
-          <PurchasedItemsList user={user} />
-        </CardContent>
-      </Card>
+    <div className="py-12 max-w-6xl mx-auto px-4">
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>โปรไฟล์ของคุณ</CardTitle>
+              <CardDescription>จัดการข้อมูลส่วนตัวและดูสินค้าของคุณ</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProfileForm user={user} profile={profile} />
+            </CardContent>
+          </Card>
+          
+          <div className="mt-8">
+            <PurchasedItemsList user={user} />
+          </div>
+        </div>
+        
+        <div className="space-y-6">
+          <VipStatusCard />
+        </div>
+      </div>
     </div>
   );
 };
