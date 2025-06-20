@@ -28,6 +28,7 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
         .select(`
           id,
           product_id,
+          created_at,
           products (
             id,
             title,
@@ -88,9 +89,9 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
       ) : (
         <div className="space-y-10">
           <div>
-            <h4 className="text-xl font-semibold mb-4 border-b pb-2">คอร์สเรียน</h4>
+            <h4 className="text-xl font-semibold mb-4 border-b pb-2">คอร์สเรียน ({courses.length})</h4>
             {courses.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
                 {courses.map((item) => (
                   <PurchasedItemCard key={item.id} item={item} />
                 ))}
@@ -101,9 +102,9 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
           </div>
           
           <div>
-            <h4 className="text-xl font-semibold mb-4 border-b pb-2">เทมเพลต</h4>
+            <h4 className="text-xl font-semibold mb-4 border-b pb-2">เทมเพลต ({templates.length})</h4>
             {templates.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
                 {templates.map((item) => (
                   <PurchasedItemCard key={item.id} item={item} />
                 ))}

@@ -22,47 +22,56 @@ const PurchasedItemCard = ({ item }: PurchasedItemCardProps) => {
 
   if (!item.products) return null;
 
-  const isDownloading = downloadTemplateMutation.isPending && downloadTemplateMutation.variables === item.products.template_file_path;
+  const isDownloading = downloadTemplateMutation.isPending;
 
   const handleDownload = () => {
     if (item.products?.template_file_path) {
       downloadTemplateMutation.mutate(item.products.template_file_path);
     } else {
-      toast.error("ขออภัย, ไม่พบไฟล์สำหรับสินค้านี้");
+      toast.error("ขออภัย ไม่พบไฟล์สำหรับสินค้านี้");
     }
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <div className="flex">
-        <img src={item.products.image_url || '/placeholder.svg'} alt={item.products.title} className="w-28 h-28 object-cover" />
+        <img 
+          src={item.products.image_url || '/placeholder.svg'} 
+          alt={item.products.title} 
+          className="w-28 h-28 object-cover flex-shrink-0" 
+        />
         <div className="p-4 flex flex-col justify-between flex-grow">
           <div>
-            <h4 className="font-semibold">{item.products.title}</h4>
-            <p className="text-sm text-muted-foreground">{item.products.product_type === 'course' ? 'คอร์สออนไลน์' : 'เทมเพลต'}</p>
+            <h4 className="font-semibold text-sm mb-1">{item.products.title}</h4>
+            <p className="text-xs text-muted-foreground mb-2">
+              {item.products.product_type === 'course' ? 'คอร์สออนไลน์' : 'เทมเพลต'}
+            </p>
           </div>
-          {item.products.product_type === 'course' ? (
-            <Button asChild size="sm" className="mt-2 self-start">
-              <Link to={`/courses/${item.products.slug}/learn`}>
-                <BookOpen className="mr-2 h-4 w-4" />
-                เข้าเรียน
-              </Link>
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              className="mt-2 self-start"
-              onClick={handleDownload}
-              disabled={!item.products?.template_file_path || isDownloading}
-            >
-              {isDownloading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="mr-2 h-4 w-4" />
-              )}
-              {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลด"}
-            </Button>
-          )}
+          
+          <div className="mt-3">
+            {item.products.product_type === 'course' ? (
+              <Button asChild size="sm" className="w-full sm:w-auto">
+                <Link to={`/courses/${item.products.slug}/learn`}>
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  เข้าเรียน
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={handleDownload}
+                disabled={!item.products?.template_file_path || isDownloading}
+              >
+                {isDownloading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลด"}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </Card>

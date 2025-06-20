@@ -17,7 +17,7 @@ export const useTemplateDownload = () => {
       const { data, error } = await supabase
         .storage
         .from('product_files')
-        .createSignedUrl(filePath, 60); // 60 seconds validity
+        .createSignedUrl(filePath, 3600); // 1 hour validity
 
       if (error) {
         throw new Error(`ไม่สามารถสร้างลิงก์ดาวน์โหลดได้: ${error.message}`);
@@ -29,9 +29,11 @@ export const useTemplateDownload = () => {
       };
     },
     onSuccess: ({ url, filename }) => {
+      // Create a temporary link element and trigger download
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', filename);
+      link.setAttribute('target', '_blank');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -39,6 +41,7 @@ export const useTemplateDownload = () => {
       toast.success("กำลังเริ่มดาวน์โหลด...");
     },
     onError: (error: Error) => {
+      console.error('Download error:', error);
       toast.error(error.message);
     }
   });
