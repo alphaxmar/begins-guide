@@ -2,8 +2,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/ProductCard";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingCard } from "@/components/ui/loading-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { PageHeader } from "@/components/ui/page-header";
 import { Tables } from "@/integrations/supabase/types";
+import { ShoppingBag } from "lucide-react";
 
 const fetchProducts = async () => {
   const { data, error } = await supabase
@@ -15,42 +19,56 @@ const fetchProducts = async () => {
 };
 
 const Products = () => {
-  const { data: products, isLoading } = useQuery<Tables<'products'>[]>({
+  const { data: products, isLoading, error } = useQuery<Tables<'products'>[]>({
     queryKey: ["products"],
     queryFn: fetchProducts,
   });
 
   return (
-    <div className="py-12">
-      <h1 className="text-3xl font-bold text-center mb-8">สินค้าทั้งหมด</h1>
-      
-      {isLoading ? (
-        <div className="grid gap-8 md:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="space-y-4">
-              <Skeleton className="h-48 w-full" />
-              <Skeleton className="h-6 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ))}
-        </div>
-      ) : products && products.length > 0 ? (
-        <div className="grid gap-8 md:grid-cols-2">
-          {products.map((product) => (
-            <ProductCard
-              key={product.slug}
-              {...product}
-              imageUrl={product.image_url || ""}
-              description={product.description || ""}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="text-center text-muted-foreground">
-          ยังไม่มีสินค้าในขณะนี้ จะถูกเพิ่มเข้ามาเร็วๆ นี้
-        </p>
-      )}
-    </div>
+    <ErrorBoundary>
+      <div className="py-12 px-4 max-w-6xl mx-auto">
+        <PageHeader
+          title="สินค้าทั้งหมด"
+          description="คอร์สออนไลน์และเทมเพลตที่จะช่วยให้คุณเริ่มต้นธุรกิจได้สำเร็จ"
+        />
+        
+        {error ? (
+          <EmptyState
+            icon={ShoppingBag}
+            title="ไม่สามารถโหลดสินค้าได้"
+            description="เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"
+            action={{
+              label: "ลองใหม่",
+              onClick: () => window.location.reload()
+            }}
+          />
+        ) : isLoading ? (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <LoadingCard key={index} />
+            ))}
+          </div>
+        ) : products && products.length > 0 ? (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {products.map((product) => (
+              <div key={product.slug} className="group">
+                <ProductCard
+                  {...product}
+                  imageUrl={product.image_url || ""}
+                  description={product.description || ""}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={ShoppingBag}
+            title="ยังไม่มีสินค้า"
+            description="เรากำลังเตรียมสินค้าคุณภาพดีไว้ให้คุณ กรุณารอติดตาม"
+          />
+        )}
+      </div>
+    </ErrorBoundary>
   );
 };
 
