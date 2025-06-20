@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +80,7 @@ const PurchasedItemCard = ({ item }: PurchasedItemCardProps) => {
               {item.template_file_path ? (
                 <TemplateDownload
                   templatePath={item.template_file_path}
-                  productTitle={item.title}
+                  fileName={item.title}
                   className="flex-1"
                 />
               ) : (
