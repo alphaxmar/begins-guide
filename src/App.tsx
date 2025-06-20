@@ -1,99 +1,101 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Articles from "./pages/Articles";
-import Products from "./pages/Products";
-import NotFound from "./pages/NotFound";
-import AuthPage from "./pages/AuthPage";
-import { AuthProvider } from "./contexts/AuthContext";
-import { CartProvider } from "./contexts/CartContext";
-import ArticleDetail from "./pages/ArticleDetail";
-import ProductDetail from "./pages/ProductDetail";
-import CreateArticle from "./pages/CreateArticle";
-import EditArticle from "./pages/EditArticle";
-import ProfilePage from "./pages/ProfilePage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import UpdatePasswordPage from "./pages/UpdatePasswordPage";
-import ProtectedRoute from "./components/ProtectedRoute";
-import DashboardPage from "./pages/admin/DashboardPage";
-import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
-import ImportArticlesPage from "./pages/admin/ImportArticlesPage";
-import AdminProductsPage from "./pages/admin/AdminProductsPage";
-import ImportProductsPage from "./pages/admin/ImportProductsPage";
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import CreateProductPage from "./pages/admin/CreateProductPage";
-import EditProductPage from "./pages/admin/EditProductPage";
-import ManageLessonsPage from "./pages/admin/ManageLessonsPage";
-import CoursePage from "./pages/CoursePage";
-import UserProtectedRoute from "./components/UserProtectedRoute";
-import CartPage from "./pages/CartPage";
-import CoursesPage from "./pages/CoursesPage";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import FloatingCartButton from "./components/FloatingCartButton";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import { Toaster } from "@/components/ui/sonner";
+
+// Import pages
+import Index from "@/pages/Index";
+import AuthPage from "@/pages/AuthPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
+import ProfilePage from "@/pages/ProfilePage";
+import Articles from "@/pages/Articles";
+import ArticleDetail from "@/pages/ArticleDetail";
+import Products from "@/pages/Products";
+import ProductDetail from "@/pages/ProductDetail";
+import CartPage from "@/pages/CartPage";
+import CheckoutPage from "@/pages/CheckoutPage";
+import CoursePage from "@/pages/CoursePage";
+import CoursesPage from "@/pages/CoursesPage";
+import NotFound from "@/pages/NotFound";
+
+// Admin pages
+import ProtectedRoute from "@/components/ProtectedRoute";
+import UserProtectedRoute from "@/components/UserProtectedRoute";
+import DashboardPage from "@/pages/admin/DashboardPage";
+import AdminProductsPage from "@/pages/admin/AdminProductsPage";
+import CreateProductPage from "@/pages/admin/CreateProductPage";
+import EditProductPage from "@/pages/admin/EditProductPage";
+import ManageLessonsPage from "@/pages/admin/ManageLessonsPage";
+import AdminArticlesPage from "@/pages/admin/AdminArticlesPage";
+import CreateArticle from "@/pages/CreateArticle";
+import EditArticle from "@/pages/EditArticle";
+import ImportProductsPage from "@/pages/admin/ImportProductsPage";
+import ImportArticlesPage from "@/pages/admin/ImportArticlesPage";
+import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+
+// Layout
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import FloatingCartButton from "@/components/FloatingCartButton";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <CartProvider>
-            <div className="flex flex-col min-h-screen">
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CartProvider>
+          <Router>
+            <div className="min-h-screen flex flex-col">
               <Header />
-              <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8">
+              <main className="flex-1 container mx-auto px-4">
                 <Routes>
+                  {/* Public routes */}
                   <Route path="/" element={<Index />} />
-                  <Route path="/articles" element={<Articles />} />
-                  <Route path="/articles/:slug" element={<ArticleDetail />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/courses" element={<CoursesPage />} />
-                  <Route path="/products/:slug" element={<ProductDetail />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/update-password" element={<UpdatePasswordPage />} />
+                  <Route path="/articles" element={<Articles />} />
+                  <Route path="/articles/:slug" element={<ArticleDetail />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products/:slug" element={<ProductDetail />} />
                   <Route path="/cart" element={<CartPage />} />
-                  
-                  {/* User Protected Routes */}
-                  <Route element={<UserProtectedRoute />}>
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/courses/:slug/learn" element={<CoursePage />} />
-                  </Route>
+                  <Route path="/courses" element={<CoursesPage />} />
 
-                  {/* Admin Protected Routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/admin" element={<DashboardPage />} />
-                    <Route path="/admin/articles" element={<AdminArticlesPage />} />
-                    <Route path="/admin/articles/import" element={<ImportArticlesPage />} />
-                    <Route path="/admin/products" element={<AdminProductsPage />} />
-                    <Route path="/admin/products/import" element={<ImportProductsPage />} />
-                    <Route path="/admin/users" element={<AdminUsersPage />} />
-                    <Route path="/admin/products/create" element={<CreateProductPage />} />
-                    <Route path="/admin/products/:slug/edit" element={<EditProductPage />} />
-                    <Route path="/admin/products/:slug/lessons" element={<ManageLessonsPage />} />
-                    <Route path="/articles/create" element={<CreateArticle />} />
-                    <Route path="/articles/:slug/edit" element={<EditArticle />} />
-                  </Route>
+                  {/* User protected routes */}
+                  <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
+                  <Route path="/checkout" element={<UserProtectedRoute><CheckoutPage /></UserProtectedRoute>} />
+                  <Route path="/courses/:slug/learn" element={<UserProtectedRoute><CoursePage /></UserProtectedRoute>} />
 
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  {/* Admin routes */}
+                  <Route path="/admin" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                  <Route path="/admin/products" element={<ProtectedRoute><AdminProductsPage /></ProtectedRoute>} />
+                  <Route path="/admin/products/new" element={<ProtectedRoute><CreateProductPage /></ProtectedRoute>} />
+                  <Route path="/admin/products/:slug/edit" element={<ProtectedRoute><EditProductPage /></ProtectedRoute>} />
+                  <Route path="/admin/products/:slug/lessons" element={<ProtectedRoute><ManageLessonsPage /></ProtectedRoute>} />
+                  <Route path="/admin/products/import" element={<ProtectedRoute><ImportProductsPage /></ProtectedRoute>} />
+                  <Route path="/admin/articles" element={<ProtectedRoute><AdminArticlesPage /></ProtectedRoute>} />
+                  <Route path="/admin/articles/new" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>} />
+                  <Route path="/admin/articles/:id/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>} />
+                  <Route path="/admin/articles/import" element={<ProtectedRoute><ImportArticlesPage /></ProtectedRoute>} />
+                  <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
+
+                  {/* 404 */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
               <Footer />
               <FloatingCartButton />
             </div>
-          </CartProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+            <Toaster />
+          </Router>
+        </CartProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
