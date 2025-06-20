@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 interface CartItem {
@@ -9,16 +10,20 @@ interface CartItem {
   slug: string;
   description?: string | null;
   category?: string | null;
+  quantity?: number;
 }
 
 interface CartContextType {
   items: CartItem[];
+  cartItems: CartItem[]; // Alias for compatibility
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
+  cartTotal: number; // Computed property
   getItemQuantity: (id: string) => number;
+  itemCount: number; // Computed property
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -49,7 +54,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return prevItems;
       } else {
         // Item doesn't exist, add it to the cart
-        return [...prevItems, item];
+        return [...prevItems, { ...item, quantity: 1 }];
       }
     });
   };
@@ -59,7 +64,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const updateQuantity = (id: string, quantity: number) => {
-    // This function is not really relevant for the current setup, but kept for potential future use
     setItems(prevItems =>
       prevItems.map(item =>
         item.id === id ? { ...item, quantity: quantity } : item
@@ -72,24 +76,30 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const getCartTotal = () => {
-    return items.reduce((total, item) => total + item.price, 0);
+    return items.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
   };
 
   const getItemQuantity = (id: string) => {
     const item = items.find(item => item.id === id);
-    return item ? 1 : 0; // Quantity is always 1 in this implementation
+    return item?.quantity || 0;
   };
+
+  const cartTotal = getCartTotal();
+  const itemCount = items.reduce((count, item) => count + (item.quantity || 1), 0);
 
   return (
     <CartContext.Provider
       value={{
         items,
+        cartItems: items, // Alias for compatibility
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
         getCartTotal,
+        cartTotal,
         getItemQuantity,
+        itemCount,
       }}
     >
       {children}

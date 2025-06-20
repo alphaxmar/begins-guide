@@ -17,22 +17,27 @@ export const useVipPackages = () => {
   return useQuery({
     queryKey: ['vip-packages'],
     queryFn: async () => {
-      // Query the vip_packages table directly with proper type assertion
-      const { data, error } = await supabase
-        .rpc('get_vip_packages') // We'll use an RPC call to avoid type issues
-        .returns<VipPackage[]>();
+      // For now, return mock data until we have proper VIP packages table
+      const mockPackages: VipPackage[] = [
+        {
+          id: 'vip-premium',
+          name: 'แพ็กเกจ VIP Premium',
+          description: 'เข้าถึงคอร์สและเทมเพลตทั้งหมดไม่จำกัด',
+          price: 2999,
+          duration_months: null, // ตลอดชีวิต
+          features: [
+            'เข้าถึงคอร์สออนไลน์ทั้งหมด',
+            'ดาวน์โหลดเทมเพลตทั้งหมด',
+            'อัปเดตเนื้อหาใหม่ฟรี',
+            'สนับสนุนลูกค้า VIP',
+            'เข้าถึงเนื้อหาพิเศษ'
+          ],
+          is_active: true,
+          created_at: new Date().toISOString()
+        }
+      ];
       
-      if (error) {
-        // Fallback to direct query if RPC doesn't exist yet
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('discount_codes') // Use existing table to avoid type errors for now
-          .select('*')
-          .limit(0); // Return empty array
-        
-        if (fallbackError) throw fallbackError;
-        return [] as VipPackage[];
-      }
-      return data || [];
+      return mockPackages;
     }
   });
 };
