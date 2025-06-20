@@ -13,8 +13,8 @@ const ManageLessonsPage = () => {
   const params = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
-  // ใช้ params.slug สำหรับหน้านี้ เพราะ route คือ :slug/lessons
-  const slug = params.slug;
+  // ใช้ params.slug เพราะ route ตอนนี้เป็น /admin/products/:slug/lessons
+  const { slug } = params;
   
   console.log("ManageLessonsPage - Raw params:", params);
   console.log("ManageLessonsPage - Extracted slug:", slug, "typeof:", typeof slug);

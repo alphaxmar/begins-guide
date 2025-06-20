@@ -124,7 +124,7 @@ function App() {
                     <EditProductPage />
                   </ProtectedRoute>
                 } />
-                <Route path="/admin/products/:productId/lessons" element={
+                <Route path="/admin/products/:slug/lessons" element={
                   <ProtectedRoute adminOnly>
                     <ManageLessonsPage />
                   </ProtectedRoute>
