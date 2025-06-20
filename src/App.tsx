@@ -74,11 +74,19 @@ function App() {
                 <Route path="/checkout-success" element={<CheckoutSuccessPage />} />
                 
                 {/* User */}
-                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Courses */}
                 <Route path="/courses" element={<CoursesPage />} />
-                <Route path="/courses/:slug/learn" element={<CoursePage />} />
+                <Route path="/courses/:slug/learn" element={
+                  <ProtectedRoute>
+                    <CoursePage />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Admin Routes */}
                 <Route path="/admin" element={
