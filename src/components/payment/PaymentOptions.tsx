@@ -2,10 +2,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Smartphone, Globe } from "lucide-react";
+import { CreditCard, Smartphone, Globe, Building2 } from "lucide-react";
 import StripeCheckoutButton from "./StripeCheckoutButton";
 import OmiseCheckoutButton from "./OmiseCheckoutButton";
 import PromptPayCheckout from "./PromptPayCheckout";
+import BankTransferCheckout from "./BankTransferCheckout";
 
 interface PaymentOptionsProps {
   productIds: string[];
@@ -48,6 +49,30 @@ const PaymentOptions = ({ productIds, amount, onSuccess }: PaymentOptionsProps) 
                   ชำระเงินผ่านแอปธนาคารที่รองรับ PromptPay
                 </p>
                 <PromptPayCheckout
+                  productIds={productIds}
+                  totalAmount={amount}
+                  onSuccess={onSuccess}
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">หรือ</span>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  โอนเงินผ่านธนาคาร
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  โอนเงินผ่านบัญชีธนาคาร ไม่มีค่าธรรมเนียม
+                </p>
+                <BankTransferCheckout
                   productIds={productIds}
                   totalAmount={amount}
                   onSuccess={onSuccess}
