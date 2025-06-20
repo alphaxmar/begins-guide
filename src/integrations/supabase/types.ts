@@ -349,6 +349,36 @@ export type Database = {
           },
         ]
       }
+      vip_memberships: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -447,6 +477,10 @@ export type Database = {
           total_spent: number
         }[]
       }
+      is_user_vip: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       send_purchase_confirmation_email: {
         Args: { p_order_id: string }
         Returns: undefined
@@ -472,7 +506,7 @@ export type Database = {
         | "software"
         | "service"
         | "membership"
-      user_role: "user" | "admin" | "partner"
+      user_role: "user" | "admin" | "partner" | "vip"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -605,7 +639,7 @@ export const Constants = {
         "service",
         "membership",
       ],
-      user_role: ["user", "admin", "partner"],
+      user_role: ["user", "admin", "partner", "vip"],
     },
   },
 } as const

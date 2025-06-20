@@ -4,11 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart, BookOpen, Loader2 } from "lucide-react";
+import { ArrowLeft, ShoppingCart, BookOpen, Loader2, Crown } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCourseAccess } from "@/hooks/useCourseAccess";
+import { useAdvancedCourseAccess } from "@/hooks/useAdvancedCourseAccess";
 import { useCart } from "@/contexts/CartContext";
 import PaymentOptions from "@/components/payment/PaymentOptions";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ const ProductDetail = () => {
     enabled: !!slug,
   });
 
-  const { hasAccess, isLoading: isAccessLoading, isError: isAccessError } = useCourseAccess(
+  const { hasAccess, isLoading: isAccessLoading, isError: isAccessError, accessType, isVip } = useAdvancedCourseAccess(
     product?.product_type === 'course' ? product.id : undefined
   );
 
@@ -119,13 +119,30 @@ const ProductDetail = () => {
           )}
         </div>
         <div className="space-y-6">
-          <Badge variant={product.product_type === 'course' ? 'default' : 'secondary'} className="w-fit">
-            {product.product_type === 'course' ? 'คอร์สออนไลน์' : 'เทมเพลต'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={product.product_type === 'course' ? 'default' : 'secondary'} className="w-fit">
+              {product.product_type === 'course' ? 'คอร์สออนไลน์' : 'เทมเพลต'}
+            </Badge>
+            {isVip && (
+              <Badge variant="default" className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                <Crown className="mr-1 h-3 w-3" />
+                VIP Access
+              </Badge>
+            )}
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{product.title}</h1>
           <p className="text-lg text-muted-foreground">{product.description}</p>
           <div className="flex items-baseline gap-4">
-            <p className="text-4xl font-bold text-primary">{product.price.toLocaleString()} บาท</p>
+            {isVip ? (
+              <div className="space-y-2">
+                <p className="text-4xl font-bold text-green-600">ฟรี สำหรับ VIP</p>
+                <p className="text-sm text-muted-foreground line-through">
+                  ราคาปกติ {product.price.toLocaleString()} บาท
+                </p>
+              </div>
+            ) : (
+              <p className="text-4xl font-bold text-primary">{product.price.toLocaleString()} บาท</p>
+            )}
           </div>
           <div className="space-y-4">
             {product.product_type === 'course' ? (
@@ -143,7 +160,18 @@ const ProductDetail = () => {
                     </Link>
                   </Button>
                 ) : (
-                  purchaseButtons
+                  <>
+                    {!isVip && purchaseButtons}
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Crown className="h-5 w-5 text-yellow-600" />
+                        <span className="font-medium text-yellow-800">สำหรับสมาชิก VIP</span>
+                      </div>
+                      <p className="text-sm text-yellow-700">
+                        สมาชิก VIP สามารถเข้าถึงคอร์สนี้และคอร์สอื่นๆ ทั้งหมดได้ฟรี รวมถึงไฟล์ดาวน์โหลดทั้งหมด
+                      </p>
+                    </div>
+                  </>
                 )}
               </>
             ) : (

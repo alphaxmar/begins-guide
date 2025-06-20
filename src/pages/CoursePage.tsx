@@ -1,13 +1,14 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useCourseData } from "@/hooks/useCourseData";
+import { useAdvancedCourseAccess } from "@/hooks/useAdvancedCourseAccess";
 import CoursePageSkeleton from "./CoursePageSkeleton";
 import LessonSidebar from "@/components/learn/LessonSidebar";
-import LessonContent from "@/components/learn/LessonContent";
+import EnhancedLessonContent from "@/components/learn/EnhancedLessonContent";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, ShoppingCart } from "lucide-react";
-import { useCourseAccess } from "@/hooks/useCourseAccess";
 
 const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,7 +16,7 @@ const CoursePage = () => {
   const location = useLocation();
 
   const { product, lessons, isLoading: isCourseDataLoading } = useCourseData(slug);
-  const { hasAccess, isLoading: isAccessLoading, isError: isAccessError } = useCourseAccess(product?.id);
+  const { hasAccess, isLoading: isAccessLoading, isError: isAccessError, accessType } = useAdvancedCourseAccess(product?.id);
   const [activeLesson, setActiveLesson] = useState<Tables<'lessons'> | null>(null);
 
   const queryParams = new URLSearchParams(location.search);
@@ -32,7 +33,6 @@ const CoursePage = () => {
       }
     }
   }, [lessons, lessonIdFromUrl, navigate, location.pathname]);
-
 
   const activeLessonIndex = useMemo(() => {
     if (!activeLesson || !lessons) return -1;
@@ -75,14 +75,16 @@ const CoursePage = () => {
         <Lock className="h-16 w-16 text-destructive mb-4" />
         <h2 className="text-2xl font-bold mb-4">คุณยังไม่มีสิทธิ์เข้าถึงคอร์สนี้</h2>
         <p className="text-muted-foreground mb-8">
-          {isAccessError ? 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์' : 'กรุณาซื้อคอร์สเพื่อเข้าถึงบทเรียนทั้งหมด'}
+          {isAccessError ? 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์' : 'กรุณาซื้อคอร์สเพื่อเข้าถึงบทเรียนทั้งหมด หรือสมัครสมาชิก VIP เพื่อเข้าถึงเนื้อหาทั้งหมด'}
         </p>
-        <Button asChild>
-          <Link to={`/products/${product.slug}`}>
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            ไปที่หน้าคอร์ส
-          </Link>
-        </Button>
+        <div className="flex gap-4">
+          <Button asChild>
+            <Link to={`/products/${product.slug}`}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              ไปที่หน้าคอร์ส
+            </Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -119,12 +121,15 @@ const CoursePage = () => {
           onLessonClick={handleLessonClick}
           productTitle={product.title}
         />
-        <LessonContent
+        <EnhancedLessonContent
           lesson={activeLesson}
           onNext={handleNext}
           onPrev={handlePrev}
           isFirstLesson={activeLessonIndex === 0}
           isLastLesson={lessons ? activeLessonIndex === lessons.length - 1 : true}
+          accessType={accessType}
+          hasAccess={hasAccess}
+          productId={product.id}
         />
       </div>
     </div>
