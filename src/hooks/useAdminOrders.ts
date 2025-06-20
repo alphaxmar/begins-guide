@@ -3,12 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+type OrderStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+
 interface AdminOrder {
   order_id: string;
   user_email: string;
   user_full_name: string;
   total_amount: number;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+  status: OrderStatus;
   payment_provider: string;
   created_at: string;
   items_count: number;
@@ -33,7 +35,7 @@ export const useUpdateOrderStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
+    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: OrderStatus }) => {
       const { error } = await supabase.rpc('admin_update_order_status', {
         order_id: orderId,
         new_status: newStatus

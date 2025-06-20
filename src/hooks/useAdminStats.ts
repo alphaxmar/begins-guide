@@ -27,13 +27,24 @@ interface DailySalesStats {
   daily_orders: number;
 }
 
+const defaultStats: DashboardStats = {
+  total_users: 0,
+  new_users_this_month: 0,
+  total_revenue: 0,
+  revenue_this_month: 0,
+  total_orders: 0,
+  pending_orders: 0,
+  completed_orders: 0,
+  failed_orders: 0,
+};
+
 export const useAdminDashboardStats = () => {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<DashboardStats> => {
       const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
       if (error) throw error;
-      return data[0] || {};
+      return data?.[0] || defaultStats;
     },
   });
 };
