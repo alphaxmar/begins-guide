@@ -56,7 +56,7 @@ serve(async (req) => {
               <p><strong>ยอดรวม: ${data?.total_amount?.toLocaleString()} บาท</strong></p>
             </div>
             
-            <p>คุณสามารถเข้าถึงสินค้าที่ซื้อได้ที่ <a href="${Deno.env.get('SITE_URL')}/profile">หน้าโปรไฟล์</a></p>
+            <p>คุณสามารถเข้าถึงสินค้าที่ซื้อได้ที่ <a href="${Deno.env.get('SITE_URL') || 'https://beginsguide.com'}/profile">หน้าโปรไฟล์</a></p>
             
             <hr style="margin: 30px 0;">
             <p style="color: #6b7280; font-size: 14px;">
@@ -78,9 +78,9 @@ serve(async (req) => {
             <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3>เริ่มต้นเส้นทางของคุณ:</h3>
               <ul>
-                <li><a href="${Deno.env.get('SITE_URL')}/articles">อ่านบทความฟรี</a></li>
-                <li><a href="${Deno.env.get('SITE_URL')}/products">เลือกดูคอร์สและเทมเพลต</a></li>
-                <li><a href="${Deno.env.get('SITE_URL')}/profile">จัดการโปรไฟล์</a></li>
+                <li><a href="${Deno.env.get('SITE_URL') || 'https://beginsguide.com'}/articles">อ่านบทความฟรี</a></li>
+                <li><a href="${Deno.env.get('SITE_URL') || 'https://beginsguide.com'}/products">เลือกดูคอร์สและเทมเพลต</a></li>
+                <li><a href="${Deno.env.get('SITE_URL') || 'https://beginsguide.com'}/profile">จัดการโปรไฟล์</a></li>
               </ul>
             </div>
             
@@ -108,11 +108,9 @@ serve(async (req) => {
     const { error: logError } = await supabaseClient
       .from('email_logs')
       .insert({
-        recipient: to,
-        email_type: type,
+        recipient_email: to,
         subject,
-        status: 'sent',
-        sent_at: new Date().toISOString()
+        status: 'sent'
       });
 
     if (logError) {
@@ -131,6 +129,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    console.error('Email notification error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

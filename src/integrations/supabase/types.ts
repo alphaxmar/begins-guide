@@ -430,6 +430,10 @@ export type Database = {
           total_spent: number
         }[]
       }
+      send_purchase_confirmation_email: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
       update_lessons_order: {
         Args: { p_lesson_ids: string[] }
         Returns: undefined
