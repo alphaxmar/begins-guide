@@ -15,17 +15,13 @@ import { arrayMove } from '@dnd-kit/sortable';
 const fetchProductBySlug = async (slug: string) => {
   console.log("fetchProductBySlug called with slug:", slug, "typeof:", typeof slug);
   
-  // แปลง slug ให้เป็น string ถ้าเป็น object
-  const cleanSlug = typeof slug === 'object' ? String(slug) : slug;
-  console.log("Clean slug:", cleanSlug);
-  
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .eq("slug", cleanSlug)
+    .eq("slug", slug)
     .maybeSingle();
     
-  console.log("Product fetch result:", { data, error, searchedSlug: cleanSlug });
+  console.log("Product fetch result:", { data, error, searchedSlug: slug });
   
   if (error) {
     console.error("Error fetching product:", error);

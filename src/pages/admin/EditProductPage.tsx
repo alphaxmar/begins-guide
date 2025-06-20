@@ -27,9 +27,10 @@ const fetchProductBySlug = async (slug: string) => {
 
 const EditProductPage = () => {
   const params = useParams();
-  const slug = params.slug;
+  // ใช้ params.id แทน params.slug เพราะใน route เป็น :id
+  const slug = params.id;
 
-  console.log("EditProductPage - slug from params:", slug);
+  console.log("EditProductPage - slug from params.id:", slug);
   console.log("EditProductPage - all params:", params);
 
   const { data: product, isLoading: isProductLoading, isError, error } = useQuery({

@@ -13,7 +13,7 @@ const ManageLessonsPage = () => {
   const params = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
-  // แปลง slug ให้ถูกต้อง
+  // ใช้ params.slug สำหรับหน้านี้ เพราะ route คือ :slug/lessons
   const slug = params.slug;
   
   console.log("ManageLessonsPage - Raw params:", params);
