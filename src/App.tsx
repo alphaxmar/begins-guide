@@ -23,6 +23,7 @@ import NotFound from "@/pages/NotFound";
 
 // Admin Pages
 import ProtectedRoute from "@/components/ProtectedRoute";
+import UserProtectedRoute from "@/components/UserProtectedRoute";
 import DashboardPage from "@/pages/admin/DashboardPage";
 import AdminProductsPage from "@/pages/admin/AdminProductsPage";
 import CreateProductPage from "@/pages/admin/CreateProductPage";
@@ -75,17 +76,17 @@ function App() {
                 
                 {/* User */}
                 <Route path="/profile" element={
-                  <ProtectedRoute>
+                  <UserProtectedRoute>
                     <ProfilePage />
-                  </ProtectedRoute>
+                  </UserProtectedRoute>
                 } />
                 
                 {/* Courses */}
                 <Route path="/courses" element={<CoursesPage />} />
                 <Route path="/courses/:slug/learn" element={
-                  <ProtectedRoute>
+                  <UserProtectedRoute>
                     <CoursePage />
-                  </ProtectedRoute>
+                  </UserProtectedRoute>
                 } />
                 
                 {/* Admin Routes */}

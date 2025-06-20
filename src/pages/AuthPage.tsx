@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Chrome, Loader2 } from 'lucide-react';
+import { Chrome, Loader2, Facebook } from 'lucide-react';
 import { cleanupAuthState } from '@/utils/authCleanup';
 
 const AuthPage = () => {
@@ -29,18 +30,14 @@ const AuthPage = () => {
     setLoading(true);
     
     try {
-      // Clean up existing state first
       cleanupAuthState();
       
-      // Attempt global sign out to clear any existing sessions
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        // Continue even if this fails
         console.log('Cleanup signout attempt:', err);
       }
 
-      // Sign in with email/password
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -54,7 +51,6 @@ const AuthPage = () => {
         }
       } else if (data.user) {
         toast.success('เข้าสู่ระบบสำเร็จ!');
-        // Force page reload for clean state
         window.location.href = '/';
       }
     } catch (error: any) {
@@ -70,7 +66,6 @@ const AuthPage = () => {
     setLoading(true);
     
     try {
-      // Clean up existing state first
       cleanupAuthState();
       
       const { data, error } = await supabase.auth.signUp({
@@ -89,7 +84,6 @@ const AuthPage = () => {
         }
       } else {
         toast.success('สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยัน');
-        // Clear form
         setEmail('');
         setPassword('');
       }
@@ -101,11 +95,10 @@ const AuthPage = () => {
     }
   };
   
-  const handleOAuthLogin = async (provider: 'google') => {
+  const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
     setLoading(true);
     
     try {
-      // Clean up existing state first
       cleanupAuthState();
       
       const { error } = await supabase.auth.signInWithOAuth({
@@ -120,7 +113,7 @@ const AuthPage = () => {
       }
     } catch (error: any) {
       console.error('OAuth error:', error);
-      toast.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google');
+      toast.error(`เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย ${provider === 'google' ? 'Google' : 'Facebook'}`);
     } finally {
       setLoading(false);
     }
@@ -195,15 +188,24 @@ const AuthPage = () => {
                   </span>
                 </div>
               </div>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={() => handleOAuthLogin('google')} 
-                disabled={loading}
-              >
-                <Chrome className="mr-2 h-4 w-4" />
-                Google
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleOAuthLogin('google')} 
+                  disabled={loading}
+                >
+                  <Chrome className="mr-2 h-4 w-4" />
+                  Google
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleOAuthLogin('facebook')} 
+                  disabled={loading}
+                >
+                  <Facebook className="mr-2 h-4 w-4" />
+                  Facebook
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -255,6 +257,34 @@ const AuthPage = () => {
                   </Button>
                 </div>
               </form>
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    หรือสมัครด้วย
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleOAuthLogin('google')} 
+                  disabled={loading}
+                >
+                  <Chrome className="mr-2 h-4 w-4" />
+                  Google
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleOAuthLogin('facebook')} 
+                  disabled={loading}
+                >
+                  <Facebook className="mr-2 h-4 w-4" />
+                  Facebook
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
