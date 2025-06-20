@@ -1,10 +1,15 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAdmin } from '@/hooks/useAdmin';
 import { Loader2 } from 'lucide-react';
+import { ReactNode } from 'react';
 
-const ProtectedRoute = () => {
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
 
@@ -20,8 +25,7 @@ const ProtectedRoute = () => {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
-

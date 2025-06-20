@@ -1,9 +1,14 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { ReactNode } from 'react';
 
-const UserProtectedRoute = () => {
+interface UserProtectedRouteProps {
+  children: ReactNode;
+}
+
+const UserProtectedRoute = ({ children }: UserProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
 
@@ -22,7 +27,7 @@ const UserProtectedRoute = () => {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default UserProtectedRoute;
