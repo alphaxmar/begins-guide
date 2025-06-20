@@ -4,13 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart, BookOpen, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, ShoppingCart, BookOpen, Loader2 } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import { useCart } from "@/contexts/CartContext";
-import StripeCheckoutButton from "@/components/payment/StripeCheckoutButton";
+import PaymentOptions from "@/components/payment/PaymentOptions";
 import { toast } from "sonner";
 
 const fetchProductBySlug = async (slug: string) => {
@@ -72,8 +72,14 @@ const ProductDetail = () => {
     );
   }
 
+  const handlePaymentSuccess = () => {
+    toast.success("การชำระเงินสำเร็จ!");
+    queryClient.invalidateQueries({ queryKey: ["purchased_products"] });
+    navigate("/profile");
+  };
+
   const purchaseButtons = (
-    <>
+    <div className="space-y-4">
       <Button
         size="lg"
         variant="outline"
@@ -83,15 +89,15 @@ const ProductDetail = () => {
         <ShoppingCart className="mr-2 h-5 w-5" />
         เพิ่มลงตะกร้า
       </Button>
-      <StripeCheckoutButton
-        productIds={[product.id]}
-        amount={product.price}
-        className="w-full sm:w-auto"
-        onSuccess={() => {
-          toast.success("กำลังเปิดหน้าชำระเงิน...");
-        }}
-      />
-    </>
+      
+      <div className="w-full">
+        <PaymentOptions
+          productIds={[product.id]}
+          amount={product.price}
+          onSuccess={handlePaymentSuccess}
+        />
+      </div>
+    </div>
   );
 
   return (
@@ -121,7 +127,7 @@ const ProductDetail = () => {
           <div className="flex items-baseline gap-4">
             <p className="text-4xl font-bold text-primary">{product.price.toLocaleString()} บาท</p>
           </div>
-          <div className="flex flex-wrap gap-4 items-center">
+          <div className="space-y-4">
             {product.product_type === 'course' ? (
               <>
                 {isAccessLoading ? (

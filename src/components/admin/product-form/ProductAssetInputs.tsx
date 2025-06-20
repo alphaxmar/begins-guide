@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ProductFormValues } from "../ProductForm";
 import { ChangeEvent, useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
-import FileUpload from "../FileUpload";
+import TemplateUpload from "../TemplateUpload";
 
 interface ProductAssetInputsProps {
   control: Control<ProductFormValues>;
@@ -27,17 +27,14 @@ const ProductAssetInputs: React.FC<ProductAssetInputsProps> = ({
       {productType === 'template' && (
         <div className="space-y-4">
           <FormLabel>ไฟล์เทมเพลต</FormLabel>
-          <FileUpload
+          <TemplateUpload
             productId={initialData?.id}
-            currentFilePath={initialData?.template_file_path || ""}
-            onFileUploaded={(filePath) => {
+            onUploadSuccess={(filePath) => {
               if (onTemplateFilePathChange) {
                 onTemplateFilePathChange(filePath);
               }
             }}
-            accept=".zip,.pdf,.png,.jpg,.jpeg,.docx,.xlsx,.pptx"
-            label="อัปโหลดไฟล์เทมเพลต"
-            description="อัปโหลดไฟล์เทมเพลตที่ลูกค้าจะได้รับหลังจากซื้อ (รองรับ .zip, .pdf, .png, .jpeg, .docx, .xlsx, .pptx)"
+            currentFilePath={initialData?.template_file_path || undefined}
           />
           
           <FormField

@@ -1,9 +1,10 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Download, ExternalLink } from "lucide-react";
+import { BookOpen, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
-import TemplateDownload from "@/components/TemplateDownload";
+import TemplateDownloadButton from "@/components/template/TemplateDownloadButton";
 
 interface PurchasedItem {
   id: string;
@@ -78,14 +79,14 @@ const PurchasedItemCard = ({ item }: PurchasedItemCardProps) => {
           ) : (
             <>
               {item.template_file_path ? (
-                <TemplateDownload
+                <TemplateDownloadButton
                   templatePath={item.template_file_path}
                   fileName={item.title}
+                  productId={item.id}
                   className="flex-1"
                 />
               ) : (
                 <Button disabled className="flex-1">
-                  <Download className="mr-2 h-4 w-4" />
                   ไม่มีไฟล์
                 </Button>
               )}
