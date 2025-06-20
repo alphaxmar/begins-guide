@@ -11,6 +11,7 @@ import ArticleDetail from "@/pages/ArticleDetail";
 import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
 import CoursePage from "@/pages/CoursePage";
+import ModernCoursePage from "@/pages/ModernCoursePage";
 import CoursesPage from "@/pages/CoursesPage";
 import AuthPage from "@/pages/AuthPage";
 import ProfilePage from "@/pages/ProfilePage";
