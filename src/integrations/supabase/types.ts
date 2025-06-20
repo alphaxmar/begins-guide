@@ -387,6 +387,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_settings: {
+        Row: {
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_branch: string | null
+          bank_name: string | null
+          created_at: string | null
+          id: number
+          omise_enabled: boolean | null
+          promptpay_number: string | null
+          stripe_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          id?: number
+          omise_enabled?: boolean | null
+          promptpay_number?: string | null
+          stripe_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          id?: number
+          omise_enabled?: boolean | null
+          promptpay_number?: string | null
+          stripe_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
