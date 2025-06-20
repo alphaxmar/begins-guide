@@ -5,47 +5,65 @@ import { Input } from "@/components/ui/input";
 import { ProductFormValues } from "../ProductForm";
 import { ChangeEvent, useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
+import FileUpload from "../FileUpload";
 
 interface ProductAssetInputsProps {
   control: Control<ProductFormValues>;
   productType: "course" | "template";
   initialData?: Tables<'products'> | null;
+  onTemplateFilePathChange?: (path: string) => void;
 }
 
-const ProductAssetInputs: React.FC<ProductAssetInputsProps> = ({ control, productType, initialData }) => {
+const ProductAssetInputs: React.FC<ProductAssetInputsProps> = ({ 
+  control, 
+  productType, 
+  initialData,
+  onTemplateFilePathChange
+}) => {
   const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
 
   return (
     <>
       {productType === 'template' && (
-        <FormField
-          control={control}
-          name="template_file"
-          render={({ field: { onChange, onBlur, name, ref } }) => (
-            <FormItem>
-              <FormLabel>ไฟล์เทมเพลต</FormLabel>
-              <FormControl>
-                <Input
-                  name={name}
-                  onBlur={onBlur}
-                  ref={ref}
-                  type="file"
-                  accept=".zip,.pdf,.png,.jpg,.jpeg"
-                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                    onChange(event.target.files);
-                  }}
-                />
-              </FormControl>
-              <FormDescription>
-                {initialData?.template_file_path
-                  ? `มีไฟล์อยู่แล้ว: ${initialData.template_file_path.split('/').pop()}. อัปโหลดไฟล์ใหม่เพื่อทับไฟล์เดิม`
-                  : "อัปโหลดไฟล์เทมเพลต (.zip, .pdf, .png, .jpeg)"}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4">
+          <FormLabel>ไฟล์เทมเพลต</FormLabel>
+          <FileUpload
+            productId={initialData?.id}
+            currentFilePath={initialData?.template_file_path || ""}
+            onFileUploaded={(filePath) => {
+              if (onTemplateFilePathChange) {
+                onTemplateFilePathChange(filePath);
+              }
+            }}
+            accept=".zip,.pdf,.png,.jpg,.jpeg,.docx,.xlsx,.pptx"
+            label="อัปโหลดไฟล์เทมเพลต"
+            description="อัปโหลดไฟล์เทมเพลตที่ลูกค้าจะได้รับหลังจากซื้อ (รองรับ .zip, .pdf, .png, .jpeg, .docx, .xlsx, .pptx)"
+          />
+          
+          <FormField
+            control={control}
+            name="template_file"
+            render={({ field: { onChange, onBlur, name, ref } }) => (
+              <FormItem className="hidden">
+                <FormControl>
+                  <Input
+                    name={name}
+                    onBlur={onBlur}
+                    ref={ref}
+                    type="file"
+                    accept=".zip,.pdf,.png,.jpg,.jpeg"
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                      onChange(event.target.files);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       )}
+      
       <FormField
         control={control}
         name="image_file"
@@ -61,7 +79,7 @@ const ProductAssetInputs: React.FC<ProductAssetInputsProps> = ({ control, produc
               <Input
                 {...fieldProps}
                 type="file"
-                value={undefined} // Needed for file inputs in react-hook-form
+                value={undefined}
                 accept="image/png, image/jpeg, image/jpg, image/webp"
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   const files = event.target.files;

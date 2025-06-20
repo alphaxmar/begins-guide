@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,9 @@ import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Package, FileText, Video, Download, Users, Wrench } from "lucide-react";
+import ProductAssetInputs from "./product-form/ProductAssetInputs";
+import { useState } from "react";
+import { Tables } from "@/integrations/supabase/types";
 
 export type ProductFormValues = z.infer<typeof productSchema>;
 
@@ -19,6 +21,7 @@ interface ProductFormProps {
   defaultValues?: Partial<ProductFormValues>;
   isLoading?: boolean;
   submitButtonText?: string;
+  initialData?: Tables<'products'> | null;
 }
 
 const PRODUCT_TYPE_OPTIONS = [
@@ -70,8 +73,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
   onSubmit, 
   defaultValues, 
   isLoading = false,
-  submitButtonText = "บันทึก"
+  submitButtonText = "บันทึก",
+  initialData
 }) => {
+  const [templateFilePath, setTemplateFilePath] = useState(initialData?.template_file_path || "");
+  
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -103,6 +109,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
+  const handleSubmit = (values: ProductFormValues) => {
+    // เพิ่ม template_file_path เข้าไปใน values หากมี
+    const finalValues = {
+      ...values,
+      template_file_path: templateFilePath || undefined
+    };
+    onSubmit(finalValues as ProductFormValues);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
@@ -115,7 +130,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           {/* Product Type Selection */}
           <Card>
             <CardHeader>
@@ -289,6 +304,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <ProductAssetInputs
+                control={form.control}
+                productType={watchedProductType as "course" | "template"}
+                initialData={initialData}
+                onTemplateFilePathChange={setTemplateFilePath}
+              />
+
               <FormField
                 control={form.control}
                 name="image_url"
@@ -308,52 +330,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="image_file"
-                render={({ field: { onChange, value, ...field } }) => (
-                  <FormItem>
-                    <FormLabel>อัปโหลดรูปภาพหน้าปก</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => onChange(e.target.files)}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      อัปโหลดรูปภาพจากคอมพิวเตอร์ของคุณ (ถ้าอัปโหลดไฟล์จะใช้แทน URL ด้านบน)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {watchedProductType === 'template' && (
-                <FormField
-                  control={form.control}
-                  name="template_file"
-                  render={({ field: { onChange, value, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>อัปโหลดไฟล์เทมเพลต</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
-                          onChange={(e) => onChange(e.target.files)}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        อัปโหลดไฟล์เทมเพลตที่ลูกค้าจะได้รับหลังจากซื้อ
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </CardContent>
           </Card>
 
