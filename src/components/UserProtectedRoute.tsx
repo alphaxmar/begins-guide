@@ -1,21 +1,21 @@
 
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, useLocation } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
 import { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface UserProtectedRouteProps {
   children: ReactNode;
 }
 
 const UserProtectedRoute = ({ children }: UserProtectedRouteProps) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (authLoading) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner />
       </div>
     );
   }
