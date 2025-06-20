@@ -29,15 +29,22 @@ const fetchProductBySlug = async (slug: string) => {
 };
 
 const EditProductPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const params = useParams();
+  const slug = params.slug;
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   console.log("EditProductPage - slug from params:", slug);
+  console.log("EditProductPage - all params:", params);
 
   const { data: product, isLoading: isProductLoading, isError, error } = useQuery({
     queryKey: ["product", slug],
-    queryFn: () => fetchProductBySlug(slug!),
+    queryFn: () => {
+      if (!slug) {
+        throw new Error("Slug is required");
+      }
+      return fetchProductBySlug(slug);
+    },
     enabled: !!slug,
   });
 
@@ -136,6 +143,27 @@ const EditProductPage = () => {
       toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
     },
   });
+
+  // Show error if no slug is provided
+  if (!slug) {
+    return (
+      <div className="py-8 max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-red-500">ไม่พบ slug ของสินค้าใน URL</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              กรุณาตรวจสอบ URL ให้ถูกต้อง
+            </p>
+            <div className="mt-4">
+              <Button onClick={() => navigate("/admin/products")}>
+                กลับไปรายการสินค้า
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isProductLoading) {
     return (
