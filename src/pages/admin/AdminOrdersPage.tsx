@@ -14,8 +14,8 @@ import { th } from 'date-fns/locale';
 type OrderStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
 
 const AdminOrdersPage = () => {
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const { data: orders, isLoading } = useAdminOrders(statusFilter || undefined);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { data: orders, isLoading } = useAdminOrders(statusFilter === 'all' ? undefined : statusFilter);
   const updateOrderStatus = useUpdateOrderStatus();
 
   const getStatusColor = (status: string) => {
@@ -40,6 +40,17 @@ const AdminOrdersPage = () => {
     }
   };
 
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+  };
+
+  const handleOrderStatusChange = (orderId: string, newStatus: string) => {
+    updateOrderStatus.mutate({ 
+      orderId, 
+      newStatus: newStatus as OrderStatus 
+    });
+  };
+
   return (
     <div className="py-8">
       <PageHeader 
@@ -48,12 +59,12 @@ const AdminOrdersPage = () => {
       />
       
       <div className="mb-6">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="กรองตามสถานะ" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">ทั้งหมด</SelectItem>
+            <SelectItem value="all">ทั้งหมด</SelectItem>
             <SelectItem value="pending">รอดำเนินการ</SelectItem>
             <SelectItem value="processing">กำลังดำเนินการ</SelectItem>
             <SelectItem value="completed">สำเร็จ</SelectItem>
@@ -110,11 +121,8 @@ const AdminOrdersPage = () => {
                     <TableCell>
                       <Select 
                         value={order.status}
-                        onValueChange={(newStatus: OrderStatus) => 
-                          updateOrderStatus.mutate({ 
-                            orderId: order.order_id, 
-                            newStatus 
-                          })
+                        onValueChange={(newStatus) => 
+                          handleOrderStatusChange(order.order_id, newStatus)
                         }
                       >
                         <SelectTrigger className="w-[120px]">
