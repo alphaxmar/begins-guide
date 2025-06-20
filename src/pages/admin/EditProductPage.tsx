@@ -10,13 +10,21 @@ import { Button } from "@/components/ui/button";
 import { BookOpenCheck } from "lucide-react";
 
 const fetchProductBySlug = async (slug: string) => {
+  console.log("Fetching product with slug:", slug);
+  
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("slug", slug)
     .maybeSingle();
   
-  if (error) throw new Error(error.message);
+  console.log("Product fetch result:", { data, error });
+  
+  if (error) {
+    console.error("Error fetching product:", error);
+    throw new Error(error.message);
+  }
+  
   return data;
 };
 
@@ -25,11 +33,15 @@ const EditProductPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  console.log("EditProductPage - slug from params:", slug);
+
   const { data: product, isLoading: isProductLoading, isError, error } = useQuery({
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug!),
     enabled: !!slug,
   });
+
+  console.log("Product query state:", { product, isProductLoading, isError, error });
 
   const updateProductMutation = useMutation({
     mutationFn: async (values: ProductFormValues) => {
@@ -145,11 +157,43 @@ const EditProductPage = () => {
   }
 
   if (isError) {
-    return <p className="text-red-500 py-8">เกิดข้อผิดพลาด: {error.message}</p>;
+    return (
+      <div className="py-8 max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-red-500">เกิดข้อผิดพลาด: {error?.message}</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง
+            </p>
+            <div className="mt-4">
+              <Button onClick={() => window.location.reload()}>
+                ลองใหม่
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (!product) {
-    return <p className="text-muted-foreground py-8">ไม่พบสินค้าที่ต้องการแก้ไข</p>;
+    return (
+      <div className="py-8 max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground">ไม่พบสินค้าที่ต้องการแก้ไข</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Slug: {slug}
+            </p>
+            <div className="mt-4">
+              <Button onClick={() => navigate("/admin/products")}>
+                กลับไปรายการสินค้า
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
   
   const handleSubmit = (values: ProductFormValues) => {
