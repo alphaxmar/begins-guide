@@ -141,7 +141,7 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
         </Card>
       )}
 
-      {paymentStatus === 'pending' && qrCodeUrl && (
+      {(paymentStatus === 'pending' || paymentStatus === 'checking') && qrCodeUrl && (
         <Card>
           <CardHeader>
             <CardTitle className="text-center">สแกน QR Code เพื่อชำระเงิน</CardTitle>
