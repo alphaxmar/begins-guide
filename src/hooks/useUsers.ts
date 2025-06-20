@@ -18,36 +18,15 @@ export const useUsers = () => {
     queryKey: ['users'],
     queryFn: async (): Promise<UserWithStats[]> => {
       try {
-        // ลองใช้ profiles table โดยตรงก่อน หากไม่ได้ก็ใช้ RPC function
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            full_name,
-            role,
-            auth_users!inner(email, created_at)
-          `);
-
-        if (profilesError) {
-          console.log('Profiles query failed, trying RPC:', profilesError);
-          const { data, error } = await supabase.rpc('get_users_with_stats');
-          if (error) {
-            console.error('RPC Error fetching users:', error);
-            throw error;
-          }
-          return data || [];
+        // Use the RPC function directly since it handles the auth.users join properly
+        const { data, error } = await supabase.rpc('get_users_with_stats');
+        
+        if (error) {
+          console.error('RPC Error fetching users:', error);
+          throw error;
         }
-
-        // Transform profiles data to match expected format
-        return profilesData.map(profile => ({
-          id: profile.id,
-          email: profile.auth_users.email,
-          full_name: profile.full_name,
-          role: profile.role,
-          created_at: profile.auth_users.created_at,
-          total_purchases: 0,
-          total_spent: 0
-        }));
+        
+        return data || [];
       } catch (error) {
         console.error('Users fetch error:', error);
         throw error;
