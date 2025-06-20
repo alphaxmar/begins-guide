@@ -17,13 +17,19 @@ export const useUsers = () => {
   return useQuery({
     queryKey: ['users'],
     queryFn: async (): Promise<UserWithStats[]> => {
-      const { data, error } = await supabase.rpc('get_users_with_stats');
-      if (error) {
-        console.error('Error fetching users:', error);
+      try {
+        const { data, error } = await supabase.rpc('get_users_with_stats');
+        if (error) {
+          console.error('Error fetching users:', error);
+          throw error;
+        }
+        return data || [];
+      } catch (error) {
+        console.error('Users fetch error:', error);
         throw error;
       }
-      return data || [];
     },
+    retry: 1,
   });
 };
 
@@ -32,11 +38,16 @@ export const useUpdateUserRole = () => {
 
   return useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'user' | 'admin' | 'partner' }) => {
-      const { error } = await supabase.rpc('admin_update_user_role', {
-        target_user_id: userId,
-        new_role: newRole
-      });
-      if (error) throw error;
+      try {
+        const { error } = await supabase.rpc('admin_update_user_role', {
+          target_user_id: userId,
+          new_role: newRole
+        });
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error updating user role:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });

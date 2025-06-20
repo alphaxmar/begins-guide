@@ -42,10 +42,16 @@ export const useAdminDashboardStats = () => {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<DashboardStats> => {
-      const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
-      if (error) throw error;
-      return data?.[0] || defaultStats;
+      try {
+        const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
+        if (error) throw error;
+        return data?.[0] || defaultStats;
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        return defaultStats;
+      }
     },
+    retry: 1,
   });
 };
 
@@ -53,10 +59,16 @@ export const useTopSellingProducts = (limit = 5) => {
   return useQuery({
     queryKey: ['top-selling-products', limit],
     queryFn: async (): Promise<TopSellingProduct[]> => {
-      const { data, error } = await supabase.rpc('get_top_selling_products', { limit_count: limit });
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.rpc('get_top_selling_products', { limit_count: limit });
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching top selling products:', error);
+        return [];
+      }
     },
+    retry: 1,
   });
 };
 
@@ -64,9 +76,15 @@ export const useDailySalesStats = (daysBack = 30) => {
   return useQuery({
     queryKey: ['daily-sales-stats', daysBack],
     queryFn: async (): Promise<DailySalesStats[]> => {
-      const { data, error } = await supabase.rpc('get_daily_sales_stats', { days_back: daysBack });
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.rpc('get_daily_sales_stats', { days_back: daysBack });
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching daily sales stats:', error);
+        return [];
+      }
     },
+    retry: 1,
   });
 };

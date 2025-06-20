@@ -21,9 +21,6 @@ const UserProtectedRoute = ({ children }: UserProtectedRouteProps) => {
   }
 
   if (!user) {
-    // Redirect them to the /auth page, but save the current location they were
-    // trying to go to. This allows us to send them along to their original
-    // destination after they log in.
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 

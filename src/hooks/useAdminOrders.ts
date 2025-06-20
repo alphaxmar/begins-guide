@@ -20,14 +20,20 @@ export const useAdminOrders = (statusFilter?: string, limit = 50, offset = 0) =>
   return useQuery({
     queryKey: ['admin-orders', statusFilter, limit, offset],
     queryFn: async (): Promise<AdminOrder[]> => {
-      const { data, error } = await supabase.rpc('get_admin_orders', {
-        status_filter: statusFilter || null,
-        limit_count: limit,
-        offset_count: offset
-      });
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.rpc('get_admin_orders', {
+          status_filter: statusFilter || null,
+          limit_count: limit,
+          offset_count: offset
+        });
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching admin orders:', error);
+        throw error;
+      }
     },
+    retry: 1,
   });
 };
 
@@ -36,11 +42,16 @@ export const useUpdateOrderStatus = () => {
 
   return useMutation({
     mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: OrderStatus }) => {
-      const { error } = await supabase.rpc('admin_update_order_status', {
-        order_id: orderId,
-        new_status: newStatus
-      });
-      if (error) throw error;
+      try {
+        const { error } = await supabase.rpc('admin_update_order_status', {
+          order_id: orderId,
+          new_status: newStatus
+        });
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error updating order status:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
