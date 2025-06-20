@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { ArrowRight, BookOpen, ShoppingBag, Users } from "lucide-react";
+import { ArrowRight, BookOpen, ShoppingBag, Users, Sparkles } from "lucide-react";
 import NewsletterSignup from "@/components/NewsletterSignup";
 
 const fetchFeaturedArticles = async () => {

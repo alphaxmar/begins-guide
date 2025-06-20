@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 const UpdatePasswordPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { session } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -34,7 +34,7 @@ const UpdatePasswordPage = () => {
     setLoading(false);
   };
   
-  if (!session) {
+  if (!user) {
       return (
         <div className="flex flex-col text-center justify-center items-center py-12 space-y-4">
             <p className="text-muted-foreground">กำลังตรวจสอบข้อมูลการยืนยัน...</p>
