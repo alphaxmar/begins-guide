@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import OmisePaymentForm from "@/components/payment/OmisePaymentForm";
+import PaymentMethodSelector from "@/components/payment/PaymentMethodSelector";
 
 const createOrder = async (productIds: string[]) => {
   const { data, error } = await supabase.rpc("create_order_for_current_user", {
@@ -56,7 +56,7 @@ const CheckoutPage = () => {
     const productIds = cartItems.map((item) => item.id);
     createOrderMutation.mutate(productIds);
 
-    // Load Omise script
+    // Load Omise script (still needed for credit card payments)
     const script = document.createElement("script");
     script.src = "https://cdn.omise.co/omise.js";
     script.onload = () => {
@@ -67,7 +67,9 @@ const CheckoutPage = () => {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, [user, cartItems]);
 
@@ -112,7 +114,7 @@ const CheckoutPage = () => {
 
   return (
     <div className="py-12">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <Button variant="ghost" onClick={() => navigate("/cart")} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
           กลับไปตะกร้าสินค้า
@@ -120,10 +122,10 @@ const CheckoutPage = () => {
 
         <h1 className="text-3xl font-bold mb-8">ชำระเงิน</h1>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Order Summary */}
           <div>
-            <Card>
+            <Card className="sticky top-24">
               <CardHeader>
                 <CardTitle>สรุปคำสั่งซื้อ</CardTitle>
               </CardHeader>
@@ -139,17 +141,23 @@ const CheckoutPage = () => {
                     <span className="font-semibold">{item.price.toLocaleString()} บาท</span>
                   </div>
                 ))}
-                <div className="flex justify-between items-center text-lg font-bold pt-4">
+                <div className="flex justify-between items-center text-lg font-bold pt-4 border-t">
                   <span>ยอดรวมทั้งหมด</span>
-                  <span>{cartTotal.toLocaleString()} บาท</span>
+                  <span className="text-2xl text-green-600">{cartTotal.toLocaleString()} บาท</span>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg mt-4">
+                  <p className="text-sm text-blue-700">
+                    <strong>หมายเลขออเดอร์:</strong> {orderId}
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Payment Form */}
+          {/* Payment Methods */}
           <div>
-            <OmisePaymentForm
+            <PaymentMethodSelector
               amount={cartTotal}
               orderId={orderId}
               onSuccess={handlePaymentSuccess}
