@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +39,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         <div className="space-y-4">
           <StripeCheckoutButton
             productIds={productIds}
+            amount={totalAmount}
             onSuccess={onSuccess}
           />
           <Button 

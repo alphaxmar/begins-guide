@@ -49,7 +49,7 @@ const PaymentOptions = ({ productIds, amount, onSuccess }: PaymentOptionsProps) 
                 </p>
                 <PromptPayCheckout
                   productIds={productIds}
-                  amount={amount}
+                  totalAmount={amount}
                   onSuccess={onSuccess}
                 />
               </div>
