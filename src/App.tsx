@@ -22,8 +22,8 @@ import UpdatePasswordPage from "@/pages/UpdatePasswordPage";
 import NotFound from "@/pages/NotFound";
 
 // Admin Pages
-import ProtectedRoute from "@/components/ProtectedRoute";
-import UserProtectedRoute from "@/components/UserProtectedRoute";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { UserProtectedRoute } from "@/components/UserProtectedRoute";
 import DashboardPage from "@/pages/admin/DashboardPage";
 import AdminProductsPage from "@/pages/admin/AdminProductsPage";
 import CreateProductPage from "@/pages/admin/CreateProductPage";
