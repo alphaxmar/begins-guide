@@ -10,10 +10,14 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const ManageLessonsPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const params = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
-  console.log("ManageLessonsPage - slug:", slug);
+  // แปลง slug ให้ถูกต้อง
+  const slug = params.slug;
+  
+  console.log("ManageLessonsPage - Raw params:", params);
+  console.log("ManageLessonsPage - Extracted slug:", slug, "typeof:", typeof slug);
   
   const {
     product,

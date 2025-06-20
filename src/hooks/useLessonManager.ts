@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,15 +13,19 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 
 const fetchProductBySlug = async (slug: string) => {
-  console.log("Fetching product with slug:", slug);
+  console.log("fetchProductBySlug called with slug:", slug, "typeof:", typeof slug);
+  
+  // แปลง slug ให้เป็น string ถ้าเป็น object
+  const cleanSlug = typeof slug === 'object' ? String(slug) : slug;
+  console.log("Clean slug:", cleanSlug);
   
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .eq("slug", slug)
+    .eq("slug", cleanSlug)
     .maybeSingle();
     
-  console.log("Product fetch result:", { data, error });
+  console.log("Product fetch result:", { data, error, searchedSlug: cleanSlug });
   
   if (error) {
     console.error("Error fetching product:", error);
@@ -54,10 +57,12 @@ const fetchLessonsByProductId = async (productId: string) => {
 export const useLessonManager = (slug?: string) => {
   const queryClient = useQueryClient();
 
+  console.log("useLessonManager called with slug:", slug, "typeof:", typeof slug);
+
   const { data: product, isLoading: isProductLoading, error: productError } = useQuery({
     queryKey: ["product-for-lessons", slug],
     queryFn: () => fetchProductBySlug(slug!),
-    enabled: !!slug,
+    enabled: !!slug && slug !== 'undefined',
     retry: 3,
     retryDelay: 1000,
   });
