@@ -15,52 +15,51 @@ serve(async (req) => {
 
   try {
     const { sessionId } = await req.json();
-    if (!sessionId) {
-      throw new Error("Session ID is required");
-    }
-
+    
+    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2023-10-16",
     });
 
-    // ดึงข้อมูล session จาก Stripe
+    // Retrieve session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     
-    if (session.payment_status !== "paid") {
-      throw new Error("Payment not completed");
+    if (session.payment_status !== 'paid') {
+      throw new Error('Payment not completed');
     }
 
-    // ยืนยันการชำระเงินใน database
+    // Create Supabase service client
     const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } }
     );
 
-    const { error: confirmError } = await supabaseService.rpc(
-      "confirm_stripe_payment", 
-      { 
+    // Confirm payment in database
+    const { error } = await supabaseService
+      .rpc('confirm_stripe_payment', {
         p_stripe_session_id: sessionId,
         p_stripe_payment_intent_id: session.payment_intent as string
-      }
-    );
+      });
 
-    if (confirmError) {
-      console.error("Error confirming payment:", confirmError);
-      throw new Error("Failed to confirm payment");
+    if (error) {
+      console.error('Error confirming payment:', error);
+      throw error;
     }
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: "Payment confirmed successfully"
+      message: "Payment confirmed successfully" 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-
-  } catch (error) {
-    console.error("Process payment error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: any) {
+    console.error("Error processing payment:", error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

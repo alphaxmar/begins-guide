@@ -1,55 +1,45 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Download, Loader2, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface TemplateDownloadProps {
   templatePath: string;
-  productTitle: string;
+  fileName: string;
   className?: string;
 }
 
-const TemplateDownload = ({ templatePath, productTitle, className = "" }: TemplateDownloadProps) => {
+const TemplateDownload = ({ templatePath, fileName, className = "" }: TemplateDownloadProps) => {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
-    if (!templatePath) {
-      toast.error("ไม่พบไฟล์เทมเพลต");
-      return;
-    }
-
     setDownloading(true);
     
     try {
       const { data, error } = await supabase.storage
-        .from('template-files')
+        .from('product_templates')
         .download(templatePath);
 
       if (error) {
         throw error;
       }
 
-      // สร้าง URL สำหรับดาวน์โหลด
-      const url = window.URL.createObjectURL(data);
-      const link = document.createElement('a');
-      link.href = url;
-      
-      // กำหนดชื่อไฟล์
-      const fileName = templatePath.split('/').pop() || `${productTitle}.pdf`;
-      link.download = fileName;
-      
-      // ดำเนินการดาวน์โหลด
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      toast.success("ดาวน์โหลดเทมเพลตสำเร็จ");
-    } catch (err: any) {
-      console.error("Download error:", err);
-      toast.error("เกิดข้อผิดพลาดในการดาวน์โหลด");
+      // Create blob URL and trigger download
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("ดาวน์โหลดเทมเพลตสำเร็จ!");
+    } catch (error: any) {
+      console.error("Download error:", error);
+      toast.error("เกิดข้อผิดพลาดในการดาวน์โหลด: " + error.message);
     } finally {
       setDownloading(false);
     }
@@ -58,9 +48,9 @@ const TemplateDownload = ({ templatePath, productTitle, className = "" }: Templa
   return (
     <Button
       onClick={handleDownload}
-      disabled={downloading || !templatePath}
-      variant="outline"
+      disabled={downloading}
       className={className}
+      variant="outline"
     >
       {downloading ? (
         <>
@@ -70,7 +60,8 @@ const TemplateDownload = ({ templatePath, productTitle, className = "" }: Templa
       ) : (
         <>
           <Download className="mr-2 h-4 w-4" />
-          ดาวน์โหลดเทมเพลต
+          <FileText className="mr-2 h-4 w-4" />
+          ดาวน์โหลด {fileName}
         </>
       )}
     </Button>
