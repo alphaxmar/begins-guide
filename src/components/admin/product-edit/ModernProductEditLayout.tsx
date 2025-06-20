@@ -37,9 +37,7 @@ const ModernProductEditLayout = ({ product, children }: ModernProductEditLayoutP
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-            {children}
-          </div>
+          {children}
         </div>
       </div>
     </div>
