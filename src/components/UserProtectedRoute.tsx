@@ -8,7 +8,7 @@ interface UserProtectedRouteProps {
   children: ReactNode;
 }
 
-const UserProtectedRoute = ({ children }: UserProtectedRouteProps) => {
+export const UserProtectedRoute = ({ children }: UserProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
 
