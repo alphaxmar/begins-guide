@@ -10,13 +10,17 @@ import {
   BarChart3,
   Mail,
   CreditCard,
-  Settings
+  Settings,
+  Crown,
+  Percent
 } from 'lucide-react';
 
 const navigation = [
   { name: 'แดชบอร์ด', href: '/admin', icon: LayoutDashboard },
   { name: 'จัดการบทความ', href: '/admin/articles', icon: FileText },
   { name: 'จัดการสินค้า', href: '/admin/products', icon: Package },
+  { name: 'จัดการแพ็กเกจ VIP', href: '/admin/vip-packages', icon: Crown },
+  { name: 'โค้ดส่วนลด', href: '/admin/discount-codes', icon: Percent },
   { name: 'คำสั่งซื้อ', href: '/admin/orders', icon: ShoppingCart },
   { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
   { name: 'รายงาน', href: '/admin/reports', icon: BarChart3 },
