@@ -8,11 +8,11 @@ interface UserRoleDialogProps {
   user: any;
   isOpen: boolean;
   onClose: () => void;
-  onRoleChange: (userId: string, newRole: 'user' | 'admin' | 'partner') => void;
+  onRoleChange: (userId: string, newRole: 'user' | 'admin' | 'partner' | 'vip') => void;
 }
 
 const UserRoleDialog = ({ user, isOpen, onClose, onRoleChange }: UserRoleDialogProps) => {
-  const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'partner'>('user');
+  const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'partner' | 'vip'>('user');
 
   const handleSave = () => {
     if (user && selectedRole) {
@@ -41,13 +41,14 @@ const UserRoleDialog = ({ user, isOpen, onClose, onRoleChange }: UserRoleDialogP
           
           <div>
             <label className="text-sm font-medium">สิทธิ์ใหม่:</label>
-            <Select value={selectedRole} onValueChange={(value: 'user' | 'admin' | 'partner') => setSelectedRole(value)}>
+            <Select value={selectedRole} onValueChange={(value: 'user' | 'admin' | 'partner' | 'vip') => setSelectedRole(value)}>
               <SelectTrigger>
                 <SelectValue placeholder="เลือกสิทธิ์" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="user">ผู้ใช้ทั่วไป</SelectItem>
                 <SelectItem value="partner">พาร์ทเนอร์</SelectItem>
+                <SelectItem value="vip">สมาชิก VIP</SelectItem>
                 <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
               </SelectContent>
             </Select>
