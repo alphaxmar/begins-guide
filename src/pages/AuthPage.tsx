@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Chrome, Loader2, Facebook } from 'lucide-react';
-import { cleanupAuthState } from '@/utils/authCleanup';
+import { Loader2 } from 'lucide-react';
+import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
@@ -77,30 +76,6 @@ const AuthPage = () => {
       } else {
         toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองใหม่อีกครั้ง');
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
-    setLoading(true);
-    
-    try {
-      cleanupAuthState();
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-      
-      if (error) {
-        toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
-      }
-    } catch (error: any) {
-      console.error('OAuth error:', error);
-      toast.error(`เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย ${provider === 'google' ? 'Google' : 'Facebook'}`);
     } finally {
       setLoading(false);
     }
@@ -175,24 +150,7 @@ const AuthPage = () => {
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleOAuthLogin('google')} 
-                  disabled={loading}
-                >
-                  <Chrome className="mr-2 h-4 w-4" />
-                  Google
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleOAuthLogin('facebook')} 
-                  disabled={loading}
-                >
-                  <Facebook className="mr-2 h-4 w-4" />
-                  Facebook
-                </Button>
-              </div>
+              <SocialLoginButtons />
             </CardContent>
           </Card>
         </TabsContent>
@@ -254,24 +212,7 @@ const AuthPage = () => {
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleOAuthLogin('google')} 
-                  disabled={loading}
-                >
-                  <Chrome className="mr-2 h-4 w-4" />
-                  Google
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleOAuthLogin('facebook')} 
-                  disabled={loading}
-                >
-                  <Facebook className="mr-2 h-4 w-4" />
-                  Facebook
-                </Button>
-              </div>
+              <SocialLoginButtons />
             </CardContent>
           </Card>
         </TabsContent>
