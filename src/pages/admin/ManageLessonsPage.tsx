@@ -6,25 +6,73 @@ import ManageLessonsSkeleton from "@/components/admin/ManageLessonsSkeleton";
 import ManageLessonsHeader from "@/components/admin/ManageLessonsHeader";
 import NoLessonsPlaceholder from "@/components/admin/NoLessonsPlaceholder";
 import LessonList from "@/components/admin/LessonList";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const ManageLessonsPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  
+  console.log("ManageLessonsPage - slug:", slug);
+  
   const {
     product,
     localLessons,
     isLoading,
+    error,
     lessonMutation,
     deleteLessonMutation,
     sensors,
     handleDragEnd,
   } = useLessonManager(slug);
 
+  console.log("ManageLessonsPage state:", { product, localLessons, isLoading, error });
+
   if (isLoading) {
     return <ManageLessonsSkeleton />;
   }
 
+  if (error) {
+    console.error("Page error:", error);
+    return (
+      <div className="py-8 max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-red-500 mb-4">เกิดข้อผิดพลาด: {error.message}</p>
+            <div className="space-x-2">
+              <Button onClick={() => window.location.reload()}>
+                ลองใหม่
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/admin/products")}>
+                กลับไปรายการสินค้า
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (!product) {
-    return <p className="text-center text-muted-foreground py-8">ไม่พบข้อมูลคอร์ส</p>;
+    return (
+      <div className="py-8 max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground py-8 mb-4">
+              ไม่พบข้อมูลคอร์ส
+            </p>
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Slug: {slug}
+            </p>
+            <div className="text-center">
+              <Button onClick={() => navigate("/admin/products")}>
+                กลับไปรายการสินค้า
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

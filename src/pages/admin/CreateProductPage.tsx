@@ -115,8 +115,11 @@ const CreateProductPage = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
 
       if (data && data.product_type === 'course') {
-        toast.info("คุณจะถูกย้ายไปหน้าจัดการบทเรียนสำหรับคอร์สใหม่นี้");
-        navigate(`/admin/products/${data.slug}/lessons`);
+        // Wait a bit for the product to be fully created before navigating
+        setTimeout(() => {
+          console.log("Navigating to lessons page with slug:", data.slug);
+          navigate(`/admin/products/${data.slug}/lessons`);
+        }, 100);
       } else {
         navigate("/admin/products");
       }

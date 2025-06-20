@@ -14,38 +14,59 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 
 const fetchProductBySlug = async (slug: string) => {
+  console.log("Fetching product with slug:", slug);
+  
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("slug", slug)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+    
+  console.log("Product fetch result:", { data, error });
+  
+  if (error) {
+    console.error("Error fetching product:", error);
+    throw new Error(error.message);
+  }
+  
   return data;
 };
 
 const fetchLessonsByProductId = async (productId: string) => {
+  console.log("Fetching lessons for product ID:", productId);
+  
   const { data, error } = await supabase
     .from("lessons")
     .select("*")
     .eq("product_id", productId)
     .order("order", { ascending: true });
-  if (error) throw new Error(error.message);
+    
+  console.log("Lessons fetch result:", { data, error });
+  
+  if (error) {
+    console.error("Error fetching lessons:", error);
+    throw new Error(error.message);
+  }
+  
   return data;
 };
 
 export const useLessonManager = (slug?: string) => {
   const queryClient = useQueryClient();
 
-  const { data: product, isLoading: isProductLoading } = useQuery({
+  const { data: product, isLoading: isProductLoading, error: productError } = useQuery({
     queryKey: ["product-for-lessons", slug],
     queryFn: () => fetchProductBySlug(slug!),
     enabled: !!slug,
+    retry: 3,
+    retryDelay: 1000,
   });
 
-  const { data: lessons, isLoading: areLessonsLoading } = useQuery<Tables<'lessons'>[]>({
+  const { data: lessons, isLoading: areLessonsLoading, error: lessonsError } = useQuery<Tables<'lessons'>[]>({
     queryKey: ["lessons", product?.id],
     queryFn: () => fetchLessonsByProductId(product!.id),
     enabled: !!product,
+    retry: 2,
   });
   
   const [localLessons, setLocalLessons] = useState<Tables<'lessons'>[]>([]);
@@ -55,6 +76,16 @@ export const useLessonManager = (slug?: string) => {
       setLocalLessons(lessons);
     }
   }, [lessons]);
+
+  // Log errors for debugging
+  useEffect(() => {
+    if (productError) {
+      console.error("Product error:", productError);
+    }
+    if (lessonsError) {
+      console.error("Lessons error:", lessonsError);
+    }
+  }, [productError, lessonsError]);
 
   const lessonMutation = useMutation({
     mutationFn: async ({ values, lessonId }: { values: LessonFormValues; lessonId?: string }) => {
@@ -158,6 +189,7 @@ export const useLessonManager = (slug?: string) => {
     product,
     localLessons,
     isLoading: isProductLoading || (!!product && areLessonsLoading),
+    error: productError || lessonsError,
     lessonMutation,
     deleteLessonMutation,
     sensors,
