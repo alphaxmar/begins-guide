@@ -92,6 +92,108 @@ export type Database = {
           },
         ]
       }
+      discount_code_usage: {
+        Row: {
+          discount_amount: number
+          discount_code_id: string | null
+          id: string
+          order_id: string | null
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          discount_amount: number
+          discount_code_id?: string | null
+          id?: string
+          order_id?: string | null
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          discount_amount?: number
+          discount_code_id?: string | null
+          id?: string
+          order_id?: string | null
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_code_usage_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_code_usage_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_codes: {
+        Row: {
+          applicable_to: string[] | null
+          code: string
+          created_at: string | null
+          description: string | null
+          discount_type: Database["public"]["Enums"]["discount_type"]
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_discount_amount: number | null
+          min_purchase_amount: number | null
+          name: string
+          updated_at: string | null
+          usage_limit: number | null
+          used_count: number | null
+          user_usage_limit: number | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          applicable_to?: string[] | null
+          code: string
+          created_at?: string | null
+          description?: string | null
+          discount_type: Database["public"]["Enums"]["discount_type"]
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_discount_amount?: number | null
+          min_purchase_amount?: number | null
+          name: string
+          updated_at?: string | null
+          usage_limit?: number | null
+          used_count?: number | null
+          user_usage_limit?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          applicable_to?: string[] | null
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          discount_type?: Database["public"]["Enums"]["discount_type"]
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_discount_amount?: number | null
+          min_purchase_amount?: number | null
+          name?: string
+          updated_at?: string | null
+          usage_limit?: number | null
+          used_count?: number | null
+          user_usage_limit?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       download_logs: {
         Row: {
           created_at: string
@@ -351,7 +453,10 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          discount_amount: number | null
+          discount_code_id: string | null
           id: string
+          original_amount: number | null
           payment_provider: string | null
           provider_payment_id: string | null
           status: Database["public"]["Enums"]["order_status"]
@@ -363,7 +468,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          discount_amount?: number | null
+          discount_code_id?: string | null
           id?: string
+          original_amount?: number | null
           payment_provider?: string | null
           provider_payment_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -375,7 +483,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          discount_amount?: number | null
+          discount_code_id?: string | null
           id?: string
+          original_amount?: number | null
           payment_provider?: string | null
           provider_payment_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -385,7 +496,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_settings: {
         Row: {
@@ -863,6 +982,7 @@ export type Database = {
     }
     Enums: {
       article_status: "draft" | "published"
+      discount_type: "percentage" | "fixed_amount"
       order_status:
         | "pending"
         | "processing"
@@ -994,6 +1114,7 @@ export const Constants = {
   public: {
     Enums: {
       article_status: ["draft", "published"],
+      discount_type: ["percentage", "fixed_amount"],
       order_status: [
         "pending",
         "processing",
