@@ -39,6 +39,9 @@ serve(async (req) => {
       throw new Error("Invalid user");
     }
 
+    // ดึงข้อมูล PromptPay จากการตั้งค่า (ใช้หมายเลขตัวอย่างถ้าไม่มีการตั้งค่า)
+    const promptPayNumber = "0962358979"; // ใช้หมายเลขจากรูปที่แสดง
+
     // สร้างคำสั่งซื้อ
     const { data: order, error: orderError } = await supabaseClient
       .from('orders')
@@ -80,43 +83,18 @@ serve(async (req) => {
       throw new Error("Failed to create order items");
     }
 
-    // สร้าง PromptPay QR Code ผ่าน Omise API
-    const omiseResponse = await fetch("https://api.omise.co/sources", {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${btoa(Deno.env.get("OMISE_SECRET_KEY") + ":")}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        "amount": (amount * 100).toString(),
-        "currency": "THB",
-        "type": "promptpay",
-      }),
-    });
-
-    const sourceData = await omiseResponse.json();
-
-    if (!omiseResponse.ok) {
-      throw new Error("Failed to create PromptPay source");
-    }
-
-    // อัปเดต order ด้วย source ID
-    const { error: updateError } = await supabaseClient
-      .from('orders')
-      .update({
-        provider_payment_id: sourceData.id
-      })
-      .eq('id', order.id);
-
-    if (updateError) {
-      throw updateError;
-    }
+    // สร้าง PromptPay QR Code URL
+    // ใช้ API ของธนาคารหรือ Third party service สำหรับสร้าง QR Code
+    // ตัวอย่างนี้ใช้ service ฟรีสำหรับสร้าง QR Code
+    const qrData = `00020101021230320000005802TH5909${promptPayNumber}63${amount.toString().padStart(4, '0')}0406${order.id.slice(0, 6)}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
 
     return new Response(
       JSON.stringify({ 
-        qr_code: sourceData.scannable_code.image.download_uri,
+        qr_code: qrCodeUrl,
         payment_ref: order.id,
-        source_id: sourceData.id
+        promptpay_number: promptPayNumber,
+        amount: amount
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

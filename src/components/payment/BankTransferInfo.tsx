@@ -1,19 +1,24 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Building2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Copy, Building2, Clock, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BankTransferInfoProps {
   amount: number;
   orderId: string;
 }
 
-const BankTransferInfo = ({ amount, orderId }: BankTransferInfoProps) => {
+const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
+  amount,
+  orderId
+}) => {
+  // ข้อมูลบัญชีธนาคาร (ในอนาคตจะดึงจาก admin settings)
   const bankInfo = {
-    bankName: "ธนาคารกสิกรไทย",
-    accountNumber: "123-4-56789-0",
-    accountName: "บริษัท บีกินส์ไกด์ จำกัด"
+    bankName: 'ธนาคารกรุงเทพ',
+    accountNumber: '138-4-41680-4',
+    accountName: 'รชยศ ตันติการรีน',
+    branch: ''
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -22,88 +27,126 @@ const BankTransferInfo = ({ amount, orderId }: BankTransferInfoProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Building2 className="mr-2 h-5 w-5" />
-          ข้อมูลการโอนเงิน
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-blue-900 mb-2">ธนาคาร</h3>
-          <p className="text-blue-800">{bankInfo.bankName}</p>
-        </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            ข้อมูลการโอนเงิน
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">ยอดเงินที่ต้องโอน</h4>
+                <p className="text-2xl font-bold text-blue-700">
+                  {amount.toLocaleString()} บาท
+                </p>
+              </div>
 
-        <div className="space-y-3">
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-            <div>
-              <p className="text-sm text-gray-600">เลขที่บัญชี</p>
-              <p className="font-mono font-semibold">{bankInfo.accountNumber}</p>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <h4 className="font-semibold text-green-800 mb-2">หมายเลขออเดอร์</h4>
+                <div className="flex items-center justify-between">
+                  <p className="font-mono text-green-700">{orderId.slice(0, 8)}</p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => copyToClipboard(orderId.slice(0, 8), 'หมายเลขออเดอร์')}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => copyToClipboard(bankInfo.accountNumber, "เลขบัญชี")}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
+
+            <div className="space-y-4">
+              <div className="p-4 border rounded-lg bg-white">
+                <h4 className="font-semibold text-gray-800 mb-3">ข้อมูลบัญชีปลายทาง</h4>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">ธนาคาร:</span>
+                    <span className="font-semibold">{bankInfo.bankName}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">เลขที่บัญชี:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-semibold">{bankInfo.accountNumber}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => copyToClipboard(bankInfo.accountNumber, 'เลขบัญชี')}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">ชื่อบัญชี:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">{bankInfo.accountName}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => copyToClipboard(bankInfo.accountName, 'ชื่อบัญชี')}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">จำนวนเงิน:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-green-600">{amount.toLocaleString()} บาท</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => copyToClipboard(amount.toString(), 'จำนวนเงิน')}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-            <div>
-              <p className="text-sm text-gray-600">ชื่อบัญชี</p>
-              <p className="font-semibold">{bankInfo.accountName}</p>
+          <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-orange-600 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-orange-800 mb-2">ขั้นตอนการโอนเงิน:</h4>
+                <ol className="text-sm text-orange-700 space-y-1">
+                  <li>1. โอนเงินตามจำนวนที่ระบุข้างต้น</li>
+                  <li>2. ระบุหมายเลขออเดอร์ในรายการโอน (ถ้าได้)</li>
+                  <li>3. เก็บสลิปการโอนไว้เป็นหลักฐาน</li>
+                  <li>4. เราจะตรวจสอบและอัปเดตสถานะภายใน 1-3 ชั่วโมงทำการ</li>
+                </ol>
+              </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => copyToClipboard(bankInfo.accountName, "ชื่อบัญชี")}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
           </div>
 
-          <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-            <div>
-              <p className="text-sm text-gray-600">จำนวนเงิน</p>
-              <p className="font-bold text-green-700 text-xl">{amount.toLocaleString()} บาท</p>
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-blue-800 mb-2">หมายเหตุสำคัญ:</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• กรุณาโอนเงินตามจำนวนที่ระบุให้ตรงบาท</li>
+                  <li>• ค่าธรรมเนียมการโอน (ถ้ามี) ลูกค้าเป็นผู้รับผิดชอบ</li>
+                  <li>• หากมีข้อสงสัย ติดต่อทีมงานผ่านช่องทางต่างๆ</li>
+                </ul>
+              </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => copyToClipboard(amount.toString(), "จำนวนเงิน")}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
           </div>
-
-          <div className="flex justify-between items-center p-3 bg-orange-50 rounded">
-            <div>
-              <p className="text-sm text-gray-600">หมายเลขออเดอร์</p>
-              <p className="font-mono text-sm">{orderId}</p>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => copyToClipboard(orderId, "หมายเลขออเดอร์")}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-          <h4 className="font-semibold text-yellow-800 mb-2">หมายเหตุสำคัญ:</h4>
-          <ul className="text-sm text-yellow-700 space-y-1">
-            <li>• กรุณาโอนเงินตามจำนวนที่ระบุข้างต้นเท่านั้น</li>
-            <li>• ระบุหมายเลขออเดอร์ในรายการโอน</li>
-            <li>• การยืนยันการชำระเงินจะใช้เวลา 1-3 ชั่วโมงทำการ</li>
-            <li>• หากมีปัญหาติดต่อ: support@beginsguide.com</li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
