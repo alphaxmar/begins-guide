@@ -21,6 +21,8 @@ const checkAdvancedPurchase = async (userId: string, productId: string): Promise
   return !!data;
 };
 
+type AccessType = 'admin' | 'vip' | 'purchased' | 'none';
+
 export const useAdvancedCourseAccess = (productId?: string) => {
   const { user } = useAuth();
   const { isVip, isLoading: isVipLoading } = useVipStatus();
@@ -35,11 +37,18 @@ export const useAdvancedCourseAccess = (productId?: string) => {
   const isLoading = isVipLoading || isAdminLoading || isPurchaseLoading;
   const hasAccess = isAdmin || isVip || (hasPurchased ?? false);
 
+  const getAccessType = (): AccessType => {
+    if (isAdmin) return 'admin';
+    if (isVip) return 'vip';
+    if (hasPurchased) return 'purchased';
+    return 'none';
+  };
+
   return { 
     hasAccess, 
     isLoading, 
     isError,
-    accessType: isAdmin ? 'admin' : isVip ? 'vip' : hasPurchased ? 'purchased' : 'none',
+    accessType: getAccessType(),
     isVip,
     isAdmin,
     hasPurchased: hasPurchased ?? false
