@@ -12,6 +12,7 @@ import { Mail, Send, Loader2 } from "lucide-react";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import EmailTester from '@/components/admin/EmailTester';
+import WebhookConfig from '@/components/admin/WebhookConfig';
 
 const AdminEmailPage = () => {
   const [recipientEmail, setRecipientEmail] = useState('');
@@ -65,8 +66,8 @@ const AdminEmailPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="จัดการระบบอีเมล"
-        description="ส่งอีเมลแจ้งข่าวสารและจัดการระบบอีเมลอัตโนมัติ"
+        title="จัดการระบบอีเมลและ Webhooks"
+        description="ส่งอีเมลแจ้งข่าวสาร จัดการระบบอีเมลอัตโนมัติ และตั้งค่า Stripe Webhooks"
       />
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -124,6 +125,8 @@ const AdminEmailPage = () => {
               </Button>
             </CardContent>
           </Card>
+          
+          <WebhookConfig />
         </div>
         
         <div className="space-y-6">

@@ -42,6 +42,8 @@ const AuthPage = () => {
       console.error('Login error:', error);
       if (error.message.includes('Invalid login credentials')) {
         toast.error('อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง');
+      } else if (error.message.includes('Email not confirmed')) {
+        toast.error('กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ ตรวจสอบกล่องจดหมายของคุณ');
       } else {
         toast.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง');
       }
@@ -73,6 +75,8 @@ const AuthPage = () => {
       console.error('Signup error:', error);
       if (error.message.includes('User already registered')) {
         toast.error('อีเมลนี้ได้ลงทะเบียนแล้ว กรุณาเข้าสู่ระบบหรือใช้อีเมลอื่น');
+      } else if (error.message.includes('Password should be at least 6 characters')) {
+        toast.error('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
       } else {
         toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองใหม่อีกครั้ง');
       }
@@ -80,6 +84,8 @@ const AuthPage = () => {
       setLoading(false);
     }
   };
+
+  const redirectTo = location.state?.from?.pathname || '/';
 
   return (
     <div className="flex justify-center items-center py-12">
@@ -150,7 +156,7 @@ const AuthPage = () => {
                   </span>
                 </div>
               </div>
-              <SocialLoginButtons />
+              <SocialLoginButtons redirectTo={redirectTo} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -212,7 +218,7 @@ const AuthPage = () => {
                   </span>
                 </div>
               </div>
-              <SocialLoginButtons />
+              <SocialLoginButtons redirectTo={redirectTo} />
             </CardContent>
           </Card>
         </TabsContent>

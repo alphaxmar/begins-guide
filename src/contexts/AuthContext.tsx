@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (minutesDiff < 5) {
               sendWelcomeEmail({
                 userEmail: session.user.email!,
-                userName: session.user.user_metadata?.full_name || undefined
+                userName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || undefined
               });
             }
           }
@@ -67,7 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = password
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+        : await supabase.auth.signInWithOtp({ 
+            email, 
+            options: { 
+              shouldCreateUser: false,
+              emailRedirectTo: `${window.location.origin}/`
+            } 
+          });
 
       if (error) throw error;
     } finally {
@@ -78,7 +84,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password?: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({ email, password: password || '' });
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password: password || '',
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
       if (error) throw error;
     } finally {
       setLoading(false);
