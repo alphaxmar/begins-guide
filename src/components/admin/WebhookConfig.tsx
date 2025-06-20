@@ -57,7 +57,7 @@ const WebhookConfig = () => {
         <div className="pt-4 border-t">
           <h4 className="font-medium mb-2">ขั้นตอนการตั้งค่า:</h4>
           <ol className="text-sm space-y-2 list-decimal list-inside text-muted-foreground">
-            <li>เข้าไปที่ Stripe Dashboard > Webhooks</li>
+            <li>เข้าไปที่ Stripe Dashboard &gt; Webhooks</li>
             <li>คลิก "Add endpoint"</li>
             <li>ใส่ Webhook URL ข้างต้น</li>
             <li>เลือก Events ที่ระบุไว้</li>
