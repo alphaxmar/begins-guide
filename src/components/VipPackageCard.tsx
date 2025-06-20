@@ -30,9 +30,10 @@ const VipPackageCard: React.FC<VipPackageCardProps> = ({ package: pkg }) => {
       id: pkg.id,
       title: pkg.name,
       price: pkg.price,
-      product_type: 'vip_package' as const,
+      product_type: 'vip_package',
       image_url: null,
-      slug: `vip-${pkg.id}`
+      slug: `vip-${pkg.id}`,
+      description: pkg.description
     };
 
     addToCart(cartItem);
