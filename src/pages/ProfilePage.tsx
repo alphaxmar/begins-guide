@@ -2,17 +2,21 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Crown, BookOpen, FileText } from "lucide-react";
 import ProfileForm from "@/components/profile/ProfileForm";
 import PurchasedItemsList from "@/components/profile/PurchasedItemsList";
 import VipStatusCard from "@/components/profile/VipStatusCard";
+import { useVipStatus } from "@/hooks/useVipStatus";
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
+  const { isVip } = useVipStatus();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,6 +67,39 @@ const ProfilePage = () => {
               <ProfileForm user={user} profile={profile} />
             </CardContent>
           </Card>
+
+          {/* VIP Quick Access - show only for VIP users */}
+          {isVip && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-yellow-500" />
+                  เข้าถึงเนื้อหา VIP
+                </CardTitle>
+                <CardDescription>
+                  เข้าถึงคอร์สและเทมเพลตทั้งหมดได้ไม่จำกัด
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Button asChild variant="outline" className="h-20 flex-col">
+                    <Link to="/vip/courses">
+                      <BookOpen className="h-6 w-6 mb-2" />
+                      <span>คอร์สทั้งหมด</span>
+                      <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="h-20 flex-col">
+                    <Link to="/vip/templates">
+                      <FileText className="h-6 w-6 mb-2" />
+                      <span>เทมเพลตทั้งหมด</span>
+                      <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           <div className="mt-8">
             <PurchasedItemsList user={user} />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CourseAccessBadge from "./CourseAccessBadge";
 import LessonDownloadButton from "./LessonDownloadButton";
+import LessonProgressCheckbox from "./LessonProgressCheckbox";
 
 interface EnhancedLessonContentProps {
   lesson: Tables<'lessons'> | null;
@@ -93,6 +94,16 @@ const EnhancedLessonContent = ({
         {lesson.content && !hasAccess && (
           <div className="bg-gray-100 p-6 rounded-lg text-center mb-6">
             <p className="text-gray-600">เนื้อหาบทเรียนสำหรับสมาชิกเท่านั้น</p>
+          </div>
+        )}
+
+        {/* Progress tracking checkbox - only show if user has access */}
+        {hasAccess && (
+          <div className="mb-6">
+            <LessonProgressCheckbox 
+              lessonId={lesson.id} 
+              lessonTitle={lesson.title}
+            />
           </div>
         )}
 
