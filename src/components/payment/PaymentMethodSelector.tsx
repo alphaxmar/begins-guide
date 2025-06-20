@@ -1,95 +1,127 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { CreditCard, Building2, QrCode } from "lucide-react";
-import OmisePaymentForm from "./OmisePaymentForm";
-import BankTransferInfo from "./BankTransferInfo";
-import PromptPayQR from "./PromptPayQR";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { CreditCard, QrCode, Smartphone } from 'lucide-react';
+import StripeCheckoutButton from './StripeCheckoutButton';
+import PromptPayCheckout from './PromptPayCheckout';
 
 interface PaymentMethodSelectorProps {
-  amount: number;
-  orderId: string;
-  onSuccess: (chargeId: string) => void;
-  onError: (error: string) => void;
+  productIds: string[];
+  totalAmount: number;
+  onSuccess?: () => void;
 }
 
-type PaymentMethod = "credit_card" | "bank_transfer" | "promptpay";
+const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
+  productIds,
+  totalAmount,
+  onSuccess
+}) => {
+  const [selectedMethod, setSelectedMethod] = useState<'stripe' | 'promptpay'>('stripe');
+  const [showPayment, setShowPayment] = useState(false);
 
-const PaymentMethodSelector = ({ amount, orderId, onSuccess, onError }: PaymentMethodSelectorProps) => {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("credit_card");
-
-  const renderPaymentForm = () => {
-    switch (selectedMethod) {
-      case "credit_card":
-        return (
-          <OmisePaymentForm
-            amount={amount}
-            orderId={orderId}
-            onSuccess={onSuccess}
-            onError={onError}
-          />
-        );
-      case "bank_transfer":
-        return <BankTransferInfo amount={amount} orderId={orderId} />;
-      case "promptpay":
-        return <PromptPayQR amount={amount} orderId={orderId} />;
-      default:
-        return null;
-    }
+  const handleProceedToPayment = () => {
+    setShowPayment(true);
   };
 
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>เลือกวิธีการชำระเงิน</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RadioGroup 
-            value={selectedMethod} 
-            onValueChange={(value) => setSelectedMethod(value as PaymentMethod)}
-            className="space-y-4"
+  if (showPayment) {
+    if (selectedMethod === 'promptpay') {
+      return (
+        <PromptPayCheckout
+          productIds={productIds}
+          totalAmount={totalAmount}
+          onSuccess={onSuccess}
+        />
+      );
+    } else {
+      return (
+        <div className="space-y-4">
+          <StripeCheckoutButton
+            productIds={productIds}
+            onSuccess={onSuccess}
+          />
+          <Button 
+            variant="outline" 
+            onClick={() => setShowPayment(false)}
+            className="w-full"
           >
-            <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50">
-              <RadioGroupItem value="credit_card" id="credit_card" />
-              <Label htmlFor="credit_card" className="flex items-center cursor-pointer flex-1">
-                <CreditCard className="mr-3 h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="font-medium">บัตรเครดิต/เดบิต</p>
-                  <p className="text-sm text-gray-500">ชำระเงินทันทีผ่านบัตรเครดิตหรือเดบิต</p>
+            เปลี่ยนวิธีการชำระเงิน
+          </Button>
+        </div>
+      );
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>เลือกวิธีการชำระเงิน</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="p-4 bg-blue-50 rounded-lg">
+          <h4 className="font-semibold text-blue-800 mb-2">ยอดรวมที่ต้องชำระ</h4>
+          <p className="text-2xl font-bold text-blue-700">
+            {totalAmount.toLocaleString()} บาท
+          </p>
+        </div>
+
+        <RadioGroup value={selectedMethod} onValueChange={(value) => setSelectedMethod(value as 'stripe' | 'promptpay')}>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+              <RadioGroupItem value="stripe" id="stripe" />
+              <Label htmlFor="stripe" className="flex-1 cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <CreditCard className="h-6 w-6 text-blue-600" />
+                  <div>
+                    <div className="font-semibold">บัตรเครดิต/เดบิต</div>
+                    <div className="text-sm text-gray-600">Visa, Mastercard, และอื่นๆ</div>
+                  </div>
                 </div>
               </Label>
             </div>
 
-            <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50">
-              <RadioGroupItem value="bank_transfer" id="bank_transfer" />
-              <Label htmlFor="bank_transfer" className="flex items-center cursor-pointer flex-1">
-                <Building2 className="mr-3 h-5 w-5 text-green-600" />
-                <div>
-                  <p className="font-medium">โอนเงินผ่านธนาคาร</p>
-                  <p className="text-sm text-gray-500">โอนเงินผ่านแอปธนาคารหรือ ATM</p>
-                </div>
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+            <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
               <RadioGroupItem value="promptpay" id="promptpay" />
-              <Label htmlFor="promptpay" className="flex items-center cursor-pointer flex-1">
-                <QrCode className="mr-3 h-5 w-5 text-purple-600" />
-                <div>
-                  <p className="font-medium">พร้อมเพย์ QR Code</p>
-                  <p className="text-sm text-gray-500">สแกน QR Code เพื่อชำระเงินผ่านพร้อมเพย์</p>
+              <Label htmlFor="promptpay" className="flex-1 cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <QrCode className="h-6 w-6 text-orange-600" />
+                  <div>
+                    <div className="font-semibold">PromptPay QR Code</div>
+                    <div className="text-sm text-gray-600">ชำระผ่านแอปธนาคาร</div>
+                  </div>
                 </div>
               </Label>
             </div>
-          </RadioGroup>
-        </CardContent>
-      </Card>
+          </div>
+        </RadioGroup>
 
-      {renderPaymentForm()}
-    </div>
+        <div className="space-y-2">
+          <Button 
+            onClick={handleProceedToPayment}
+            className="w-full"
+            size="lg"
+          >
+            {selectedMethod === 'stripe' ? (
+              <>
+                <CreditCard className="mr-2 h-4 w-4" />
+                ดำเนินการชำระเงินด้วยบัตร
+              </>
+            ) : (
+              <>
+                <Smartphone className="mr-2 h-4 w-4" />
+                สร้าง QR Code สำหรับชำระเงิน
+              </>
+            )}
+          </Button>
+          
+          <p className="text-xs text-gray-600 text-center">
+            การชำระเงินของคุณมีความปลอดภัยและได้รับการเข้ารหัส
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

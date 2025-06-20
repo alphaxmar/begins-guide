@@ -1,382 +1,347 @@
 
-import ArticleCard from "@/components/ArticleCard";
-import ProductCard from "@/components/ProductCard";
-import { Button } from "@/components/ui/button";
-import { LoadingCard } from "@/components/ui/loading-card";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
-import { ArrowRight, BookOpen, ShoppingBag, Users, Sparkles, Target, TrendingUp, CheckCircle, Heart, Star, Clock } from "lucide-react";
-import NewsletterSignup from "@/components/NewsletterSignup";
-
-const fetchFeaturedArticles = async () => {
-  const { data, error } = await supabase
-    .from("articles")
-    .select("*")
-    .limit(3)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-const fetchFeaturedCourses = async () => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("product_type", "course")
-    .limit(2)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return data;
-};
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import NewsletterSignup from '@/components/NewsletterSignup';
+import { ArrowRight, BookOpen, Download, Users, Star, CheckCircle, Target, Lightbulb, TrendingUp } from 'lucide-react';
 
 const Index = () => {
-  const { data: articles, isLoading: isLoadingArticles, error: articlesError } = useQuery<Tables<'articles'>[]>({
-    queryKey: ["featuredArticles"],
-    queryFn: fetchFeaturedArticles,
-  });
-
-  const { data: courses, isLoading: isLoadingCourses, error: coursesError } = useQuery<Tables<'products'>[]>({
-    queryKey: ["featuredCourses"],
-    queryFn: fetchFeaturedCourses,
-  });
-
   return (
     <div className="min-h-screen">
-      <ErrorBoundary>
-        <div className="space-y-20 md:space-y-28">
-          {/* Enhanced Hero Section */}
-          <section className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-background"></div>
-            <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 md:py-32">
-              <div className="text-center mb-16">
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full text-sm font-medium mb-8 border border-primary/20">
-                  <Sparkles className="h-4 w-4" />
-                  สำหรับคนไทยที่อยากมีธุรกิจของตัวเอง
-                </div>
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8">
-                  จาก <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">ไอเดีย</span><br />
-                  สู่ <span className="bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">ธุรกิจจริง</span>
-                </h1>
-                <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-                  เริ่มต้นทำธุรกิจแบบมั่นใจ ด้วยความรู้ เครื่องมือ และแผนที่ชัดเจน<br />
-                  <span className="text-primary font-semibold">ไม่ต้องเริ่มจากศูนย์อีกต่อไป</span>
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-6">
-                  <Button size="lg" className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 text-lg" asChild>
-                    <Link to="/products" className="flex items-center gap-3">
-                      <ShoppingBag className="h-6 w-6" />
-                      เริ่มเรียนเลย
-                    </Link>
-                  </Button>
-                  <Button size="lg" variant="outline" className="border-2 border-primary/30 hover:bg-primary/5 transition-all duration-300 px-8 py-4 text-lg" asChild>
-                    <Link to="/articles" className="flex items-center gap-3">
-                      <BookOpen className="h-6 w-6" />
-                      อ่านบทความฟรี
-                    </Link>
-                  </Button>
-                </div>
-              </div>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-5xl font-bold mb-6">
+              เปลี่ยนจาก "ไอเดีย" ไปสู่ "การลงมือทำ"
+            </h1>
+            <p className="text-xl mb-8 text-blue-100">
+              Begins Guide - แพลตฟอร์มช่วยเหลือคนไทยที่ต้องการเริ่มต้นทำธุรกิจ 
+              ด้วยเนื้อหาความรู้ฟรี คอร์สออนไลน์ และเครื่องมือที่จำเป็น
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+                <Link to="/products">
+                  <Star className="mr-2 h-5 w-5" />
+                  เริ่มต้นด้วย VIP Package
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-blue-600">
+                <Link to="/articles">
+                  เรียนรู้ฟรี จากบทความ
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
 
-              {/* Trust Indicators */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-                <div className="text-center p-6 bg-card/50 rounded-2xl border border-border/50 backdrop-blur-sm">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">500+</h3>
-                  <p className="text-muted-foreground">คนไทยที่เริ่มต้นธุรกิจสำเร็จ</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              <div className="flex flex-col items-center">
+                <div className="bg-white/20 rounded-full p-4 mb-4">
+                  <Target className="h-8 w-8" />
                 </div>
-                <div className="text-center p-6 bg-card/50 rounded-2xl border border-border/50 backdrop-blur-sm">
-                  <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <TrendingUp className="h-8 w-8 text-accent" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">95%</h3>
-                  <p className="text-muted-foreground">ของผู้เรียนนำไปใช้ได้จริง</p>
+                <h3 className="font-semibold mb-2">ค้นพบไอเดีย</h3>
+                <p className="text-sm text-blue-100">หาไอเดียธุรกิจที่เหมาะกับคุณ</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="bg-white/20 rounded-full p-4 mb-4">
+                  <Lightbulb className="h-8 w-8" />
                 </div>
-                <div className="text-center p-6 bg-card/50 rounded-2xl border border-border/50 backdrop-blur-sm">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">4.8/5</h3>
-                  <p className="text-muted-foreground">คะแนนความพึงพอใจ</p>
+                <h3 className="font-semibold mb-2">เรียนรู้ความรู้</h3>
+                <p className="text-sm text-blue-100">ความรู้ที่นำไปใช้ได้จริง</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="bg-white/20 rounded-full p-4 mb-4">
+                  <TrendingUp className="h-8 w-8" />
                 </div>
+                <h3 className="font-semibold mb-2">ลงมือทำ</h3>
+                <p className="text-sm text-blue-100">เครื่องมือสำหรับเริ่มต้น</p>
               </div>
             </div>
-          </section>
+          </div>
+        </div>
+      </section>
 
-          {/* Target Audience Section */}
-          <section className="px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-5xl font-bold mb-6">เหมาะสำหรับใคร?</h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  ไม่ว่าคุณจะเป็นใคร อยู่ในช่วงไหนของชีวิต เราพร้อมช่วยคุณเริ่มต้นธุรกิจ
-                </p>
+      {/* Problem Statement */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-8">คุณเจอปัญหาเหล่านี้ไหม?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="border-red-200">
+                <CardContent className="p-6 text-center">
+                  <div className="text-red-500 mb-4">😕</div>
+                  <h3 className="font-semibold mb-2 text-red-700">ขาดไอเดีย</h3>
+                  <p className="text-sm text-gray-600">ไม่มีไอเดียธุรกิจที่ชัดเจน</p>
+                </CardContent>
+              </Card>
+              <Card className="border-orange-200">
+                <CardContent className="p-6 text-center">
+                  <div className="text-orange-500 mb-4">🤔</div>
+                  <h3 className="font-semibold mb-2 text-orange-700">ขาดความรู้</h3>
+                  <p className="text-sm text-gray-600">ไม่รู้เรื่องการตลาดและการเงิน</p>
+                </CardContent>
+              </Card>
+              <Card className="border-blue-200">
+                <CardContent className="p-6 text-center">
+                  <div className="text-blue-500 mb-4">🛠️</div>
+                  <h3 className="font-semibold mb-2 text-blue-700">ขาดเครื่องมือ</h3>
+                  <p className="text-sm text-gray-600">ไม่มีแผนการหรือเครื่องมือ</p>
+                </CardContent>
+              </Card>
+              <Card className="border-purple-200">
+                <CardContent className="p-6 text-center">
+                  <div className="text-purple-500 mb-4">😵‍💫</div>
+                  <h3 className="font-semibold mb-2 text-purple-700">รู้สึกท่วมท้น</h3>
+                  <p className="text-sm text-gray-600">ข้อมูลเยอะแต่ไม่รู้เริ่มจากไหน</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* User Personas */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">เหมาะสำหรับใคร?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                      เมย์
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">น้องเมย์</CardTitle>
+                      <CardDescription>นักศึกษา/First Jobber (22 ปี)</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    ต้องการหารายได้เสริมเพื่อแบ่งเบาภาระและเก็บเงินก้อนแรก
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      ไอเดียธุรกิจลงทุนน้อย
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      บทความสอนทีละขั้นตอน
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      คอร์สราคาประหยัด
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                      กร
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">พี่กร</CardTitle>
+                      <CardDescription>พนักงานออฟฟิศ (32 ปี)</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    ต้องการทำอาชีพเสริม หรือลาออกมาทำธุรกิจของตัวเองใน 1-2 ปี
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      Case Study ของคนที่ทำสำเร็จ
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      เทมเพลต Business Model Canvas
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      VIP Package เข้าถึงทั้งหมด
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      สมชาย
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">คุณสมชาย</CardTitle>
+                      <CardDescription>ผู้ว่างงาน/มองหาอาชีพใหม่ (45 ปี)</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    ต้องการสร้างธุรกิจของตัวเองเพื่อเป็นอาชีพหลักอย่างมั่นคง
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      คำแนะนำที่เชื่อถือได้
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      แผนการที่ชัดเจน
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      VIP ครบวงจร
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* VIP Package Highlight */}
+      <section className="py-16 bg-gradient-to-r from-yellow-50 to-orange-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge className="mb-4 bg-yellow-500 text-black">แนะนำ</Badge>
+            <h2 className="text-3xl font-bold mb-6">VIP Package - ทางลัดสู่ความสำเร็จ</h2>
+            <p className="text-lg text-gray-600 mb-8">
+              เข้าถึงคอร์สและเครื่องมือทั้งหมดได้ไม่จำกัด ในราคาเดียว
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="text-left">
+                <h3 className="text-xl font-semibold mb-4 flex items-center">
+                  <BookOpen className="h-5 w-5 mr-2 text-blue-500" />
+                  คอร์สออนไลน์ทั้งหมด
+                </h3>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />การตลาดออนไลน์</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />การวางแผนทางการเงิน</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />การพัฒนาผลิตภัณฑ์</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />และอื่นๆ อีกมากมาย</li>
+                </ul>
               </div>
               
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="bg-card p-8 rounded-3xl border border-border/50 hover:shadow-lg transition-all duration-300">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-2xl flex items-center justify-center mb-6">
-                    <Users className="h-10 w-10 text-blue-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">นักศึกษา / คนทำงานใหม่</h3>
-                  <p className="text-muted-foreground mb-6">
-                    อยากหารายได้เสริม ลงทุนน้อย เริ่มต้นง่าย เหมาะกับเวลาจำกัด
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">ธุรกิจออนไลน์ลงทุนต่ำ</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">ขายของออนไลน์แบบง่ายๆ</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">สร้างรายได้ระหว่างเรียน</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-card p-8 rounded-3xl border border-border/50 hover:shadow-lg transition-all duration-300">
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-2xl flex items-center justify-center mb-6">
-                    <Target className="h-10 w-10 text-green-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">พนักงานออฟฟิศ</h3>
-                  <p className="text-muted-foreground mb-6">
-                    วางแผนลาออกทำธุรกิจ หรือต้องการอาชีพเสริมหลังเลิกงาน
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">วิเคราะห์ตลาดอย่างมืออาชีพ</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">วางแผนการเงินธุรกิจ</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">สร้างรายได้เสริมที่มั่นคง</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-card p-8 rounded-3xl border border-border/50 hover:shadow-lg transition-all duration-300">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-2xl flex items-center justify-center mb-6">
-                    <Heart className="h-10 w-10 text-purple-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">ผู้ที่กำลังหางาน</h3>
-                  <p className="text-muted-foreground mb-6">
-                    ต้องการสร้างอาชีพใหม่ เป็นเจ้าของธุรกิจ มีความมั่นคงทางการเงิน
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">เปลี่ยนอาชีพใหม่อย่างมั่นใจ</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">สร้างธุรกิจที่ยั่งยืน</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">มีรายได้ที่มั่นคง</span>
-                    </li>
-                  </ul>
-                </div>
+              <div className="text-left">
+                <h3 className="text-xl font-semibold mb-4 flex items-center">
+                  <Download className="h-5 w-5 mr-2 text-purple-500" />
+                  เครื่องมือและเทมเพลต
+                </h3>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />Business Model Canvas</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />แผนธุรกิจ Template</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />Marketing Plan Template</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-500 mr-2" />เครื่องมือคำนวณการเงิน</li>
+                </ul>
               </div>
             </div>
-          </section>
 
-          {/* Process Section */}
-          <section className="px-4 bg-muted/30 py-20">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-5xl font-bold mb-6">เริ่มต้นได้ใน 3 ขั้นตอน</h2>
-                <p className="text-xl text-muted-foreground">
-                  ไม่ซับซ้อน ไม่วุ่นวาย ทำตามได้จริง
-                </p>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center group">
-                  <div className="w-24 h-24 bg-gradient-to-br from-primary to-primary/80 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-105 transition-transform duration-300">
-                    <span className="text-3xl font-bold text-white">1</span>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">เรียนรู้พื้นฐาน</h3>
-                  <p className="text-muted-foreground text-lg">
-                    อ่านบทความฟรี เรียนรู้หลักการทำธุรกิจ เทคนิคการตลาด และการวางแผน
+            <Button asChild size="lg" className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold">
+              <Link to="/products">
+                <Star className="mr-2 h-5 w-5" />
+                ดู VIP Package
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">สิ่งที่คุณจะได้รับ</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Card className="text-center hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-blue-500" />
+                  <CardTitle>บทความความรู้ฟรี</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    บทความคุณภาพสูงที่จะช่วยให้คุณเข้าใจธุรกิจมากขึ้น
                   </p>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="text-center group">
-                  <div className="w-24 h-24 bg-gradient-to-br from-accent to-accent/80 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-105 transition-transform duration-300">
-                    <span className="text-3xl font-bold text-white">2</span>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">เรียนคอร์สเชิงลึก</h3>
-                  <p className="text-muted-foreground text-lg">
-                    เลือกคอร์สที่เหมาะกับเป้าหมาย เรียนทีละก้าว มีแบบฝึกหัดจริง
+              <Card className="text-center hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <Users className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                  <CardTitle>คอร์สจากผู้เชี่ยวชาญ</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    เรียนรู้จากผู้ที่มีประสบการณ์ตรงในการทำธุรกิจ
                   </p>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="text-center group">
-                  <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-105 transition-transform duration-300">
-                    <span className="text-3xl font-bold text-white">3</span>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">ลงมือทำจริง</h3>
-                  <p className="text-muted-foreground text-lg">
-                    ใช้เครื่องมือและเทมเพลต เริ่มต้นธุรกิจ ติดตามผลและปรับปรุง
+              <Card className="text-center hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <Download className="h-12 w-12 mx-auto mb-4 text-purple-500" />
+                  <CardTitle>เครื่องมือที่ใช้ได้จริง</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    เทมเพลตและเครื่องมือที่ช่วยให้คุณวางแผนได้ง่ายขึ้น
                   </p>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
-          </section>
+          </div>
+        </div>
+      </section>
 
-          {/* Featured Articles */}
-          <section className="px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">บทความสำหรับมือใหม่</h2>
-                <p className="text-muted-foreground text-lg">เริ่มต้นด้วยความรู้ฟรีที่คัดสรรมาเพื่อคุณ</p>
-              </div>
-              
-              {articlesError ? (
-                <EmptyState
-                  icon={BookOpen}
-                  title="ไม่สามารถโหลดบทความได้"
-                  description="เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"
-                  action={{
-                    label: "ลองใหม่",
-                    onClick: () => window.location.reload()
-                  }}
-                />
-              ) : (
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  {isLoadingArticles
-                    ? Array.from({ length: 3 }).map((_, index) => (
-                        <LoadingCard key={index} />
-                      ))
-                    : articles && articles.length > 0
-                    ? articles.map((article) => (
-                        <div key={article.slug} className="group">
-                          <ArticleCard
-                            {...article}
-                            imageUrl={article.cover_image_url || "/placeholder.svg"}
-                            excerpt={article.excerpt || ""}
-                            category={article.category || ""}
-                          />
-                        </div>
-                      ))
-                    : <div className="col-span-full">
-                        <EmptyState
-                          icon={BookOpen}
-                          title="ยังไม่มีบทความ"
-                          description="เรากำลังเตรียมเนื้อหาดีๆ ไว้ให้คุณ กรุณารอติดตาม"
-                          action={{
-                            label: "ดูบทความทั้งหมด",
-                            onClick: () => window.location.href = "/articles"
-                          }}
-                        />
-                      </div>}
-                </div>
-              )}
-              
-              {articles && articles.length > 0 && (
-                <div className="text-center mt-12">
-                  <Button variant="ghost" size="lg" className="group" asChild>
-                    <Link to="/articles" className="flex items-center gap-2">
-                      อ่านบทความทั้งหมด 
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Featured Courses */}
-          <section className="px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">คอร์สยอดนิยม</h2>
-                <p className="text-muted-foreground text-lg">เรียนรู้จากผู้เชี่ยวชาญ พร้อมใช้งานจริง</p>
-              </div>
-              
-              {coursesError ? (
-                <EmptyState
-                  icon={ShoppingBag}
-                  title="ไม่สามารถโหลดคอร์สได้"
-                  description="เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"
-                  action={{
-                    label: "ลองใหม่",
-                    onClick: () => window.location.reload()
-                  }}
-                />
-              ) : (
-                <div className="grid gap-8 md:grid-cols-2">
-                  {isLoadingCourses
-                    ? Array.from({ length: 2 }).map((_, index) => (
-                        <LoadingCard key={index} />
-                      ))
-                    : courses && courses.length > 0
-                    ? courses.map((product) => (
-                        <div key={product.slug} className="group">
-                          <ProductCard
-                            {...product}
-                            imageUrl={product.image_url || ""}
-                            description={product.description || ""}
-                          />
-                        </div>
-                      ))
-                    : <div className="col-span-full">
-                        <EmptyState
-                          icon={ShoppingBag}
-                          title="ยังไม่มีคอร์ส"
-                          description="เรากำลังเตรียมคอร์สคุณภาพสูงไว้ให้คุณ กรุณารอติดตาม"
-                          action={{
-                            label: "ดูสินค้าทั้งหมด",
-                            onClick: () => window.location.href = "/products"
-                          }}
-                        />
-                      </div>}
-                </div>
-              )}
-              
-              {courses && courses.length > 0 && (
-                <div className="text-center mt-12">
-                  <Button variant="ghost" size="lg" className="group" asChild>
-                    <Link to="/products" className="flex items-center gap-2">
-                      ดูคอร์สทั้งหมด 
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Newsletter Section */}
-          <section className="py-16 bg-gradient-to-br from-primary/5 via-accent/5 to-background">
-            <div className="container mx-auto px-4">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  พร้อมเริ่มต้นแล้วใช่ไหม?
-                </h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-                  รับเทคนิคใหม่ๆ เคล็ดลับการทำธุรกิจ และข่าวสารคอร์สใหม่ก่อนใคร ฟรี!
-                </p>
-              </div>
+      {/* Newsletter Section */}
+      <section className="py-16 bg-blue-600 text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">รับข้อมูลข่าวสารและเทคนิคใหม่ๆ</h2>
+            <p className="text-xl mb-8 text-blue-100">
+              สมัครรับข้อมูลข่าวสารและเทคนิคการทำธุรกิจที่มีประโยชน์ส่งตรงถึงอีเมลคุณ
+            </p>
+            <div className="max-w-md mx-auto">
               <NewsletterSignup />
             </div>
-          </section>
+          </div>
         </div>
-      </ErrorBoundary>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 bg-gray-900 text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-6">พร้อมที่จะเริ่มต้นแล้วหรือยัง?</h2>
+            <p className="text-xl mb-8 text-gray-300">
+              ไม่ว่าคุณจะเป็น "น้องเมย์" "พี่กร" หรือ "คุณสมชาย" เราพร้อมช่วยให้คุณเปลี่ยนไอเดียเป็นความจริง
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+                <Link to="/products">
+                  เริ่มต้นเลย
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="border-gray-300 text-gray-300 hover:bg-gray-800">
+                <Link to="/articles">อ่านบทความฟรี</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

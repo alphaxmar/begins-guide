@@ -1,9 +1,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface RelatedPostsProps {
   currentSlug: string;
@@ -11,39 +11,67 @@ interface RelatedPostsProps {
   limit?: number;
 }
 
-const RelatedPosts = ({ currentSlug, category, limit = 3 }: RelatedPostsProps) => {
+const RelatedPosts: React.FC<RelatedPostsProps> = ({ 
+  currentSlug, 
+  category, 
+  limit = 3 
+}) => {
   const { data: relatedPosts, isLoading } = useQuery({
     queryKey: ['related-posts', currentSlug, category],
     queryFn: async () => {
       let query = supabase
         .from('articles')
-        .select('id, title, slug, excerpt, image_url, created_at')
+        .select('id, title, excerpt, slug, image_url, created_at')
         .eq('status', 'published')
-        .neq('slug', currentSlug);
+        .neq('slug', currentSlug)
+        .limit(limit);
 
+      // ถ้ามี category ให้กรองตาม category ก่อน
       if (category) {
         query = query.eq('category', category);
       }
 
-      const { data, error } = await query
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
       if (error) throw error;
+
+      // ถ้าผลลัพธ์น้อยกว่า limit และมี category ให้ค้นหาเพิ่มจากบทความอื่น
+      if (data && data.length < limit && category) {
+        const remaining = limit - data.length;
+        const { data: additionalPosts } = await supabase
+          .from('articles')
+          .select('id, title, excerpt, slug, image_url, created_at')
+          .eq('status', 'published')
+          .neq('slug', currentSlug)
+          .neq('category', category)
+          .limit(remaining)
+          .order('created_at', { ascending: false });
+
+        if (additionalPosts) {
+          data.push(...additionalPosts);
+        }
+      }
+
       return data || [];
     },
   });
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>บทความที่เกี่ยวข้อง</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LoadingSpinner />
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold">บทความที่เกี่ยวข้อง</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {Array.from({ length: limit }).map((_, index) => (
+            <Card key={index}>
+              <Skeleton className="h-48 rounded-t-lg" />
+              <CardHeader>
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -52,45 +80,32 @@ const RelatedPosts = ({ currentSlug, category, limit = 3 }: RelatedPostsProps) =
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>บทความที่เกี่ยวข้อง</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {relatedPosts.map((post) => (
-            <Link 
-              key={post.id} 
-              to={`/articles/${post.slug}`}
-              className="block group"
-            >
-              <div className="flex gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                {post.image_url && (
-                  <img
-                    src={post.image_url}
-                    alt={post.title}
-                    className="w-16 h-16 object-cover rounded"
-                  />
+    <div className="space-y-4">
+      <h3 className="text-xl font-semibold">บทความที่เกี่ยวข้อง</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {relatedPosts.map((post) => (
+          <Card key={post.id} className="hover:shadow-lg transition-shadow">
+            <Link to={`/articles/${post.slug}`}>
+              {post.image_url && (
+                <img 
+                  src={post.image_url} 
+                  alt={post.title}
+                  className="w-full h-48 object-cover rounded-t-lg"
+                />
+              )}
+              <CardHeader>
+                <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
+                {post.excerpt && (
+                  <CardDescription className="line-clamp-3">
+                    {post.excerpt}
+                  </CardDescription>
                 )}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
-                    {post.title}
-                  </h4>
-                  {post.excerpt && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(post.created_at).toLocaleDateString('th-TH')}
-                  </p>
-                </div>
-              </div>
+              </CardHeader>
             </Link>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 };
 
