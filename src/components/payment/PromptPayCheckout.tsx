@@ -63,7 +63,7 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
     try {
       // เรียก edge function เพื่อตรวจสอบสถานะการชำระเงิน
       const { data, error } = await supabase.functions.invoke('check-promptpay-status', {
-        body: { order_id: orderId }
+        body: { payment_ref: orderId }
       });
 
       if (error) throw error;
