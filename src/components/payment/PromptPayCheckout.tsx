@@ -14,6 +14,8 @@ interface PromptPayCheckoutProps {
   onSuccess?: () => void;
 }
 
+type PaymentStatus = 'idle' | 'pending' | 'checking' | 'completed';
+
 const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
   productIds,
   totalAmount,
@@ -23,7 +25,7 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [orderId, setOrderId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'pending' | 'checking' | 'completed'>('idle');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle');
 
   const generatePromptPayQR = async () => {
     if (!user) {
