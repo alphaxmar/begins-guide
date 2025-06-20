@@ -6,7 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import StripeCheckoutButton from "@/components/payment/StripeCheckoutButton";
+import PaymentOptions from "@/components/payment/PaymentOptions";
 
 const CheckoutPage = () => {
   const { user } = useAuth();
@@ -36,7 +36,7 @@ const CheckoutPage = () => {
 
   return (
     <div className="py-12">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4">
         <Button variant="ghost" onClick={() => navigate("/cart")} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
           กลับไปตะกร้าสินค้า
@@ -73,24 +73,13 @@ const CheckoutPage = () => {
 
           {/* Payment Methods */}
           <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>วิธีการชำระเงิน</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-muted-foreground">
-                    ชำระเงินอย่างปลอดภัยผ่าน Stripe โดยสามารถใช้บัตรเครดิต/เดบิต
-                  </p>
-                  <StripeCheckoutButton
-                    amount={cartTotal}
-                    onSuccess={() => {
-                      // การ redirect จะจัดการโดย Stripe
-                    }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <PaymentOptions
+              productIds={cartItems.map(item => item.id)}
+              amount={cartTotal}
+              onSuccess={() => {
+                navigate("/checkout-success");
+              }}
+            />
           </div>
         </div>
       </div>

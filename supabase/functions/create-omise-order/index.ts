@@ -39,7 +39,7 @@ serve(async (req) => {
       throw new Error("Invalid user");
     }
 
-    // คำนวณราคารวม
+    // ดึงข้อมูลสินค้า
     const { data: products, error: productsError } = await supabaseClient
       .from('products')
       .select('id, price')

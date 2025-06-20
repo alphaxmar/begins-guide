@@ -25,7 +25,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // ดึงข้อมูล order
+    // ค้นหา order จาก payment reference
     const { data: order, error: orderError } = await supabaseClient
       .from('orders')
       .select('*')
@@ -36,8 +36,8 @@ serve(async (req) => {
       throw new Error("Order not found");
     }
 
-    // ตรวจสอบสถานะจาก Omise
-    if (order.provider_payment_id) {
+    // ตรวจสอบสถานะจาก Omise (ถ้ามี source ID)
+    if (order.provider_payment_id && order.payment_provider === 'promptpay') {
       const omiseResponse = await fetch(`https://api.omise.co/sources/${order.provider_payment_id}`, {
         headers: {
           "Authorization": `Basic ${btoa(Deno.env.get("OMISE_SECRET_KEY") + ":")}`,
@@ -45,67 +45,42 @@ serve(async (req) => {
       });
 
       const sourceData = await omiseResponse.json();
-
-      if (omiseResponse.ok && sourceData.flow === 'redirect' && sourceData.charges?.data?.length > 0) {
+      
+      if (sourceData.flow === 'redirect' && sourceData.charges?.data?.length > 0) {
         const charge = sourceData.charges.data[0];
-        
-        if (charge.paid) {
-          // อัปเดตสถานะคำสั่งซื้อ
+        if (charge.status === 'successful') {
+          // อัปเดตสถานะ order เป็น completed
           const { error: updateError } = await supabaseClient
             .from('orders')
-            .update({
+            .update({ 
               status: 'completed',
               updated_at: new Date().toISOString()
             })
-            .eq('id', order.id);
+            .eq('id', payment_ref);
 
           if (updateError) {
-            throw updateError;
-          }
-
-          // ดึงข้อมูล order items เพื่อสร้าง user purchases
-          const { data: orderItems, error: itemsError } = await supabaseClient
-            .from('order_items')
-            .select('product_id')
-            .eq('order_id', order.id);
-
-          if (itemsError || !orderItems) {
-            throw new Error("Failed to fetch order items");
+            console.error('Error updating order:', updateError);
           }
 
           // สร้าง user purchases
-          const purchases = orderItems.map(item => ({
-            user_id: order.user_id,
-            product_id: item.product_id
-          }));
+          const { data: orderItems } = await supabaseClient
+            .from('order_items')
+            .select('product_id')
+            .eq('order_id', payment_ref);
 
-          const { error: purchasesError } = await supabaseClient
-            .from('user_purchases')
-            .insert(purchases);
+          if (orderItems && orderItems.length > 0) {
+            const purchases = orderItems.map(item => ({
+              user_id: order.user_id,
+              product_id: item.product_id
+            }));
 
-          if (purchasesError) {
-            console.error("Failed to create user purchases:", purchasesError);
+            await supabaseClient
+              .from('user_purchases')
+              .insert(purchases);
           }
 
           return new Response(
             JSON.stringify({ status: 'completed' }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 200,
-            }
-          );
-        } else if (charge.failure_code) {
-          // อัปเดตสถานะเป็น failed
-          await supabaseClient
-            .from('orders')
-            .update({
-              status: 'failed',
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', order.id);
-
-          return new Response(
-            JSON.stringify({ status: 'failed' }),
             {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
               status: 200,
@@ -116,7 +91,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ status: 'pending' }),
+      JSON.stringify({ status: order.status }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,

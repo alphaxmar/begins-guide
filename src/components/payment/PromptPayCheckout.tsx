@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { QrCode, Clock, CheckCircle } from 'lucide-react';
+import { QrCode, Clock, CheckCircle, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PromptPayCheckoutProps {
@@ -87,6 +87,12 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
     }
   };
 
+  const copyPromptPayNumber = () => {
+    const promptPayNumber = "0861234567";
+    navigator.clipboard.writeText(promptPayNumber);
+    toast.success("คัดลอกหมายเลขพร้อมเพย์แล้ว");
+  };
+
   if (paymentStatus === 'completed') {
     return (
       <Card className="w-full max-w-md mx-auto">
@@ -164,6 +170,20 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
               <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
                 <p className="text-green-800 font-semibold">ยอดเงิน: {totalAmount.toLocaleString()} บาท</p>
                 <p className="text-green-700 text-sm">หมายเลขออเดอร์: {orderId}</p>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
+                <div>
+                  <p className="text-sm text-gray-600">หมายเลขพร้อมเพย์</p>
+                  <p className="font-mono font-semibold">0861234567</p>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={copyPromptPayNumber}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
 
               <Alert>
