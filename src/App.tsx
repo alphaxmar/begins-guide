@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import Layout from "@/components/Layout";
@@ -54,6 +54,17 @@ import VipManagementPage from "./pages/admin/VipManagementPage";
 
 const queryClient = new QueryClient();
 
+// Admin Layout Wrapper
+const AdminLayoutWrapper = () => {
+  return (
+    <ProtectedRoute adminOnly>
+      <AdminLayout>
+        <Outlet />
+      </AdminLayout>
+    </ProtectedRoute>
+  );
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -99,11 +110,7 @@ function App() {
                 </Route>
 
                 {/* Admin routes */}
-                <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }>
+                <Route path="/admin" element={<AdminLayoutWrapper />}>
                   <Route index element={<DashboardPage />} />
                   <Route path="articles" element={<AdminArticlesPage />} />
                   <Route path="articles/create" element={<CreateArticle />} />
