@@ -805,6 +805,10 @@ export type Database = {
           total_spent: number
         }[]
       }
+      is_admin_user: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       is_user_vip: {
         Args: { user_id: string }
         Returns: boolean

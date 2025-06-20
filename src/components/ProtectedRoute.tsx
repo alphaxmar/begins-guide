@@ -20,11 +20,12 @@ const ProtectedRoute: React.FC<PropsWithChildren<ProtectedRouteProps>> = ({ chil
     adminOnly,
     isAdmin,
     adminLoading,
-    adminError
+    adminError,
+    currentPath: location.pathname
   });
 
   // Show loading while checking authentication
-  if (authLoading || (user && adminLoading)) {
+  if (authLoading || (user && adminOnly && adminLoading)) {
     return (
       <div className="flex justify-center items-center h-96">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -47,6 +48,7 @@ const ProtectedRoute: React.FC<PropsWithChildren<ProtectedRouteProps>> = ({ chil
           <div className="text-center">
             <h2 className="text-lg font-semibold text-red-600">เกิดข้อผิดพลาด</h2>
             <p className="text-gray-600">ไม่สามารถตรวจสอบสิทธิ์ได้ กรุณาลองใหม่อีกครั้ง</p>
+            <p className="text-sm text-gray-500 mt-2">หากยังไม่สามารถเข้าได้ กรุณาติดต่อผู้ดูแลระบบ</p>
           </div>
         </div>
       );

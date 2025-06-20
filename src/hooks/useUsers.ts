@@ -19,37 +19,34 @@ export const useUsers = () => {
     queryFn: async (): Promise<UserWithStats[]> => {
       try {
         console.log('Fetching users with RPC function');
-        // Use the RPC function directly since it handles the auth.users join properly
+        
+        // First try the RPC function which should now work with fixed RLS policies
         const { data, error } = await supabase.rpc('get_users_with_stats');
         
         if (error) {
           console.error('RPC Error fetching users:', error);
           
-          // If RPC fails, try a simpler approach
-          if (error.message?.includes('Access denied') || error.message?.includes('Admin role required')) {
-            console.log('RPC access denied, trying direct profiles query');
-            const { data: profilesData, error: profilesError } = await supabase
-              .from('profiles')
-              .select('*');
-            
-            if (profilesError) {
-              console.error('Profiles query error:', profilesError);
-              throw profilesError;
-            }
-            
-            // Return simplified data without auth.users info
-            return (profilesData || []).map(profile => ({
-              id: profile.id,
-              email: 'No email access',
-              full_name: profile.full_name,
-              role: profile.role,
-              created_at: new Date().toISOString(),
-              total_purchases: 0,
-              total_spent: 0
-            }));
+          // If RPC fails, try a direct approach for admins
+          console.log('RPC failed, trying direct profiles query');
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, full_name, role, updated_at');
+          
+          if (profilesError) {
+            console.error('Profiles query error:', profilesError);
+            throw profilesError;
           }
           
-          throw error;
+          // Return simplified data without auth.users info and purchase stats
+          return (profilesData || []).map(profile => ({
+            id: profile.id,
+            email: 'Email access restricted',
+            full_name: profile.full_name,
+            role: profile.role,
+            created_at: profile.updated_at || new Date().toISOString(),
+            total_purchases: 0,
+            total_spent: 0
+          }));
         }
         
         console.log('Successfully fetched users:', data?.length || 0);
@@ -71,16 +68,14 @@ export const useUpdateUserRole = () => {
       try {
         console.log('Updating user role:', userId, newRole);
         
-        // Update role in profiles table
+        // Update role in profiles table using direct update
         const { error: profileError } = await supabase
           .from('profiles')
-          .upsert({ 
-            id: userId, 
+          .update({ 
             role: newRole, 
             updated_at: new Date().toISOString() 
-          }, {
-            onConflict: 'id'
-          });
+          })
+          .eq('id', userId);
 
         if (profileError) {
           console.error('Profile update error:', profileError);
@@ -96,7 +91,8 @@ export const useUpdateUserRole = () => {
               user_id: userId,
               is_active: true,
               start_date: new Date().toISOString(),
-              end_date: null // ไม่มีวันหมดอายุ
+              end_date: null,
+              updated_at: new Date().toISOString()
             }, {
               onConflict: 'user_id'
             });
@@ -110,7 +106,10 @@ export const useUpdateUserRole = () => {
           console.log('Deactivating VIP membership');
           const { error: deactivateError } = await supabase
             .from('vip_memberships')
-            .update({ is_active: false })
+            .update({ 
+              is_active: false,
+              updated_at: new Date().toISOString()
+            })
             .eq('user_id', userId);
 
           if (deactivateError) {

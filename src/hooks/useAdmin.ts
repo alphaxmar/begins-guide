@@ -12,6 +12,7 @@ const checkAdminRole = async (userId: string | undefined) => {
   try {
     console.log('Checking admin role for user:', userId);
     
+    // Direct query without recursion issues since we fixed the RLS policies
     const { data, error } = await supabase
       .from('profiles')
       .select('role')
@@ -20,12 +21,19 @@ const checkAdminRole = async (userId: string | undefined) => {
     
     if (error) {
       console.error('Error checking admin role:', error);
+      
       // If profile doesn't exist, create it with default role
       if (error.code === 'PGRST116') {
         console.log('Profile not found, creating default profile');
         const { error: insertError } = await supabase
           .from('profiles')
-          .insert({ id: userId, role: 'user' });
+          .insert({ 
+            id: userId, 
+            role: 'user',
+            full_name: null,
+            avatar_url: null,
+            updated_at: new Date().toISOString()
+          });
         
         if (insertError) {
           console.error('Error creating profile:', insertError);
