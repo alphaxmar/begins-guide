@@ -222,6 +222,8 @@ export type Database = {
           payment_provider: string | null
           provider_payment_id: string | null
           status: Database["public"]["Enums"]["order_status"]
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           total_amount: number
           updated_at: string
           user_id: string
@@ -232,6 +234,8 @@ export type Database = {
           payment_provider?: string | null
           provider_payment_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           total_amount: number
           updated_at?: string
           user_id: string
@@ -242,6 +246,8 @@ export type Database = {
           payment_provider?: string | null
           provider_payment_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string
@@ -362,8 +368,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      confirm_stripe_payment: {
+        Args: {
+          p_stripe_session_id: string
+          p_stripe_payment_intent_id: string
+        }
+        Returns: undefined
+      }
       create_order_for_current_user: {
         Args: { product_ids: string[] }
+        Returns: string
+      }
+      create_stripe_order: {
+        Args: { p_product_ids: string[]; p_stripe_session_id: string }
         Returns: string
       }
       current_user_has_role: {

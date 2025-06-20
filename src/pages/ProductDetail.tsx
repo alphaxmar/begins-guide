@@ -1,3 +1,4 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import { useCart } from "@/contexts/CartContext";
+import StripeCheckoutButton from "@/components/payment/StripeCheckoutButton";
 import { toast } from "sonner";
 
 const fetchProductBySlug = async (slug: string) => {
@@ -38,31 +40,6 @@ const ProductDetail = () => {
   const { hasAccess, isLoading: isAccessLoading, isError: isAccessError } = useCourseAccess(
     product?.product_type === 'course' ? product.id : undefined
   );
-
-  const buyNowMutation = useMutation({
-    mutationFn: async (productId: string) => {
-      if (!user) {
-        toast.info("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อ");
-        navigate("/auth", { replace: true });
-        throw new Error("User not authenticated");
-      }
-      const { error } = await supabase.rpc('create_order_for_current_user', { product_ids: [productId] });
-      if (error) {
-        throw new Error(`เกิดข้อผิดพลาดในการสั่งซื้อ: ${error.message}`);
-      }
-      return productId;
-    },
-    onSuccess: (productId) => {
-      toast.success("สั่งซื้อสินค้าสำเร็จ!");
-      queryClient.invalidateQueries({ queryKey: ["purchaseStatus", user?.id, productId] });
-      queryClient.invalidateQueries({ queryKey: ["purchased_products", user?.id] });
-    },
-    onError: (error: Error) => {
-      if (error.message !== "User not authenticated") {
-        toast.error(error.message);
-      }
-    },
-  });
 
   if (isLoading) {
     return (
@@ -102,24 +79,18 @@ const ProductDetail = () => {
         variant="outline"
         className="w-full sm:w-auto"
         onClick={() => addToCart(product)}
-        disabled={buyNowMutation.isPending}
       >
         <ShoppingCart className="mr-2 h-5 w-5" />
         เพิ่มลงตะกร้า
       </Button>
-      <Button
-        size="lg"
+      <StripeCheckoutButton
+        productIds={[product.id]}
+        amount={product.price}
         className="w-full sm:w-auto"
-        onClick={() => buyNowMutation.mutate(product.id)}
-        disabled={buyNowMutation.isPending}
-      >
-        {buyNowMutation.isPending ? (
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-        ) : (
-          <Zap className="mr-2 h-5 w-5" />
-        )}
-        {buyNowMutation.isPending ? 'กำลังดำเนินการ...' : 'ซื้อเลย'}
-      </Button>
+        onSuccess={() => {
+          toast.success("กำลังเปิดหน้าชำระเงิน...");
+        }}
+      />
     </>
   );
 

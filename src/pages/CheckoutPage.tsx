@@ -3,43 +3,16 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
-import { useMutation } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
-import PaymentMethodSelector from "@/components/payment/PaymentMethodSelector";
-
-const createOrder = async (productIds: string[]) => {
-  const { data, error } = await supabase.rpc("create_order_for_current_user", {
-    product_ids: productIds,
-  });
-
-  if (error) {
-    throw new Error("เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ");
-  }
-
-  return data;
-};
+import StripeCheckoutButton from "@/components/payment/StripeCheckoutButton";
 
 const CheckoutPage = () => {
   const { user } = useAuth();
-  const { cartItems, cartTotal, clearCart } = useCart();
+  const { cartItems, cartTotal } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
-  const [orderId, setOrderId] = useState<string | null>(null);
-
-  const createOrderMutation = useMutation({
-    mutationFn: createOrder,
-    onSuccess: (orderIdResult) => {
-      setOrderId(orderIdResult);
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-      navigate("/cart");
-    },
-  });
 
   useEffect(() => {
     if (!user) {
@@ -51,37 +24,7 @@ const CheckoutPage = () => {
       navigate("/cart");
       return;
     }
-
-    // Create order when component mounts
-    const productIds = cartItems.map((item) => item.id);
-    createOrderMutation.mutate(productIds);
-
-    // Load Omise script (still needed for credit card payments)
-    const script = document.createElement("script");
-    script.src = "https://cdn.omise.co/omise.js";
-    script.onload = () => {
-      if (window.Omise) {
-        window.Omise.setPublicKey(import.meta.env.VITE_OMISE_PUBLIC_KEY || "");
-      }
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
   }, [user, cartItems]);
-
-  const handlePaymentSuccess = (chargeId: string) => {
-    toast.success("ชำระเงินสำเร็จ! กำลังย้ายไปหน้าโปรไฟล์");
-    clearCart();
-    navigate("/profile");
-  };
-
-  const handlePaymentError = (error: string) => {
-    toast.error(`ชำระเงินไม่สำเร็จ: ${error}`);
-  };
 
   if (!user) {
     return null;
@@ -89,27 +32,6 @@ const CheckoutPage = () => {
 
   if (cartItems.length === 0) {
     return null;
-  }
-
-  if (createOrderMutation.isPending) {
-    return (
-      <div className="py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4">กำลังสร้างคำสั่งซื้อ...</h1>
-      </div>
-    );
-  }
-
-  if (createOrderMutation.isError || !orderId) {
-    return (
-      <div className="py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4">เกิดข้อผิดพลาด</h1>
-        <p className="text-muted-foreground mb-4">ไม่สามารถสร้างคำสั่งซื้อได้</p>
-        <Button onClick={() => navigate("/cart")}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          กลับไปตะกร้าสินค้า
-        </Button>
-      </div>
-    );
   }
 
   return (
@@ -145,24 +67,30 @@ const CheckoutPage = () => {
                   <span>ยอดรวมทั้งหมด</span>
                   <span className="text-2xl text-green-600">{cartTotal.toLocaleString()} บาท</span>
                 </div>
-                
-                <div className="bg-blue-50 p-4 rounded-lg mt-4">
-                  <p className="text-sm text-blue-700">
-                    <strong>หมายเลขออเดอร์:</strong> {orderId}
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Payment Methods */}
           <div>
-            <PaymentMethodSelector
-              amount={cartTotal}
-              orderId={orderId}
-              onSuccess={handlePaymentSuccess}
-              onError={handlePaymentError}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle>วิธีการชำระเงิน</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">
+                    ชำระเงินอย่างปลอดภัยผ่าน Stripe โดยสามารถใช้บัตรเครดิต/เดบิต
+                  </p>
+                  <StripeCheckoutButton
+                    amount={cartTotal}
+                    onSuccess={() => {
+                      // การ redirect จะจัดการโดย Stripe
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
