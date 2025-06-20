@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,17 +27,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (event === 'SIGNED_IN') {
           setUser(session?.user ?? null);
           setLoading(false);
+          
+          // Check if this is a new user by looking at created_at vs current time
+          // If user was created very recently (within last 5 minutes), send welcome email
+          if (session?.user) {
+            const userCreatedAt = new Date(session.user.created_at);
+            const now = new Date();
+            const timeDiff = now.getTime() - userCreatedAt.getTime();
+            const minutesDiff = timeDiff / (1000 * 60);
+            
+            if (minutesDiff < 5) {
+              sendWelcomeEmail({
+                userEmail: session.user.email!,
+                userName: session.user.user_metadata?.full_name || undefined
+              });
+            }
+          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setLoading(false);
-        } else if (event === 'SIGNED_UP') {
-          // Send welcome email for new sign ups
-          if (session?.user?.email) {
-            sendWelcomeEmail({
-              userEmail: session.user.email,
-              userName: session.user.user_metadata?.full_name || undefined
-            });
-          }
+        } else {
           setUser(session?.user ?? null);
           setLoading(false);
         }
