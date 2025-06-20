@@ -11,6 +11,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 
+type OrderStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+
 const AdminOrdersPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const { data: orders, isLoading } = useAdminOrders(statusFilter || undefined);
@@ -108,7 +110,7 @@ const AdminOrdersPage = () => {
                     <TableCell>
                       <Select 
                         value={order.status}
-                        onValueChange={(newStatus) => 
+                        onValueChange={(newStatus: OrderStatus) => 
                           updateOrderStatus.mutate({ 
                             orderId: order.order_id, 
                             newStatus 
