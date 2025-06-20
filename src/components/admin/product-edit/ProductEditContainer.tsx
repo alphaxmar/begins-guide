@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
 import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
-import ProductEditHeader from "./ProductEditHeader";
+import ModernProductEditLayout from "./ModernProductEditLayout";
+import ModernProductForm from "./ModernProductForm";
 
 interface ProductEditContainerProps {
   product: Tables<'products'>;
@@ -113,18 +114,13 @@ const ProductEditContainer = ({ product, slug }: ProductEditContainerProps) => {
   };
 
   return (
-    <div className="py-8">
-      <div className="max-w-4xl mx-auto">
-        <ProductEditHeader product={product} />
-        <ProductForm 
-          onSubmit={handleSubmit} 
-          defaultValues={product} 
-          isLoading={updateProductMutation.isPending} 
-          submitButtonText="อัปเดตสินค้า"
-          initialData={product}
-        />
-      </div>
-    </div>
+    <ModernProductEditLayout product={product}>
+      <ModernProductForm 
+        product={product}
+        onSubmit={handleSubmit}
+        isLoading={updateProductMutation.isPending}
+      />
+    </ModernProductEditLayout>
   );
 };
 

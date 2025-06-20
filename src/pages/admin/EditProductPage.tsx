@@ -25,9 +25,42 @@ const fetchProductBySlug = async (slug: string) => {
   return data;
 };
 
+// สร้าง Loading Skeleton สำหรับธีมมืด
+const ModernLoadingSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-slate-900">
+      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-8 bg-slate-700 rounded animate-pulse"></div>
+          <div>
+            <div className="w-32 h-6 bg-slate-700 rounded animate-pulse mb-2"></div>
+            <div className="w-48 h-4 bg-slate-700 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="space-y-6">
+              <div className="w-48 h-8 bg-slate-700 rounded animate-pulse"></div>
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="w-24 h-4 bg-slate-700 rounded animate-pulse"></div>
+                    <div className="w-full h-10 bg-slate-700 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const EditProductPage = () => {
   const params = useParams();
-  // ใช้ params.id แทน params.slug เพราะใน route เป็น :id
   const slug = params.id;
 
   console.log("EditProductPage - slug from params.id:", slug);
@@ -52,7 +85,7 @@ const EditProductPage = () => {
   }
 
   if (isProductLoading) {
-    return <ProductEditLoadingSkeleton />;
+    return <ModernLoadingSkeleton />;
   }
 
   if (isError) {
