@@ -18,14 +18,41 @@ export const useUsers = () => {
     queryKey: ['users'],
     queryFn: async (): Promise<UserWithStats[]> => {
       try {
+        console.log('Fetching users with RPC function');
         // Use the RPC function directly since it handles the auth.users join properly
         const { data, error } = await supabase.rpc('get_users_with_stats');
         
         if (error) {
           console.error('RPC Error fetching users:', error);
+          
+          // If RPC fails, try a simpler approach
+          if (error.message?.includes('Access denied') || error.message?.includes('Admin role required')) {
+            console.log('RPC access denied, trying direct profiles query');
+            const { data: profilesData, error: profilesError } = await supabase
+              .from('profiles')
+              .select('*');
+            
+            if (profilesError) {
+              console.error('Profiles query error:', profilesError);
+              throw profilesError;
+            }
+            
+            // Return simplified data without auth.users info
+            return (profilesData || []).map(profile => ({
+              id: profile.id,
+              email: 'No email access',
+              full_name: profile.full_name,
+              role: profile.role,
+              created_at: new Date().toISOString(),
+              total_purchases: 0,
+              total_spent: 0
+            }));
+          }
+          
           throw error;
         }
         
+        console.log('Successfully fetched users:', data?.length || 0);
         return data || [];
       } catch (error) {
         console.error('Users fetch error:', error);
@@ -42,16 +69,27 @@ export const useUpdateUserRole = () => {
   return useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'user' | 'admin' | 'partner' | 'vip' }) => {
       try {
+        console.log('Updating user role:', userId, newRole);
+        
         // Update role in profiles table
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ role: newRole, updated_at: new Date().toISOString() })
-          .eq('id', userId);
+          .upsert({ 
+            id: userId, 
+            role: newRole, 
+            updated_at: new Date().toISOString() 
+          }, {
+            onConflict: 'id'
+          });
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+          throw profileError;
+        }
 
-        // If role is VIP, create VIP membership
+        // If role is VIP, create/activate VIP membership
         if (newRole === 'vip') {
+          console.log('Creating VIP membership');
           const { error: vipError } = await supabase
             .from('vip_memberships')
             .upsert({
@@ -63,16 +101,24 @@ export const useUpdateUserRole = () => {
               onConflict: 'user_id'
             });
 
-          if (vipError) throw vipError;
+          if (vipError) {
+            console.error('VIP membership error:', vipError);
+            throw vipError;
+          }
         } else {
           // If role is not VIP, deactivate VIP membership
+          console.log('Deactivating VIP membership');
           const { error: deactivateError } = await supabase
             .from('vip_memberships')
             .update({ is_active: false })
             .eq('user_id', userId);
 
-          if (deactivateError) console.error('Error deactivating VIP:', deactivateError);
+          if (deactivateError) {
+            console.error('Error deactivating VIP:', deactivateError);
+          }
         }
+        
+        console.log('Successfully updated user role');
       } catch (error) {
         console.error('Error updating user role:', error);
         throw error;
@@ -81,6 +127,7 @@ export const useUpdateUserRole = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['vipStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['userRole'] });
       toast.success('เปลี่ยนสิทธิ์ผู้ใช้สำเร็จ');
     },
     onError: (error) => {

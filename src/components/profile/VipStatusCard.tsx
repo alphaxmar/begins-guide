@@ -2,18 +2,31 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Crown, Sparkles, ArrowRight } from "lucide-react";
+import { Crown, Sparkles, ArrowRight, AlertCircle } from "lucide-react";
 import { useVipStatus } from "@/hooks/useVipStatus";
 import { Link } from "react-router-dom";
 
 const VipStatusCard = () => {
-  const { isVip, isLoading } = useVipStatus();
+  const { isVip, isLoading, error } = useVipStatus();
 
   if (isLoading) {
     return (
       <Card>
         <CardContent className="p-6">
           <div className="h-16 bg-muted animate-pulse rounded"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="border-red-200">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertCircle className="h-5 w-5" />
+            <span>ไม่สามารถตรวจสอบสถานะ VIP ได้</span>
+          </div>
         </CardContent>
       </Card>
     );
