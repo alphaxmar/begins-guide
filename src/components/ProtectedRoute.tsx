@@ -7,9 +7,10 @@ import { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  adminOnly?: boolean;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
 
@@ -21,7 +22,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (adminOnly && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 

@@ -35,6 +35,7 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
             slug,
             product_type,
             image_url,
+            description,
             template_file_path
           )
         `)
@@ -73,6 +74,22 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
   const courses = purchasedItems?.filter(item => item.products?.product_type === 'course') ?? [];
   const templates = purchasedItems?.filter(item => item.products?.product_type === 'template') ?? [];
 
+  // Transform the data to match PurchasedItemCard expectations
+  const transformPurchasedItem = (item: PurchasedItem) => {
+    if (!item.products) return null;
+    
+    return {
+      id: item.products.id,
+      title: item.products.title,
+      description: item.products.description,
+      image_url: item.products.image_url,
+      product_type: item.products.product_type,
+      slug: item.products.slug,
+      template_file_path: item.products.template_file_path,
+      purchased_at: item.created_at,
+    };
+  };
+
   return (
     <div className="mt-8 border-t pt-8">
       <h3 className="text-2xl font-bold tracking-tight mb-6">สินค้าของฉัน</h3>
@@ -92,9 +109,12 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
             <h4 className="text-xl font-semibold mb-4 border-b pb-2">คอร์สเรียน ({courses.length})</h4>
             {courses.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-                {courses.map((item) => (
-                  <PurchasedItemCard key={item.id} item={item} />
-                ))}
+                {courses.map((item) => {
+                  const transformedItem = transformPurchasedItem(item);
+                  return transformedItem ? (
+                    <PurchasedItemCard key={item.id} item={transformedItem} />
+                  ) : null;
+                })}
               </div>
             ) : (
               <p className="text-muted-foreground py-4">คุณยังไม่มีคอร์สเรียน</p>
@@ -105,9 +125,12 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
             <h4 className="text-xl font-semibold mb-4 border-b pb-2">เทมเพลต ({templates.length})</h4>
             {templates.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-                {templates.map((item) => (
-                  <PurchasedItemCard key={item.id} item={item} />
-                ))}
+                {templates.map((item) => {
+                  const transformedItem = transformPurchasedItem(item);
+                  return transformedItem ? (
+                    <PurchasedItemCard key={item.id} item={transformedItem} />
+                  ) : null;
+                })}
               </div>
             ) : (
               <p className="text-muted-foreground py-4">คุณยังไม่มีเทมเพลต</p>
