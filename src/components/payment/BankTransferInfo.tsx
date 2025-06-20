@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy, Building2, Clock, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 
 interface BankTransferInfoProps {
   amount: number;
@@ -13,18 +14,30 @@ const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
   amount,
   orderId
 }) => {
-  // ข้อมูลบัญชีธนาคาร (ในอนาคตจะดึงจาก admin settings)
+  const { settings, isLoading } = usePaymentSettings();
+
+  // ใช้ข้อมูลจากการตั้งค่าแทนการ hardcode
   const bankInfo = {
-    bankName: 'ธนาคารกรุงเทพ',
-    accountNumber: '138-4-41680-4',
-    accountName: 'รชยศ ตันติการรีน',
-    branch: ''
+    bankName: settings.bank_name || 'ธนาคารกรุงเทพ',
+    accountNumber: settings.bank_account_number || '138-4-41680-4',
+    accountName: settings.bank_account_name || 'รณยศ ตันติถาวรรัช',
+    branch: settings.bank_branch || ''
   };
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast.success(`คัดลอก${label}แล้ว`);
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">กำลังโหลดข้อมูลการโอนเงิน...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
