@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -18,10 +17,10 @@ export const useUsers = () => {
     queryKey: ['users'],
     queryFn: async (): Promise<UserWithStats[]> => {
       try {
-        console.log('Fetching users with stats...');
+        console.log('Fetching users with stats using admin function...');
         
-        // Use the RPC function that handles admin permission checking
-        const { data, error } = await supabase.rpc('get_users_with_stats');
+        // Use the new admin-specific RPC function
+        const { data, error } = await supabase.rpc('get_users_with_stats_admin');
         
         if (error) {
           console.error('RPC Error:', error);
@@ -36,7 +35,6 @@ export const useUsers = () => {
       }
     },
     retry: 1,
-    // ลด staleTime เพื่อให้ data fresh ขึ้น
     staleTime: 0,
     gcTime: 1000 * 60 * 5, // 5 minutes
   });
