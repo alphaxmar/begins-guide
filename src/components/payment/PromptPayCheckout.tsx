@@ -28,11 +28,6 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
   const [showQR, setShowQR] = useState(false);
 
   const createPromptPayOrder = async () => {
-    if (!user) {
-      toast.error('กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน');
-      return;
-    }
-
     if (!settings.promptpay_number) {
       toast.error('ยังไม่มีการตั้งค่าหมายเลข PromptPay');
       return;
@@ -45,14 +40,24 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
         amount: totalAmount
       });
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // เพิ่ม Authorization header ถ้ามีผู้ใช้ล็อกอิน
+      if (user) {
+        const session = await supabase.auth.getSession();
+        if (session.data.session?.access_token) {
+          headers.Authorization = `Bearer ${session.data.session.access_token}`;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('create-promptpay-payment', {
         body: {
           product_ids: productIds,
           amount: totalAmount
         },
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        }
+        headers
       });
 
       console.log('Function response:', { data, error });
