@@ -1,11 +1,16 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+
+type VipPackageRow = Tables<'vip_packages'>;
+type VipPackageInsert = TablesInsert<'vip_packages'>;
+type VipPackageUpdate = TablesUpdate<'vip_packages'>;
 
 interface VipPackage {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   price: number;
   duration_months: number | null;
   features: string[];
@@ -32,7 +37,7 @@ export const useVipPackages = () => {
       // Convert JSONB features to string array
       const packages: VipPackage[] = (data || []).map(pkg => ({
         ...pkg,
-        features: Array.isArray(pkg.features) ? pkg.features : []
+        features: Array.isArray(pkg.features) ? pkg.features.map(f => String(f)) : []
       }));
 
       return packages;
@@ -45,12 +50,18 @@ export const useVipPackageMutations = () => {
 
   const createPackage = useMutation({
     mutationFn: async (packageData: Omit<VipPackage, 'id' | 'created_at' | 'updated_at'>) => {
+      const insertData: VipPackageInsert = {
+        name: packageData.name,
+        description: packageData.description,
+        price: packageData.price,
+        duration_months: packageData.duration_months,
+        features: packageData.features, // JSONB will handle array conversion
+        is_active: packageData.is_active
+      };
+
       const { data, error } = await supabase
         .from('vip_packages')
-        .insert([{
-          ...packageData,
-          features: packageData.features // JSONB will handle array conversion
-        }])
+        .insert([insertData])
         .select()
         .single();
       
@@ -58,7 +69,7 @@ export const useVipPackageMutations = () => {
       
       return {
         ...data,
-        features: Array.isArray(data.features) ? data.features : []
+        features: Array.isArray(data.features) ? data.features.map(f => String(f)) : []
       } as VipPackage;
     },
     onSuccess: () => {
@@ -68,17 +79,19 @@ export const useVipPackageMutations = () => {
 
   const updatePackage = useMutation({
     mutationFn: async (updatedPackage: VipPackage) => {
+      const updateData: VipPackageUpdate = {
+        name: updatedPackage.name,
+        description: updatedPackage.description,
+        price: updatedPackage.price,
+        duration_months: updatedPackage.duration_months,
+        features: updatedPackage.features, // JSONB will handle array conversion
+        is_active: updatedPackage.is_active,
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('vip_packages')
-        .update({
-          name: updatedPackage.name,
-          description: updatedPackage.description,
-          price: updatedPackage.price,
-          duration_months: updatedPackage.duration_months,
-          features: updatedPackage.features, // JSONB will handle array conversion
-          is_active: updatedPackage.is_active,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', updatedPackage.id)
         .select()
         .single();
@@ -87,7 +100,7 @@ export const useVipPackageMutations = () => {
       
       return {
         ...data,
-        features: Array.isArray(data.features) ? data.features : []
+        features: Array.isArray(data.features) ? data.features.map(f => String(f)) : []
       } as VipPackage;
     },
     onSuccess: () => {

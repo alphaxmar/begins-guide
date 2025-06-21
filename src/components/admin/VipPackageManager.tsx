@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useVipPackages, useVipPackageMutations } from '@/hooks/useVipPackages';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +26,7 @@ interface VipPackage {
   features: string[];
   is_active: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 const VipPackageManager = () => {
@@ -56,7 +56,8 @@ const VipPackageManager = () => {
       updatePackage.mutate({ 
         ...packageData, 
         id: selectedPackage.id, 
-        created_at: selectedPackage.created_at 
+        created_at: selectedPackage.created_at,
+        updated_at: selectedPackage.updated_at 
       }, {
         onSuccess: () => {
           toast.success('อัปเดตแพ็กเกจ VIP สำเร็จ');
