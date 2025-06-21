@@ -31,6 +31,8 @@ const TemplateDownloadButton = ({
     setDownloading(true);
 
     try {
+      console.log("Checking download access for user:", user.id, "product:", productId);
+      
       // ตรวจสอบสิทธิ์การเข้าถึง
       const { data: purchaseCheck, error: purchaseError } = await supabase
         .from('user_purchases')
@@ -40,13 +42,16 @@ const TemplateDownloadButton = ({
         .single();
 
       if (purchaseError || !purchaseCheck) {
+        console.error("Purchase check failed:", purchaseError);
         toast.error("คุณไม่มีสิทธิ์ดาวน์โหลดไฟล์นี้");
         return;
       }
 
-      // ดาวน์โหลดไฟล์จาก Storage
+      console.log("Download access confirmed, downloading from path:", templatePath);
+
+      // ดาวน์โหลดไฟล์จาก Storage (ใช้ bucket ที่ถูกต้อง)
       const { data, error } = await supabase.storage
-        .from('product_templates')
+        .from('product_files')
         .download(templatePath);
 
       if (error) {

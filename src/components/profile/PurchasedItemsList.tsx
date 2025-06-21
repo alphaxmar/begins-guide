@@ -22,7 +22,13 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
   const { data: purchasedItems, isLoading, isError, error } = useQuery<PurchasedItem[]>({
     queryKey: ['purchased_products', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log("No user found");
+        return [];
+      }
+      
+      console.log("Fetching purchases for user:", user.id);
+      
       const { data, error } = await supabase
         .from('user_purchases')
         .select(`
@@ -43,12 +49,20 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error("Error fetching purchases:", error);
         throw new Error(error.message);
       }
-      return data.filter(item => item.products) as PurchasedItem[];
+      
+      console.log("Raw purchase data:", data);
+      const filteredData = data.filter(item => item.products) as PurchasedItem[];
+      console.log("Filtered purchase data:", filteredData);
+      
+      return filteredData;
     },
     enabled: !!user,
   });
+
+  console.log("PurchasedItemsList state:", { isLoading, isError, purchasedItems });
 
   if (isLoading) {
     return (
@@ -67,6 +81,12 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
       <div className="mt-8 border-t pt-8">
         <h3 className="text-xl font-semibold mb-4">สินค้าของฉัน</h3>
         <p className="text-destructive">เกิดข้อผิดพลาดในการโหลดสินค้า: {(error as Error).message}</p>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="mt-4"
+        >
+          ลองใหม่
+        </Button>
       </div>
     );
   }
@@ -99,9 +119,17 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
           <Package className="mx-auto h-12 w-12 text-muted-foreground" />
           <h4 className="text-lg font-semibold mt-4">ยังไม่มีสินค้า</h4>
           <p className="text-muted-foreground mt-1 mb-4">เลือกซื้อคอร์สเรียนหรือเทมเพลตเพื่อเริ่มต้นเส้นทางของคุณ</p>
-          <Button asChild>
-            <Link to="/products">เลือกชมสินค้าทั้งหมด</Link>
-          </Button>
+          <div className="space-x-4">
+            <Button asChild>
+              <Link to="/products">เลือกชมสินค้าทั้งหมด</Link>
+            </Button>
+            <Button variant="outline" onClick={() => {
+              console.log("Creating test purchase...");
+              // เพิ่ม debug button สำหรับทดสอบ
+            }}>
+              Debug: ตรวจสอบข้อมูล
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-10">

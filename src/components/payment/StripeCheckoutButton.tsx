@@ -35,6 +35,10 @@ const StripeCheckoutButton = ({
     // Use provided productIds or get paid items from cart
     const idsToUse = productIds || getPaidItems().map(item => item.id);
     
+    console.log("Starting checkout for user:", user.id);
+    console.log("Product IDs:", idsToUse);
+    console.log("Amount:", amount);
+    
     if (idsToUse.length === 0) {
       toast.error("ไม่มีสินค้าที่ต้องชำระเงิน");
       return;
@@ -47,7 +51,12 @@ const StripeCheckoutButton = ({
         body: { productIds: idsToUse }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Stripe checkout error:", error);
+        throw error;
+      }
+
+      console.log("Stripe checkout response:", data);
 
       if (data?.url) {
         // เปิด Stripe checkout ในแท็บใหม่
@@ -59,6 +68,7 @@ const StripeCheckoutButton = ({
           paidItems.forEach(item => removeFromCart(item.id));
         }
         
+        toast.success("กำลังนำคุณไปยังหน้าชำระเงิน...");
         onSuccess?.();
       } else {
         throw new Error("ไม่ได้รับ URL สำหรับการชำระเงิน");

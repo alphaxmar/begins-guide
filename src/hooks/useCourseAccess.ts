@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 const checkPurchase = async (userId: string, productId: string): Promise<boolean> => {
+  console.log("Checking purchase for user:", userId, "product:", productId);
+  
   const { data, error } = await supabase
     .from("user_purchases")
     .select("id")
@@ -13,9 +15,10 @@ const checkPurchase = async (userId: string, productId: string): Promise<boolean
 
   if (error) {
     console.error("Error checking purchase:", error);
-    throw error;
+    return false;
   }
   
+  console.log("Purchase check result:", !!data);
   return !!data;
 };
 
@@ -27,6 +30,8 @@ export const useCourseAccess = (productId?: string) => {
     queryFn: () => checkPurchase(user!.id, productId!),
     enabled: !!user && !!productId,
   });
+
+  console.log("Course access check - User:", user?.id, "Product:", productId, "Has access:", hasAccess);
 
   return { hasAccess: hasAccess ?? false, isLoading, isError };
 };
