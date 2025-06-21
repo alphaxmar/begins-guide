@@ -10,18 +10,19 @@ import { toast } from 'sonner';
 interface VipPackage {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   price: number;
   duration_months: number | null;
   features: string[];
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-interface VipPackageCardProps {
-  package: VipPackage;
+interface VipPackageCardProps extends VipPackage {
 }
 
-const VipPackageCard: React.FC<VipPackageCardProps> = ({ package: pkg }) => {
+const VipPackageCard: React.FC<VipPackageCardProps> = (pkg) => {
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
@@ -33,7 +34,7 @@ const VipPackageCard: React.FC<VipPackageCardProps> = ({ package: pkg }) => {
       product_type: 'vip_package',
       image_url: null,
       slug: `vip-${pkg.id}`,
-      description: pkg.description
+      description: pkg.description || ''
     };
 
     addToCart(cartItem);
