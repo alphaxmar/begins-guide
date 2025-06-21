@@ -24,7 +24,7 @@ const StripeCheckoutButton = ({
 }: StripeCheckoutButtonProps) => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const { cartItems, clearCart } = useCart();
+  const { getPaidItems, removeFromCart } = useCart();
 
   const handleCheckout = async () => {
     if (!user) {
@@ -32,10 +32,11 @@ const StripeCheckoutButton = ({
       return;
     }
 
-    const idsToUse = productIds || cartItems.map(item => item.id);
+    // Use provided productIds or get paid items from cart
+    const idsToUse = productIds || getPaidItems().map(item => item.id);
     
     if (idsToUse.length === 0) {
-      toast.error("ไม่มีสินค้าในตะกร้า");
+      toast.error("ไม่มีสินค้าที่ต้องชำระเงิน");
       return;
     }
 
@@ -52,9 +53,10 @@ const StripeCheckoutButton = ({
         // เปิด Stripe checkout ในแท็บใหม่
         window.open(data.url, '_blank');
         
-        // ถ้าเป็นการซื้อจากตะกร้า ให้ clear cart
+        // ถ้าเป็นการซื้อจากตะกร้า ให้ลบเฉพาะสินค้าที่ต้องชำระเงิน
         if (!productIds) {
-          clearCart();
+          const paidItems = getPaidItems();
+          paidItems.forEach(item => removeFromCart(item.id));
         }
         
         onSuccess?.();

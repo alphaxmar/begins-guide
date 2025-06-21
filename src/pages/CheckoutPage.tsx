@@ -10,9 +10,12 @@ import PaymentOptions from "@/components/payment/PaymentOptions";
 
 const CheckoutPage = () => {
   const { user } = useAuth();
-  const { cartItems, cartTotal } = useCart();
+  const { getPaidItems, getPaidTotal } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const paidItems = getPaidItems();
+  const paidTotal = getPaidTotal();
 
   useEffect(() => {
     if (!user) {
@@ -20,17 +23,18 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (cartItems.length === 0) {
+    // Only allow checkout if there are paid items
+    if (paidItems.length === 0) {
       navigate("/cart");
       return;
     }
-  }, [user, cartItems]);
+  }, [user, paidItems]);
 
   if (!user) {
     return null;
   }
 
-  if (cartItems.length === 0) {
+  if (paidItems.length === 0) {
     return null;
   }
 
@@ -52,7 +56,7 @@ const CheckoutPage = () => {
                 <CardTitle>สรุปคำสั่งซื้อ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {cartItems.map((item) => (
+                {paidItems.map((item) => (
                   <div key={item.id} className="flex justify-between items-center py-2 border-b">
                     <div>
                       <h3 className="font-medium">{item.title}</h3>
@@ -65,7 +69,7 @@ const CheckoutPage = () => {
                 ))}
                 <div className="flex justify-between items-center text-lg font-bold pt-4 border-t">
                   <span>ยอดรวมทั้งหมด</span>
-                  <span className="text-2xl text-green-600">{cartTotal.toLocaleString()} บาท</span>
+                  <span className="text-2xl text-green-600">{paidTotal.toLocaleString()} บาท</span>
                 </div>
               </CardContent>
             </Card>
@@ -74,8 +78,8 @@ const CheckoutPage = () => {
           {/* Payment Methods */}
           <div>
             <PaymentOptions
-              productIds={cartItems.map(item => item.id)}
-              amount={cartTotal}
+              productIds={paidItems.map(item => item.id)}
+              amount={paidTotal}
               onSuccess={() => {
                 navigate("/checkout-success");
               }}

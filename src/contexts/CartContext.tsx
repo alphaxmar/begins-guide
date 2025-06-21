@@ -24,6 +24,12 @@ interface CartContextType {
   cartTotal: number; // Computed property
   getItemQuantity: (id: string) => number;
   itemCount: number; // Computed property
+  // New methods for handling free/paid items separately
+  getFreeItems: () => CartItem[];
+  getPaidItems: () => CartItem[];
+  getPaidTotal: () => number;
+  hasFreeItems: boolean;
+  hasPaidItems: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -84,8 +90,23 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     return item?.quantity || 0;
   };
 
+  // New methods for separating free and paid items
+  const getFreeItems = () => {
+    return items.filter(item => item.price === 0);
+  };
+
+  const getPaidItems = () => {
+    return items.filter(item => item.price > 0);
+  };
+
+  const getPaidTotal = () => {
+    return getPaidItems().reduce((total, item) => total + item.price * (item.quantity || 1), 0);
+  };
+
   const cartTotal = getCartTotal();
   const itemCount = items.reduce((count, item) => count + (item.quantity || 1), 0);
+  const hasFreeItems = getFreeItems().length > 0;
+  const hasPaidItems = getPaidItems().length > 0;
 
   return (
     <CartContext.Provider
@@ -100,6 +121,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         cartTotal,
         getItemQuantity,
         itemCount,
+        getFreeItems,
+        getPaidItems,
+        getPaidTotal,
+        hasFreeItems,
+        hasPaidItems,
       }}
     >
       {children}
