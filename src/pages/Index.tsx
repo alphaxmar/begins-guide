@@ -67,7 +67,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* VIP Package Highlight - Improved layout for multiple packages */}
+      {/* VIP Package Highlight - 3 Column Layout */}
       <section className="py-20 bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
@@ -85,46 +85,24 @@ const Index = () => {
               </p>
             </div>
 
-            {/* VIP Packages Display - Handle multiple packages */}
+            {/* VIP Packages Display - 3 Column Grid */}
             {!isLoading && activeVipPackages.length > 0 && (
               <div className="mb-16">
-                {activeVipPackages.length === 1 ? (
-                  // Single package - center it
-                  <div className="max-w-lg mx-auto">
-                    <VipPackageCard package={activeVipPackages[0]} />
-                  </div>
-                ) : activeVipPackages.length === 2 ? (
-                  // Two packages - side by side
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    {activeVipPackages.map((pkg) => (
-                      <VipPackageCard key={pkg.id} package={pkg} />
-                    ))}
-                  </div>
-                ) : (
-                  // Three or more packages - grid layout with featured package
-                  <div className="space-y-8">
-                    {/* Featured package (first one) */}
-                    <div className="max-w-lg mx-auto">
-                      <div className="relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {activeVipPackages.map((pkg, index) => (
+                    <div key={pkg.id} className="relative">
+                      {/* Featured badge for first package */}
+                      {index === 0 && (
                         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                           <Badge className="bg-red-500 text-white text-sm px-4 py-1 animate-pulse">
                             🔥 แนะนำ
                           </Badge>
                         </div>
-                        <VipPackageCard package={activeVipPackages[0]} />
-                      </div>
+                      )}
+                      <VipPackageCard package={pkg} />
                     </div>
-                    
-                    {/* Other packages */}
-                    {activeVipPackages.length > 1 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {activeVipPackages.slice(1).map((pkg) => (
-                          <VipPackageCard key={pkg.id} package={pkg} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             )}
 
