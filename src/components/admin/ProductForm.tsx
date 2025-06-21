@@ -91,8 +91,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
       product_type: "course",
       image_url: "",
       category: "",
-      start_date: "",
-      end_date: "",
       certificate_enabled: false,
       download_limit: undefined,
       download_expiry_hours: 24,
@@ -124,6 +122,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   const handleSubmit = (values: ProductFormValues) => {
+    console.log("Form submitted with values:", values);
     const finalValues = {
       ...values,
       template_file_path: templateFilePath || undefined
@@ -134,10 +133,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold text-white">
           {defaultValues ? "แก้ไขสินค้า" : "สร้างสินค้าใหม่"}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-slate-400">
           {defaultValues ? "อัปเดตข้อมูลสินค้าของคุณ" : "เพิ่มสินค้าใหม่เข้าสู่ระบบ"}
         </p>
       </div>
@@ -145,13 +144,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           {/* Product Type Selection */}
-          <Card>
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <Package className="h-5 w-5" />
                 ประเภทสินค้า
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-400">
                 เลือกประเภทสินค้าที่ต้องการสร้าง
               </CardDescription>
             </CardHeader>
@@ -161,23 +160,23 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 name="product_type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ประเภทสินค้า</FormLabel>
+                    <FormLabel className="text-white">ประเภทสินค้า</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                           <SelectValue placeholder="เลือกประเภทสินค้า" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="bg-slate-700 border-slate-600">
                         {PRODUCT_TYPE_OPTIONS.map((option) => {
                           const IconComponent = option.icon;
                           return (
-                            <SelectItem key={option.value} value={option.value}>
+                            <SelectItem key={option.value} value={option.value} className="text-white hover:bg-slate-600">
                               <div className="flex items-center gap-2">
                                 <IconComponent className="h-4 w-4" />
                                 <div>
                                   <div className="font-medium">{option.label}</div>
-                                  <div className="text-xs text-muted-foreground">{option.description}</div>
+                                  <div className="text-xs text-slate-400">{option.description}</div>
                                 </div>
                               </div>
                             </SelectItem>
@@ -186,7 +185,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       </SelectContent>
                     </Select>
                     {selectedProductTypeInfo && (
-                      <FormDescription>
+                      <FormDescription className="text-slate-400">
                         {selectedProductTypeInfo.description}
                       </FormDescription>
                     )}
@@ -198,10 +197,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </Card>
 
           {/* Basic Information */}
-          <Card>
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle>ข้อมูลพื้นฐาน</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">ข้อมูลพื้นฐาน</CardTitle>
+              <CardDescription className="text-slate-400">
                 ข้อมูลหลักของสินค้าที่จะแสดงให้ลูกค้าเห็น
               </CardDescription>
             </CardHeader>
@@ -211,15 +210,16 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ชื่อสินค้า *</FormLabel>
+                    <FormLabel className="text-white">ชื่อสินค้า *</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="ระบุชื่อสินค้าของคุณ..." 
+                        className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                         {...field}
                         onChange={(e) => handleTitleChange(e.target.value)}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-slate-400">
                       ชื่อที่จะแสดงให้ลูกค้าเห็นในหน้าร้านค้า
                     </FormDescription>
                     <FormMessage />
@@ -232,17 +232,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 name="slug"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL Slug *</FormLabel>
+                    <FormLabel className="text-white">URL Slug *</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="url-slug-ของ-สินค้า" 
+                        className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                         {...field}
                         onChange={(e) => {
                           form.setValue("slug", e.target.value, { shouldDirty: true });
                         }}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-slate-400">
                       URL ที่ใช้เข้าถึงสินค้า (ตัวอักษรเล็ก, ตัวเลข, และขีดกลางเท่านั้น)
                     </FormDescription>
                     <FormMessage />
@@ -255,15 +256,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>รายละเอียดสินค้า</FormLabel>
+                    <FormLabel className="text-white">รายละเอียดสินค้า</FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="อธิบายรายละเอียดเกี่ยวกับสินค้าของคุณ..." 
-                        className="min-h-[120px]"
+                        className="min-h-[120px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-slate-400">
                       รายละเอียดที่จะช่วยให้ลูกค้าเข้าใจและตัดสินใจซื้อสินค้า
                     </FormDescription>
                     <FormMessage />
@@ -274,13 +275,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </Card>
 
           {/* Product Metadata */}
-          <Card>
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <Settings className="h-5 w-5" />
                 การตั้งค่าเพิ่มเติม
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-400">
                 ตั้งค่าหมวดหมู่และการดาวน์โหลดสำหรับสินค้า
               </CardDescription>
             </CardHeader>
@@ -291,13 +292,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
           {/* Course-specific details */}
           {watchedProductType === 'course' && (
-            <Card>
+            <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <GraduationCap className="h-5 w-5" />
                   รายละเอียดคอร์ส
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-slate-400">
                   ข้อมูลเพิ่มเติมเฉพาะสำหรับคอร์สเรียน
                 </CardDescription>
               </CardHeader>
@@ -308,10 +309,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
           )}
 
           {/* Pricing */}
-          <Card>
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle>ราคาและการขาย</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">ราคาและการขาย</CardTitle>
+              <CardDescription className="text-slate-400">
                 กำหนดราคาขายของสินค้า
               </CardDescription>
             </CardHeader>
@@ -321,18 +322,19 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ราคา (บาท) *</FormLabel>
+                    <FormLabel className="text-white">ราคา (บาท) *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
                         placeholder="0" 
                         min="0"
                         step="1"
+                        className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-slate-400">
                       ราคาขายของสินค้าในหน่วยบาท (จำนวนเต็มเท่านั้น)
                     </FormDescription>
                     <FormMessage />
@@ -343,10 +345,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </Card>
 
           {/* Media and Files */}
-          <Card>
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle>ไฟล์และสื่อ</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">ไฟล์และสื่อ</CardTitle>
+              <CardDescription className="text-slate-400">
                 อัปโหลดรูปภาพและไฟล์ที่เกี่ยวข้องกับสินค้า
               </CardDescription>
             </CardHeader>
@@ -363,14 +365,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 name="image_url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL รูปภาพหน้าปก</FormLabel>
+                    <FormLabel className="text-white">URL รูปภาพหน้าปก</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="https://example.com/image.jpg" 
+                        className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-slate-400">
                       URL ของรูปภาพที่จะแสดงเป็นหน้าปกสินค้า
                     </FormDescription>
                     <FormMessage />
@@ -380,13 +383,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </CardContent>
           </Card>
 
-          <Separator />
+          <Separator className="bg-slate-700" />
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" asChild>
-              <a href="/admin/products">ยกเลิก</a>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 hover:text-white"
+              onClick={() => window.location.href = "/admin/products"}
+            >
+              ยกเลิก
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
               {isLoading ? "กำลังบันทึก..." : submitButtonText}
             </Button>
           </div>

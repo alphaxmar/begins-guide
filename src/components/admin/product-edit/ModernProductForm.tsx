@@ -23,7 +23,21 @@ const ModernProductForm = ({ product, onSubmit, isLoading }: ModernProductFormPr
           <div className="bg-slate-800 text-white">
             <ProductForm 
               onSubmit={onSubmit} 
-              defaultValues={product} 
+              defaultValues={{
+                title: product.title,
+                slug: product.slug,
+                description: product.description || '',
+                price: product.price,
+                product_type: product.product_type as any,
+                image_url: product.image_url || '',
+                category: product.category || '',
+                start_date: product.start_date || '',
+                end_date: product.end_date || '',
+                certificate_enabled: product.certificate_enabled || false,
+                download_limit: product.download_limit || undefined,
+                download_expiry_hours: product.download_expiry_hours || 24,
+                template_file_path: product.template_file_path || '',
+              }}
               isLoading={isLoading} 
               submitButtonText="บันทึกการเปลี่ยนแปลง"
               initialData={product}
