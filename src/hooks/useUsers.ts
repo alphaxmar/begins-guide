@@ -52,34 +52,18 @@ export const useUpdateUserRole = () => {
         console.log('User ID:', userId);
         console.log('New Role:', newRole);
         
-        // Check if current user is admin first
+        // Check if current user is logged in
         const { data: currentUser, error: userError } = await supabase.auth.getUser();
-        if (userError) {
+        if (userError || !currentUser.user) {
           console.error('Auth error:', userError);
           throw new Error('กรุณาล็อกอินใหม่');
         }
         
         console.log('Current user ID:', currentUser.user?.id);
         
-        // Check current user's role
-        const { data: currentProfile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', currentUser.user?.id)
-          .single();
-          
-        if (profileError) {
-          console.error('Profile check error:', profileError);
-          throw new Error('ไม่สามารถตรวจสอบสิทธิ์ได้');
-        }
+        // Update role using direct table update (RLS will handle authorization)
+        console.log('Updating role in profiles table...');
         
-        if (currentProfile?.role !== 'admin') {
-          throw new Error('คุณไม่มีสิทธิ์ในการเปลี่ยนบทบาทผู้ใช้');
-        }
-        
-        console.log('Admin permission confirmed, updating role...');
-        
-        // Update role in profiles table
         const { error: updateError } = await supabase
           .from('profiles')
           .update({ 
