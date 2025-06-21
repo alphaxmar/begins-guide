@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ui/page-header";
+import { usePaymentSettings } from "@/hooks/usePaymentSettings";
 import { 
   CreditCard, 
   Smartphone, 
@@ -19,10 +20,14 @@ import {
   EyeOff,
   Save,
   Settings,
-  Banknote
+  Banknote,
+  Loader2
 } from "lucide-react";
 
 const AdminPaymentSettingsPage = () => {
+  const { settings, isLoading: settingsLoading, updateSettings } = usePaymentSettings();
+  
+  // Local state for form inputs
   const [promptPayNumber, setPromptPayNumber] = useState('');
   const [showStripeKey, setShowStripeKey] = useState(false);
   const [showOmiseKey, setShowOmiseKey] = useState(false);
@@ -35,9 +40,32 @@ const AdminPaymentSettingsPage = () => {
   const [accountName, setAccountName] = useState('');
   const [bankBranch, setBankBranch] = useState('');
 
-  const handleSavePromptPay = () => {
-    // TODO: Implement save to database or edge function
-    toast.success('บันทึกหมายเลข PromptPay สำเร็จ');
+  // Loading states for individual saves
+  const [savingPromptPay, setSavingPromptPay] = useState(false);
+  const [savingBank, setSavingBank] = useState(false);
+
+  // Load settings into form when they change
+  useEffect(() => {
+    if (settings) {
+      setPromptPayNumber(settings.promptpay_number || '');
+      setBankName(settings.bank_name || '');
+      setAccountNumber(settings.bank_account_number || '');
+      setAccountName(settings.bank_account_name || '');
+      setBankBranch(settings.bank_branch || '');
+    }
+  }, [settings]);
+
+  const handleSavePromptPay = async () => {
+    if (!promptPayNumber.trim()) {
+      toast.error('กรุณาใส่หมายเลข PromptPay');
+      return;
+    }
+
+    setSavingPromptPay(true);
+    const success = await updateSettings({
+      promptpay_number: promptPayNumber.trim()
+    });
+    setSavingPromptPay(false);
   };
 
   const handleSaveStripeKey = () => {
@@ -50,10 +78,33 @@ const AdminPaymentSettingsPage = () => {
     toast.success('บันทึก Omise Secret Key สำเร็จ');
   };
 
-  const handleSaveBankAccount = () => {
-    // TODO: Implement save to database
-    toast.success('บันทึกข้อมูลบัญชีธนาคารสำเร็จ');
+  const handleSaveBankAccount = async () => {
+    if (!bankName || !accountNumber || !accountName) {
+      toast.error('กรุณากรอกข้อมูลธนาคาร หมายเลขบัญชี และชื่อบัญชี');
+      return;
+    }
+
+    setSavingBank(true);
+    const success = await updateSettings({
+      bank_name: bankName,
+      bank_account_number: accountNumber,
+      bank_account_name: accountName,
+      bank_branch: bankBranch
+    });
+    setSavingBank(false);
   };
+
+  if (settingsLoading) {
+    return (
+      <AdminLayout>
+        <div className="py-8">
+          <div className="flex justify-center items-center h-96">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -130,8 +181,16 @@ const AdminPaymentSettingsPage = () => {
               </div>
 
               <div className="pt-2">
-                <Button onClick={handleSaveBankAccount} className="w-full md:w-auto">
-                  <Save className="mr-2 h-4 w-4" />
+                <Button 
+                  onClick={handleSaveBankAccount} 
+                  className="w-full md:w-auto"
+                  disabled={savingBank}
+                >
+                  {savingBank ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
                   บันทึกข้อมูลบัญชีธนาคาร
                 </Button>
               </div>
@@ -166,8 +225,15 @@ const AdminPaymentSettingsPage = () => {
                     value={promptPayNumber}
                     onChange={(e) => setPromptPayNumber(e.target.value)}
                   />
-                  <Button onClick={handleSavePromptPay}>
-                    <Save className="mr-2 h-4 w-4" />
+                  <Button 
+                    onClick={handleSavePromptPay}
+                    disabled={savingPromptPay}
+                  >
+                    {savingPromptPay ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
                     บันทึก
                   </Button>
                 </div>

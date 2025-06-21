@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface PaymentSettings {
@@ -20,19 +21,30 @@ export const usePaymentSettings = () => {
     try {
       setIsLoading(true);
       
-      // ใช้ข้อมูลคงที่ที่ตรงกับฐานข้อมูลจนกว่า types จะถูกอัปเดต
-      setSettings({
-        promptpay_number: '0962358979',
-        bank_name: 'ธนาคารกรุงเทพ',
-        bank_account_number: '138-4-41680-4',
-        bank_account_name: 'รณยศ ตันติถาวรรัช',
-        bank_branch: '',
-        stripe_enabled: true,
-        omise_enabled: true
-      });
+      const { data, error } = await supabase
+        .from('payment_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (error) {
+        console.error('Error fetching payment settings:', error);
+        // Use fallback data if fetch fails
+        setSettings({
+          promptpay_number: '0962358979',
+          bank_name: 'ธนาคารกรุงเทพ',
+          bank_account_number: '138-4-41680-4',
+          bank_account_name: 'รณยศ ตันติถาวรรัช',
+          bank_branch: '',
+          stripe_enabled: true,
+          omise_enabled: true
+        });
+      } else {
+        setSettings(data);
+      }
     } catch (error) {
       console.error('Error fetching payment settings:', error);
-      // ใช้ข้อมูลจากรูปที่แสดงเป็น fallback
+      // Use fallback data
       setSettings({
         promptpay_number: '0962358979',
         bank_name: 'ธนาคารกรุงเทพ',
@@ -51,14 +63,28 @@ export const usePaymentSettings = () => {
     try {
       setIsLoading(true);
       
-      // อัปเดต local state (จะต้องแก้ไขให้เชื่อมกับฐานข้อมูลเมื่อ types ถูกอัปเดต)
+      const { error } = await supabase
+        .from('payment_settings')
+        .upsert({
+          id: 1,
+          ...newSettings,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error updating payment settings:', error);
+        toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        return false;
+      }
+
+      // Update local state
       setSettings(prev => ({ ...prev, ...newSettings }));
-      toast.success('บันทึกการตั้งค่าสำเร็จ (ในหน่วยความจำ)');
+      toast.success('บันทึกการตั้งค่าสำเร็จ');
+      return true;
     } catch (error) {
       console.error('Error updating payment settings:', error);
-      // แม้เกิดข้อผิดพลาดก็ยังอัปเดต local state
-      setSettings(prev => ({ ...prev, ...newSettings }));
-      toast.success('บันทึกการตั้งค่าสำเร็จ (ในหน่วยความจำ)');
+      toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      return false;
     } finally {
       setIsLoading(false);
     }
