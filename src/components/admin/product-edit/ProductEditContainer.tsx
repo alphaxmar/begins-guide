@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,14 +97,24 @@ const ProductEditContainer = ({ product, slug }: ProductEditContainerProps) => {
       return data;
     },
     onSuccess: (data) => {
-      toast.success("อัปเดตสินค้าเรียบร้อยแล้ว!");
+      toast.success("✅ บันทึกการเปลี่ยนแปลงเรียบร้อยแล้ว!", {
+        description: `สินค้า "${data.title}" ได้รับการอัปเดตแล้ว`,
+        duration: 3000,
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["product", slug] });
       queryClient.invalidateQueries({ queryKey: ["product", data.slug] });
-      navigate("/admin/products");
+      
+      // หน่วงเวลาเล็กน้อยเพื่อให้ผู้ใช้เห็น toast ก่อนที่จะ redirect
+      setTimeout(() => {
+        navigate("/admin/products");
+      }, 1500);
     },
     onError: (error) => {
-      toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
+      toast.error("❌ เกิดข้อผิดพลาดในการบันทึก", {
+        description: error.message,
+        duration: 4000,
+      });
     },
   });
 
