@@ -83,7 +83,8 @@ function App() {
                   <Route path="products/:slug" element={<ProductDetail />} />
                   <Route path="courses" element={<CoursesPage />} />
                   <Route path="courses/:slug" element={<CoursePage />} />
-                  <Route path="learn/:slug" element={<ModernCoursePage />} />
+                  {/* Updated route pattern to match expected URL */}
+                  <Route path="courses/:slug/learn" element={<ModernCoursePage />} />
                   <Route path="auth" element={<AuthPage />} />
                   <Route path="reset-password" element={<ResetPasswordPage />} />
                   <Route path="update-password" element={<UpdatePasswordPage />} />
