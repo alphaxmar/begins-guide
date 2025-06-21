@@ -32,7 +32,7 @@ const Index = () => {
                   เริ่มต้นด้วย VIP Package
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-blue-600">
+              <Button asChild variant="outline" size="lg" className="border-white text-blue-600 bg-white hover:bg-gray-100 hover:text-blue-700">
                 <Link to="/articles">
                   เรียนรู้ฟรี จากบทความ
                   <ArrowRight className="ml-2 h-4 w-4" />
