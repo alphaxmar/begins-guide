@@ -18,35 +18,14 @@ export const useUsers = () => {
     queryKey: ['users'],
     queryFn: async (): Promise<UserWithStats[]> => {
       try {
-        console.log('Fetching users with RPC function');
+        console.log('Fetching users with stats...');
         
-        // First try the RPC function which should now work with fixed RLS policies
+        // Use the RPC function that handles admin permission checking
         const { data, error } = await supabase.rpc('get_users_with_stats');
         
         if (error) {
-          console.error('RPC Error fetching users:', error);
-          
-          // If RPC fails, try a direct approach for admins
-          console.log('RPC failed, trying direct profiles query');
-          const { data: profilesData, error: profilesError } = await supabase
-            .from('profiles')
-            .select('id, full_name, role, updated_at');
-          
-          if (profilesError) {
-            console.error('Profiles query error:', profilesError);
-            throw profilesError;
-          }
-          
-          // Return simplified data without auth.users info and purchase stats
-          return (profilesData || []).map(profile => ({
-            id: profile.id,
-            email: 'Email access restricted',
-            full_name: profile.full_name,
-            role: profile.role,
-            created_at: profile.updated_at || new Date().toISOString(),
-            total_purchases: 0,
-            total_spent: 0
-          }));
+          console.error('RPC Error:', error);
+          throw new Error(`ไม่สามารถดึงข้อมูลผู้ใช้ได้: ${error.message}`);
         }
         
         console.log('Successfully fetched users:', data?.length || 0);
@@ -66,34 +45,56 @@ export const useUpdateUserRole = () => {
   return useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'user' | 'admin' | 'partner' | 'vip' }) => {
       try {
-        console.log('Updating user role:', userId, newRole);
+        console.log('=== Starting role update ===');
+        console.log('User ID:', userId);
+        console.log('New Role:', newRole);
         
-        // Check current user's admin status first
-        const { data: currentUser, error: currentUserError } = await supabase.auth.getUser();
-        if (currentUserError) {
-          console.error('Failed to get current user:', currentUserError);
+        // Check if current user is admin first
+        const { data: currentUser, error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error('Auth error:', userError);
           throw new Error('กรุณาล็อกอินใหม่');
         }
-
-        // Update role in profiles table using direct update
-        const { error: profileError } = await supabase
+        
+        console.log('Current user ID:', currentUser.user?.id);
+        
+        // Check current user's role
+        const { data: currentProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', currentUser.user?.id)
+          .single();
+          
+        if (profileError) {
+          console.error('Profile check error:', profileError);
+          throw new Error('ไม่สามารถตรวจสอบสิทธิ์ได้');
+        }
+        
+        if (currentProfile?.role !== 'admin') {
+          throw new Error('คุณไม่มีสิทธิ์ในการเปลี่ยนบทบาทผู้ใช้');
+        }
+        
+        console.log('Admin permission confirmed, updating role...');
+        
+        // Update role in profiles table
+        const { error: updateError } = await supabase
           .from('profiles')
           .update({ 
-            role: newRole, 
-            updated_at: new Date().toISOString() 
+            role: newRole,
+            updated_at: new Date().toISOString()
           })
           .eq('id', userId);
 
-        if (profileError) {
-          console.error('Profile update error:', profileError);
-          throw new Error(`ไม่สามารถอัปเดตสิทธิ์ได้: ${profileError.message}`);
+        if (updateError) {
+          console.error('Role update error:', updateError);
+          throw new Error(`ไม่สามารถอัปเดตสิทธิ์ได้: ${updateError.message}`);
         }
 
-        console.log('Profile role updated successfully');
+        console.log('Role updated successfully in profiles table');
 
-        // If role is VIP, create/activate VIP membership
+        // Handle VIP membership
         if (newRole === 'vip') {
-          console.log('Creating VIP membership');
+          console.log('Creating/updating VIP membership...');
           const { error: vipError } = await supabase
             .from('vip_memberships')
             .upsert({
@@ -107,15 +108,14 @@ export const useUpdateUserRole = () => {
             });
 
           if (vipError) {
-            console.error('VIP membership error:', vipError);
-            // Don't throw error here, just log it
-            console.warn('VIP membership update failed, but role was updated successfully');
+            console.warn('VIP membership error:', vipError);
+            // Don't throw error, just warn
           } else {
             console.log('VIP membership created/updated successfully');
           }
         } else {
-          // If role is not VIP, deactivate VIP membership
-          console.log('Deactivating VIP membership');
+          // Deactivate VIP membership if role is not VIP
+          console.log('Deactivating VIP membership...');
           const { error: deactivateError } = await supabase
             .from('vip_memberships')
             .update({ 
@@ -126,22 +126,23 @@ export const useUpdateUserRole = () => {
 
           if (deactivateError) {
             console.warn('Error deactivating VIP:', deactivateError);
-            // Don't throw error here, just log it
           }
         }
         
-        console.log('Successfully completed user role update');
+        console.log('=== Role update completed successfully ===');
         return { success: true };
       } catch (error) {
-        console.error('Error updating user role:', error);
+        console.error('=== Role update failed ===');
+        console.error('Error:', error);
         throw error;
       }
     },
     onSuccess: () => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['vipStatus'] });
       queryClient.invalidateQueries({ queryKey: ['userRole'] });
-      toast.success('เปลี่ยนสิทธิ์ผู้ใช้สำเร็จ');
+      toast.success('เปลี่ยนสิทธิ์ผู้ใช้สำเร็จแล้ว!');
     },
     onError: (error: any) => {
       console.error('Mutation error:', error);

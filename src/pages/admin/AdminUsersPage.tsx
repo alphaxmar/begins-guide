@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,11 +8,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useUsers, useUpdateUserRole } from "@/hooks/useUsers";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PageHeader } from "@/components/ui/page-header";
-import { Search, UserCheck, Shield, Crown, AlertCircle } from "lucide-react";
+import { Search, UserCheck, Shield, Crown, AlertCircle, RefreshCw } from "lucide-react";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import UserRoleDialog from '@/components/admin/UserRoleDialog';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from 'sonner';
 
 const AdminUsersPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,24 +65,45 @@ const AdminUsersPage = () => {
   };
 
   const handleRoleChange = async (userId: string, newRole: 'user' | 'admin' | 'partner' | 'vip') => {
-    console.log('AdminUsersPage: Role change requested', { userId, newRole });
+    console.log('AdminUsersPage: Role change initiated');
+    console.log('Target User ID:', userId);
+    console.log('New Role:', newRole);
     
     try {
       await updateUserRole.mutateAsync({ userId, newRole });
+      
+      // Close dialog and reset state on success
       setIsRoleDialogOpen(false);
       setSelectedUser(null);
-      // Refetch users to update the display
-      refetch();
+      
+      // Show success message
+      toast.success(`เปลี่ยนสิทธิ์เป็น ${getRoleText(newRole)} สำเร็จแล้ว`);
+      
+      // Refresh the users list
+      setTimeout(() => {
+        refetch();
+      }, 1000);
+      
     } catch (error) {
-      console.error('Role change failed:', error);
-      // Error handling is done in the mutation's onError
+      console.error('AdminUsersPage: Role change failed:', error);
+      // Error toast is handled by the mutation's onError
     }
   };
 
   const openRoleDialog = (user: any) => {
-    console.log('Opening role dialog for user:', user.id);
+    console.log('AdminUsersPage: Opening role dialog for user:', {
+      id: user.id,
+      email: user.email,
+      currentRole: user.role
+    });
     setSelectedUser(user);
     setIsRoleDialogOpen(true);
+  };
+
+  const handleRefresh = () => {
+    console.log('Manually refreshing users list...');
+    refetch();
+    toast.info('กำลังรีเฟรชข้อมูลผู้ใช้...');
   };
 
   if (error) {
@@ -96,14 +117,17 @@ const AdminUsersPage = () => {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้: {error.message}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => refetch()}
-              className="ml-2"
-            >
-              ลองใหม่
-            </Button>
+            <div className="mt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="mr-2"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                ลองใหม่
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
       </div>
@@ -117,6 +141,7 @@ const AdminUsersPage = () => {
         description="ดูและจัดการข้อมูลผู้ใช้งานในระบบ"
       />
 
+      {/* Search and Filter Section */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="flex-1">
           <div className="relative">
@@ -129,23 +154,42 @@ const AdminUsersPage = () => {
             />
           </div>
         </div>
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="กรองตามสิทธิ์" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">ทุกสิทธิ์</SelectItem>
-            <SelectItem value="user">ผู้ใช้ทั่วไป</SelectItem>
-            <SelectItem value="partner">พาร์ทเนอร์</SelectItem>
-            <SelectItem value="vip">สมาชิก VIP</SelectItem>
-            <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="กรองตามสิทธิ์" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">ทุกสิทธิ์</SelectItem>
+              <SelectItem value="user">ผู้ใช้ทั่วไป</SelectItem>
+              <SelectItem value="partner">พาร์ทเนอร์</SelectItem>
+              <SelectItem value="vip">สมาชิก VIP</SelectItem>
+              <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={handleRefresh}
+            disabled={isLoading}
+            title="รีเฟรชข้อมูล"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>รายการผู้ใช้งาน ({filteredUsers?.length || 0} คน)</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>รายการผู้ใช้งาน ({filteredUsers?.length || 0} คน)</span>
+            {updateUserRole.isPending && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                กำลังอัปเดตสิทธิ์...
+              </div>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -153,60 +197,71 @@ const AdminUsersPage = () => {
               <LoadingSpinner />
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ผู้ใช้งาน</TableHead>
-                  <TableHead>สิทธิ์</TableHead>
-                  <TableHead>สถิติการซื้อ</TableHead>
-                  <TableHead>วันที่สมัคร</TableHead>
-                  <TableHead>การจัดการ</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{user.full_name || 'ไม่ระบุชื่อ'}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        <p className="text-xs text-muted-foreground">ID: {user.id}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getRoleColor(user.role)}>
-                        {getRoleIcon(user.role)}
-                        <span className="ml-1">{getRoleText(user.role)}</span>
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div>{user.total_purchases} ครั้ง</div>
-                        <div className="text-muted-foreground">
-                          ฿{Number(user.total_spent).toLocaleString()}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(user.created_at), 'dd MMM yyyy', { locale: th })}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openRoleDialog(user)}
-                        disabled={updateUserRole.isPending}
-                      >
-                        เปลี่ยนสิทธิ์
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ผู้ใช้งาน</TableHead>
+                    <TableHead>สิทธิ์</TableHead>
+                    <TableHead>สถิติการซื้อ</TableHead>
+                    <TableHead>วันที่สมัคร</TableHead>
+                    <TableHead>การจัดการ</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers?.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{user.full_name || 'ไม่ระบุชื่อ'}</p>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <p className="text-xs text-muted-foreground font-mono">
+                            ID: {user.id.substring(0, 8)}...
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getRoleColor(user.role)}>
+                          {getRoleIcon(user.role)}
+                          <span className="ml-1">{getRoleText(user.role)}</span>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{user.total_purchases} ครั้ง</div>
+                          <div className="text-muted-foreground">
+                            ฿{Number(user.total_spent).toLocaleString()}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(user.created_at), 'dd MMM yyyy', { locale: th })}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openRoleDialog(user)}
+                          disabled={updateUserRole.isPending}
+                        >
+                          {updateUserRole.isPending ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              กำลังอัปเดต...
+                            </>
+                          ) : (
+                            'เปลี่ยนสิทธิ์'
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
           
-          {filteredUsers && filteredUsers.length === 0 && (
+          {filteredUsers && filteredUsers.length === 0 && !isLoading && (
             <div className="text-center py-8 text-muted-foreground">
               ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไข
             </div>
@@ -218,8 +273,10 @@ const AdminUsersPage = () => {
         user={selectedUser}
         isOpen={isRoleDialogOpen}
         onClose={() => {
-          setIsRoleDialogOpen(false);
-          setSelectedUser(null);
+          if (!updateUserRole.isPending) {
+            setIsRoleDialogOpen(false);
+            setSelectedUser(null);
+          }
         }}
         onRoleChange={handleRoleChange}
         isLoading={updateUserRole.isPending}
