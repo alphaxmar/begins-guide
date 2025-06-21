@@ -31,7 +31,7 @@ const EditArticle = () => {
   const { data: article, isLoading: isArticleLoading } = useQuery<Tables<'articles'>>({
     queryKey: ['article', slug],
     queryFn: () => fetchArticleForEdit(slug!),
-    enabled: !!slug && isAdmin,
+    enabled: !!slug && !!isAdmin,
   });
   
   useEffect(() => {

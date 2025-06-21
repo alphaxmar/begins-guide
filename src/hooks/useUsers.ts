@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -17,18 +18,58 @@ export const useUsers = () => {
     queryKey: ['users'],
     queryFn: async (): Promise<UserWithStats[]> => {
       try {
-        console.log('Fetching users with stats using admin function...');
+        console.log('Fetching users with stats...');
         
-        // Use the new admin-specific RPC function
-        const { data, error } = await supabase.rpc('get_users_with_stats_admin');
-        
-        if (error) {
-          console.error('RPC Error:', error);
-          throw new Error(`ไม่สามารถดึงข้อมูลผู้ใช้ได้: ${error.message}`);
+        // Use a simpler approach that works with existing RLS
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            full_name,
+            role,
+            updated_at
+          `)
+          .order('updated_at', { ascending: false });
+
+        if (profilesError) {
+          console.error('Profiles Error:', profilesError);
+          throw new Error(`ไม่สามารถดึงข้อมูลผู้ใช้ได้: ${profilesError.message}`);
         }
+
+        // Get user purchase stats
+        const { data: purchaseStats, error: statsError } = await supabase
+          .from('user_purchases')
+          .select(`
+            user_id,
+            product_id,
+            products!inner(price)
+          `);
+
+        if (statsError) {
+          console.warn('Purchase stats error:', statsError);
+        }
+
+        // Combine data
+        const usersWithStats: UserWithStats[] = (profiles || []).map(profile => {
+          const userPurchases = purchaseStats?.filter(p => p.user_id === profile.id) || [];
+          const totalPurchases = userPurchases.length;
+          const totalSpent = userPurchases.reduce((sum, purchase) => {
+            return sum + (purchase.products?.price || 0);
+          }, 0);
+
+          return {
+            id: profile.id,
+            email: 'Email not accessible', // Will be shown as placeholder
+            full_name: profile.full_name,
+            role: profile.role,
+            created_at: profile.updated_at || new Date().toISOString(),
+            total_purchases: totalPurchases,
+            total_spent: totalSpent
+          };
+        });
         
-        console.log('Successfully fetched users:', data?.length || 0);
-        return data || [];
+        console.log('Successfully fetched users:', usersWithStats.length);
+        return usersWithStats;
       } catch (error) {
         console.error('Users fetch error:', error);
         throw error;
