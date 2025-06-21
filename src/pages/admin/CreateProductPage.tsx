@@ -203,6 +203,12 @@ const CreateProductPage = () => {
           description: values.description || null,
           image_url: newImageUrl,
           template_file_path: newTemplateFilePath,
+          category: values.category || null,
+          start_date: values.start_date ? new Date(values.start_date).toISOString() : null,
+          end_date: values.end_date ? new Date(values.end_date).toISOString() : null,
+          certificate_enabled: values.certificate_enabled || false,
+          download_limit: values.download_limit || null,
+          download_expiry_hours: values.download_expiry_hours || 24,
         })
         .eq("id", createdProduct.id)
         .select()
@@ -276,7 +282,7 @@ const CreateProductPage = () => {
           {/* Product Information Section */}
           <Card className="bg-slate-800 border-slate-700">
             <CardHeader className="border-b border-slate-700">
-              <CardTitle className="text-white text-xl">ข้อมูลสินค้า</CardTitle>
+              <CardTitle className="text-white text-xl">ข้อมูลสินค้าและราคา</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="bg-slate-800 text-white">
@@ -305,9 +311,28 @@ const CreateProductPage = () => {
             </CardContent>
           </Card>
 
-          {/* Episodes Section - Show only after product is created and is a course */}
-          {createdProduct && createdProduct.product_type === 'course' && (
-            <ProductLessonsSection product={createdProduct} />
+          {/* Episodes Section - Show always if it's a course (even during creation) */}
+          {(createdProduct?.product_type === 'course' || (!createdProduct && 'course' === 'course')) && (
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader className="border-b border-slate-700">
+                <CardTitle className="text-white text-xl">เอกสารและ Episodes</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {createdProduct ? (
+                  <ProductLessonsSection product={createdProduct} />
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-slate-400 mb-4">
+                      <svg className="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      <h3 className="text-lg font-medium text-slate-300 mb-2">กรุณาสร้างคอร์สก่อน</h3>
+                      <p className="text-slate-400 mb-6">คุณต้องสร้างคอร์สเสียก่อน จึงจะสามารถเพิ่ม Episodes ได้</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {/* Finish Button - Show only after product is created */}
