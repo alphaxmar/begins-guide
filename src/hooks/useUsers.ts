@@ -18,9 +18,27 @@ export const useUsers = () => {
     queryKey: ['users'],
     queryFn: async (): Promise<UserWithStats[]> => {
       try {
-        console.log('Fetching users with stats...');
+        console.log('Fetching users with stats using admin function...');
         
-        // Now we can use the profiles table directly with the new safe RLS policies
+        // Try to use the admin function first
+        const { data: adminData, error: adminError } = await supabase.rpc('get_users_with_stats_admin');
+        
+        if (!adminError && adminData) {
+          console.log('Successfully fetched users via admin function:', adminData.length);
+          return adminData.map(user => ({
+            id: user.id,
+            email: user.email || 'No email available',
+            full_name: user.full_name,
+            role: user.role,
+            created_at: user.created_at,
+            total_purchases: Number(user.total_purchases) || 0,
+            total_spent: Number(user.total_spent) || 0
+          }));
+        }
+
+        console.log('Admin function failed, falling back to direct query...', adminError);
+        
+        // Fallback to direct profile access
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select(`
@@ -59,7 +77,7 @@ export const useUsers = () => {
 
           return {
             id: profile.id,
-            email: 'Email not accessible', // Will be shown as placeholder
+            email: 'Email not accessible via fallback', // Will be shown as placeholder
             full_name: profile.full_name,
             role: profile.role,
             created_at: profile.updated_at || new Date().toISOString(),
@@ -68,7 +86,7 @@ export const useUsers = () => {
           };
         });
         
-        console.log('Successfully fetched users:', usersWithStats.length);
+        console.log('Successfully fetched users via fallback:', usersWithStats.length);
         return usersWithStats;
       } catch (error) {
         console.error('Users fetch error:', error);
