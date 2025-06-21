@@ -40,23 +40,33 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
         amount: totalAmount
       });
 
+      // สร้าง request body
+      const requestBody = {
+        product_ids: productIds,
+        amount: totalAmount
+      };
+
+      console.log('Request body:', JSON.stringify(requestBody));
+
+      // สร้าง headers
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
 
       // เพิ่ม Authorization header ถ้ามีผู้ใช้ล็อกอิน
       if (user) {
-        const session = await supabase.auth.getSession();
-        if (session.data.session?.access_token) {
-          headers.Authorization = `Bearer ${session.data.session.access_token}`;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers.Authorization = `Bearer ${session.access_token}`;
+          console.log('Added Authorization header');
         }
       }
 
+      console.log('Headers:', headers);
+
+      // เรียก Edge Function
       const { data, error } = await supabase.functions.invoke('create-promptpay-payment', {
-        body: {
-          product_ids: productIds,
-          amount: totalAmount
-        },
+        body: requestBody,
         headers
       });
 
@@ -64,7 +74,15 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
 
       if (error) {
         console.error('Function error:', error);
-        throw error;
+        throw new Error(error.message || 'เกิดข้อผิดพลาดในการเรียกใช้ function');
+      }
+
+      if (!data) {
+        throw new Error('ไม่ได้รับข้อมูลจาก function');
+      }
+
+      if (!data.payment_ref) {
+        throw new Error('ไม่ได้รับหมายเลขอ้างอิง');
       }
 
       setOrderId(data.payment_ref);

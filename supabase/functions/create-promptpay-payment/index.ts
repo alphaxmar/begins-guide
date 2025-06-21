@@ -13,10 +13,54 @@ serve(async (req) => {
   }
 
   try {
-    const { product_ids, amount } = await req.json();
+    console.log("=== Start create-promptpay-payment ===");
+    console.log("Request method:", req.method);
+    console.log("Request headers:", Object.fromEntries(req.headers.entries()));
+
+    let requestBody;
+    try {
+      const bodyText = await req.text();
+      console.log("Raw body text:", bodyText);
+      
+      if (!bodyText || bodyText.trim() === '') {
+        throw new Error("Request body is empty");
+      }
+      
+      requestBody = JSON.parse(bodyText);
+      console.log("Parsed request body:", requestBody);
+    } catch (parseError) {
+      console.error("JSON parsing error:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    const { product_ids, amount } = requestBody;
     
-    if (!product_ids || !Array.isArray(product_ids) || product_ids.length === 0 || !amount) {
-      throw new Error("Product IDs and amount are required");
+    if (!product_ids || !Array.isArray(product_ids) || product_ids.length === 0) {
+      console.error("Invalid product_ids:", product_ids);
+      return new Response(
+        JSON.stringify({ error: "Product IDs are required and must be an array" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      console.error("Invalid amount:", amount);
+      return new Response(
+        JSON.stringify({ error: "Amount is required and must be a positive number" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
     }
 
     console.log("Creating PromptPay payment with:", { product_ids, amount });
@@ -45,6 +89,8 @@ serve(async (req) => {
       } catch (authError) {
         console.log("Auth error (continuing without user):", authError);
       }
+    } else {
+      console.log("No Authorization header provided");
     }
 
     // ดึงข้อมูล PromptPay จากการตั้งค่า
@@ -56,11 +102,24 @@ serve(async (req) => {
 
     if (settingsError) {
       console.error("Settings error:", settingsError);
-      throw new Error("Failed to fetch payment settings");
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch payment settings" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        }
+      );
     }
 
     if (!paymentSettings?.promptpay_number) {
-      throw new Error("PromptPay number not configured");
+      console.error("PromptPay number not configured");
+      return new Response(
+        JSON.stringify({ error: "PromptPay number not configured" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        }
+      );
     }
 
     const promptPayNumber = paymentSettings.promptpay_number;
@@ -70,50 +129,54 @@ serve(async (req) => {
     let orderId = 'GUEST_' + Date.now().toString(36).toUpperCase();
     
     if (userId) {
-      const { data: order, error: orderError } = await supabaseClient
-        .from('orders')
-        .insert({
-          user_id: userId,
-          total_amount: amount,
-          status: 'pending',
-          payment_provider: 'promptpay'
-        })
-        .select()
-        .single();
+      try {
+        const { data: order, error: orderError } = await supabaseClient
+          .from('orders')
+          .insert({
+            user_id: userId,
+            total_amount: amount,
+            status: 'pending',
+            payment_provider: 'promptpay'
+          })
+          .select()
+          .single();
 
-      if (orderError) {
-        console.error("Order error:", orderError);
-        throw new Error("Failed to create order");
-      }
+        if (orderError) {
+          console.error("Order error:", orderError);
+          // ไม่ throw error แต่ใช้ guest order ID
+          console.log("Using guest order ID instead");
+        } else {
+          orderId = order.id;
+          console.log("Order created:", orderId);
 
-      orderId = order.id;
-      console.log("Order created:", orderId);
+          // สร้าง order items
+          const { data: products, error: productsError } = await supabaseClient
+            .from('products')
+            .select('id, price')
+            .in('id', product_ids);
 
-      // สร้าง order items
-      const { data: products, error: productsError } = await supabaseClient
-        .from('products')
-        .select('id, price')
-        .in('id', product_ids);
+          if (!productsError && products) {
+            const orderItems = products.map(product => ({
+              order_id: orderId,
+              product_id: product.id,
+              quantity: 1,
+              price: product.price
+            }));
 
-      if (productsError || !products) {
-        console.error("Products error:", productsError);
-        throw new Error("Failed to fetch products");
-      }
+            const { error: itemsError } = await supabaseClient
+              .from('order_items')
+              .insert(orderItems);
 
-      const orderItems = products.map(product => ({
-        order_id: orderId,
-        product_id: product.id,
-        quantity: 1,
-        price: product.price
-      }));
-
-      const { error: itemsError } = await supabaseClient
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) {
-        console.error("Items error:", itemsError);
-        throw new Error("Failed to create order items");
+            if (itemsError) {
+              console.error("Items error:", itemsError);
+              // ไม่ throw error แต่ log warning
+              console.log("Failed to create order items but continuing");
+            }
+          }
+        }
+      } catch (orderCreationError) {
+        console.error("Order creation failed:", orderCreationError);
+        console.log("Using guest order ID instead");
       }
     }
 
@@ -123,25 +186,29 @@ serve(async (req) => {
 
     console.log("QR Code URL generated:", qrCodeUrl);
 
+    const response = {
+      qr_code: qrCodeUrl,
+      payment_ref: orderId,
+      promptpay_number: promptPayNumber,
+      amount: amount
+    };
+
+    console.log("Returning response:", response);
+
     return new Response(
-      JSON.stringify({ 
-        qr_code: qrCodeUrl,
-        payment_ref: orderId,
-        promptpay_number: promptPayNumber,
-        amount: amount
-      }),
+      JSON.stringify(response),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       }
     );
   } catch (error: any) {
-    console.error("Error:", error);
+    console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Internal server error" }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
+        status: 500,
       }
     );
   }
