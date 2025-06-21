@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import PurchasedItemCard from "./PurchasedItemCard";
 import { Tables } from "@/integrations/supabase/types";
 import { User } from "@supabase/supabase-js";
-import { Package } from "lucide-react";
+import { Package, RefreshCw, ShoppingCart } from "lucide-react";
 
 type ProductWithTemplatePath = Tables<'products'> & { template_file_path?: string | null };
 type PurchasedItem = Tables<'user_purchases'> & {
@@ -19,7 +19,7 @@ interface PurchasedItemsListProps {
 }
 
 const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
-  const { data: purchasedItems, isLoading, isError, error } = useQuery<PurchasedItem[]>({
+  const { data: purchasedItems, isLoading, isError, error, refetch } = useQuery<PurchasedItem[]>({
     queryKey: ['purchased_products', user?.id],
     queryFn: async () => {
       if (!user) {
@@ -50,7 +50,7 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
 
       if (error) {
         console.error("Error fetching purchases:", error);
-        throw new Error(error.message);
+        throw new Error(`ไม่สามารถโหลดข้อมูลได้: ${error.message}`);
       }
       
       console.log("Raw purchase data:", data);
@@ -60,17 +60,22 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
       return filteredData;
     },
     enabled: !!user,
+    retry: 2, // เพิ่ม retry
+    staleTime: 30 * 1000, // 30 วินาที
   });
 
-  console.log("PurchasedItemsList state:", { isLoading, isError, purchasedItems });
+  console.log("PurchasedItemsList state:", { isLoading, isError, purchasedItems, error });
 
   if (isLoading) {
     return (
-      <div className="mt-8 border-t pt-8">
-        <h3 className="text-xl font-semibold mb-4">สินค้าของฉัน</h3>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-2xl font-bold tracking-tight">สินค้าของฉัน</h3>
+          <Skeleton className="h-10 w-32" />
+        </div>
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-          <Skeleton className="h-28 w-full rounded-lg" />
-          <Skeleton className="h-28 w-full rounded-lg" />
+          <Skeleton className="h-64 w-full rounded-lg" />
+          <Skeleton className="h-64 w-full rounded-lg" />
         </div>
       </div>
     );
@@ -78,15 +83,28 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
 
   if (isError) {
     return (
-      <div className="mt-8 border-t pt-8">
-        <h3 className="text-xl font-semibold mb-4">สินค้าของฉัน</h3>
-        <p className="text-destructive">เกิดข้อผิดพลาดในการโหลดสินค้า: {(error as Error).message}</p>
-        <Button 
-          onClick={() => window.location.reload()} 
-          className="mt-4"
-        >
-          ลองใหม่
-        </Button>
+      <div className="space-y-6">
+        <h3 className="text-2xl font-bold tracking-tight text-destructive">เกิดข้อผิดพลาด</h3>
+        <div className="text-center py-8 border-2 border-dashed border-destructive/30 rounded-lg bg-destructive/5">
+          <p className="text-destructive mb-4">
+            ไม่สามารถโหลดรายการสินค้าได้: {(error as Error)?.message}
+          </p>
+          <div className="space-x-4">
+            <Button 
+              onClick={() => refetch()} 
+              variant="outline"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              ลองใหม่
+            </Button>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="destructive"
+            >
+              รีโหลดหน้า
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -111,30 +129,55 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
   };
 
   return (
-    <div className="mt-8 border-t pt-8">
-      <h3 className="text-2xl font-bold tracking-tight mb-6">สินค้าของฉัน</h3>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-2xl font-bold tracking-tight">สินค้าของฉัน</h3>
+        <Button 
+          onClick={() => refetch()} 
+          variant="outline" 
+          size="sm"
+          disabled={isLoading}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          รีเฟรช
+        </Button>
+      </div>
       
       {!purchasedItems || purchasedItems.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed rounded-lg bg-muted/5">
-          <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h4 className="text-lg font-semibold mt-4">ยังไม่มีสินค้า</h4>
-          <p className="text-muted-foreground mt-1 mb-4">เลือกซื้อคอร์สเรียนหรือเทมเพลตเพื่อเริ่มต้นเส้นทางของคุณ</p>
+          <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <h4 className="text-lg font-semibold mb-2">ยังไม่มีสินค้า</h4>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            เลือกซื้อคอร์สเรียนหรือเทมเพลตเพื่อเริ่มต้นเส้นทางการเรียนรู้ของคุณ
+          </p>
           <div className="space-x-4">
             <Button asChild>
-              <Link to="/products">เลือกชมสินค้าทั้งหมด</Link>
+              <Link to="/products">
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                เลือกชมสินค้าทั้งหมด
+              </Link>
             </Button>
-            <Button variant="outline" onClick={() => {
-              console.log("Creating test purchase...");
-              // เพิ่ม debug button สำหรับทดสอบ
-            }}>
-              Debug: ตรวจสอบข้อมูล
+            <Button variant="outline" asChild>
+              <Link to="/courses">
+                คอร์สเรียน
+              </Link>
             </Button>
           </div>
         </div>
       ) : (
-        <div className="space-y-10">
+        <div className="space-y-8">
+          {/* คอร์สเรียน */}
           <div>
-            <h4 className="text-xl font-semibold mb-4 border-b pb-2">คอร์สเรียน ({courses.length})</h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-xl font-semibold border-b-2 border-blue-200 pb-2">
+                📚 คอร์สเรียน ({courses.length})
+              </h4>
+              {courses.length > 0 && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/courses">ดูทั้งหมด</Link>
+                </Button>
+              )}
+            </div>
             {courses.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
                 {courses.map((item) => {
@@ -145,12 +188,27 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
                 })}
               </div>
             ) : (
-              <p className="text-muted-foreground py-4">คุณยังไม่มีคอร์สเรียน</p>
+              <div className="text-center py-8 border border-dashed rounded-lg bg-blue-50/50">
+                <p className="text-muted-foreground">คุณยังไม่มีคอร์สเรียน</p>
+                <Button variant="outline" size="sm" className="mt-2" asChild>
+                  <Link to="/courses">เลือกคอร์สเรียน</Link>
+                </Button>
+              </div>
             )}
           </div>
           
+          {/* เทมเพลต */}
           <div>
-            <h4 className="text-xl font-semibold mb-4 border-b pb-2">เทมเพลต ({templates.length})</h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-xl font-semibold border-b-2 border-green-200 pb-2">
+                📄 เทมเพลต ({templates.length})
+              </h4>
+              {templates.length > 0 && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/products?type=template">ดูทั้งหมด</Link>
+                </Button>
+              )}
+            </div>
             {templates.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
                 {templates.map((item) => {
@@ -161,7 +219,12 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
                 })}
               </div>
             ) : (
-              <p className="text-muted-foreground py-4">คุณยังไม่มีเทมเพลต</p>
+              <div className="text-center py-8 border border-dashed rounded-lg bg-green-50/50">
+                <p className="text-muted-foreground">คุณยังไม่มีเทมเพลต</p>
+                <Button variant="outline" size="sm" className="mt-2" asChild>
+                  <Link to="/products?type=template">เลือกเทมเพลต</Link>
+                </Button>
+              </div>
             )}
           </div>
         </div>
