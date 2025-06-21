@@ -39,8 +39,18 @@ serve(async (req) => {
       throw new Error("Invalid user");
     }
 
-    // ดึงข้อมูล PromptPay จากการตั้งค่า (ใช้หมายเลขตัวอย่างถ้าไม่มีการตั้งค่า)
-    const promptPayNumber = "0962358979"; // ใช้หมายเลขจากรูปที่แสดง
+    // ดึงข้อมูล PromptPay จากการตั้งค่า
+    const { data: paymentSettings, error: settingsError } = await supabaseClient
+      .from('payment_settings')
+      .select('promptpay_number')
+      .eq('id', 1)
+      .single();
+
+    if (settingsError || !paymentSettings?.promptpay_number) {
+      throw new Error("PromptPay number not configured");
+    }
+
+    const promptPayNumber = paymentSettings.promptpay_number;
 
     // สร้างคำสั่งซื้อ
     const { data: order, error: orderError } = await supabaseClient
@@ -84,8 +94,6 @@ serve(async (req) => {
     }
 
     // สร้าง PromptPay QR Code URL
-    // ใช้ API ของธนาคารหรือ Third party service สำหรับสร้าง QR Code
-    // ตัวอย่างนี้ใช้ service ฟรีสำหรับสร้าง QR Code
     const qrData = `00020101021230320000005802TH5909${promptPayNumber}63${amount.toString().padStart(4, '0')}0406${order.id.slice(0, 6)}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
 

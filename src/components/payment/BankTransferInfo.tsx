@@ -16,14 +16,6 @@ const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
 }) => {
   const { settings, isLoading } = usePaymentSettings();
 
-  // ใช้ข้อมูลจากการตั้งค่าแทนการ hardcode
-  const bankInfo = {
-    bankName: settings.bank_name || 'ธนาคารกรุงเทพ',
-    accountNumber: settings.bank_account_number || '138-4-41680-4',
-    accountName: settings.bank_account_name || 'รณยศ ตันติถาวรรัช',
-    branch: settings.bank_branch || ''
-  };
-
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast.success(`คัดลอก${label}แล้ว`);
@@ -38,6 +30,14 @@ const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
       </Card>
     );
   }
+
+  // Use settings data or fallback to default values
+  const bankInfo = {
+    bankName: settings.bank_name || 'ธนาคารกรุงเทพ',
+    accountNumber: settings.bank_account_number || '138-4-41680-4',
+    accountName: settings.bank_account_name || 'รณยศ ตันติถาวรรัช',
+    branch: settings.bank_branch || ''
+  };
 
   return (
     <div className="space-y-6">
@@ -110,6 +110,13 @@ const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
                       </Button>
                     </div>
                   </div>
+
+                  {bankInfo.branch && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">สาขา:</span>
+                      <span className="font-semibold">{bankInfo.branch}</span>
+                    </div>
+                  )}
 
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">จำนวนเงิน:</span>

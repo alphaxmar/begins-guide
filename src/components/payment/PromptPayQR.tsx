@@ -8,23 +8,35 @@ import { toast } from "sonner";
 interface PromptPayQRProps {
   amount: number;
   orderId: string;
+  promptPayNumber: string;
 }
 
-const PromptPayQR = ({ amount, orderId }: PromptPayQRProps) => {
+const PromptPayQR = ({ amount, orderId, promptPayNumber }: PromptPayQRProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
-  const promptPayNumber = "0861234567"; // หมายเลขพร้อมเพย์
 
   useEffect(() => {
-    // สร้าง QR Code URL สำหรับพร้อมเพย์
-    // ในการใช้งานจริงควรใช้ API สำหรับสร้าง QR Code
-    const qrData = `00020101021129370016A000000677010111011${promptPayNumber.length.toString().padStart(2, '0')}${promptPayNumber}53037645802TH5916BEGINS GUIDE LTD6007Bangkok62410007${orderId}6304`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
-    setQrCodeUrl(qrUrl);
+    if (promptPayNumber && amount && orderId) {
+      // สร้าง QR Code URL สำหรับพร้อมเพย์
+      // ในการใช้งานจริงควรใช้ API สำหรับสร้าง QR Code
+      const qrData = `00020101021129370016A000000677010111011${promptPayNumber.length.toString().padStart(2, '0')}${promptPayNumber}53037645802TH5916BEGINS GUIDE LTD6007Bangkok62410007${orderId.slice(0, 8)}6304`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+      setQrCodeUrl(qrUrl);
+    }
   }, [amount, orderId, promptPayNumber]);
 
   const copyPromptPayNumber = () => {
     navigator.clipboard.writeText(promptPayNumber);
     toast.success("คัดลอกหมายเลขพร้อมเพย์แล้ว");
+  };
+
+  const copyAmount = () => {
+    navigator.clipboard.writeText(amount.toString());
+    toast.success("คัดลอกจำนวนเงินแล้ว");
+  };
+
+  const copyOrderId = () => {
+    navigator.clipboard.writeText(orderId.slice(0, 8));
+    toast.success("คัดลอกหมายเลขออเดอร์แล้ว");
   };
 
   return (
@@ -68,14 +80,32 @@ const PromptPayQR = ({ amount, orderId }: PromptPayQRProps) => {
             </Button>
           </div>
 
-          <div className="p-3 bg-green-50 rounded">
-            <p className="text-sm text-gray-600">จำนวนเงิน</p>
-            <p className="font-bold text-green-700 text-xl">{amount.toLocaleString()} บาท</p>
+          <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+            <div>
+              <p className="text-sm text-gray-600">จำนวนเงิน</p>
+              <p className="font-bold text-green-700 text-xl">{amount.toLocaleString()} บาท</p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={copyAmount}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
           </div>
 
-          <div className="p-3 bg-orange-50 rounded">
-            <p className="text-sm text-gray-600">หมายเลขออเดอร์</p>
-            <p className="font-mono text-sm">{orderId}</p>
+          <div className="flex justify-between items-center p-3 bg-orange-50 rounded">
+            <div>
+              <p className="text-sm text-gray-600">หมายเลขออเดอร์</p>
+              <p className="font-mono text-sm">{orderId.slice(0, 8)}</p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={copyOrderId}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 

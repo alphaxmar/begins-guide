@@ -1,12 +1,14 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { QrCode, Clock, CheckCircle, Copy } from 'lucide-react';
+import { QrCode, Copy, CheckCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import PromptPayQR from './PromptPayQR';
 
 interface PromptPayCheckoutProps {
   productIds: string[];
@@ -14,28 +16,30 @@ interface PromptPayCheckoutProps {
   onSuccess?: () => void;
 }
 
-type PaymentStatus = 'idle' | 'pending' | 'checking' | 'completed';
-
 const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
   productIds,
   totalAmount,
   onSuccess
 }) => {
   const { user } = useAuth();
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const { settings, isLoading: settingsLoading } = usePaymentSettings();
   const [orderId, setOrderId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle');
+  const [showQR, setShowQR] = useState(false);
 
-  const generatePromptPayQR = async () => {
+  const createPromptPayOrder = async () => {
     if (!user) {
       toast.error('กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน');
       return;
     }
 
+    if (!settings.promptpay_number) {
+      toast.error('ยังไม่มีการตั้งค่าหมายเลข PromptPay');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // เรียก edge function เพื่อสร้าง PromptPay QR Code
       const { data, error } = await supabase.functions.invoke('create-promptpay-payment', {
         body: {
           product_ids: productIds,
@@ -45,11 +49,9 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
 
       if (error) throw error;
 
-      setQrCodeUrl(data.qr_code);
       setOrderId(data.payment_ref);
-      setPaymentStatus('pending');
-      
-      toast.success('สร้าง QR Code สำเร็จ กรุณาสแกนเพื่อชำระเงิน');
+      setShowQR(true);
+      toast.success('สร้าง QR Code สำเร็จ กรุณาชำระเงินตามจำนวนที่กำหนด');
     } catch (error: any) {
       console.error('Error creating PromptPay payment:', error);
       toast.error('เกิดข้อผิดพลาดในการสร้าง QR Code');
@@ -58,165 +60,127 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
     }
   };
 
-  const checkPaymentStatus = async () => {
-    if (!orderId) return;
-
-    setPaymentStatus('checking');
-    try {
-      // เรียก edge function เพื่อตรวจสอบสถานะการชำระเงิน
-      const { data, error } = await supabase.functions.invoke('check-promptpay-status', {
-        body: { payment_ref: orderId }
-      });
-
-      if (error) throw error;
-
-      if (data.status === 'completed') {
-        setPaymentStatus('completed');
-        toast.success('ชำระเงินสำเร็จแล้ว!');
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
-        toast.info('ยังไม่พบการชำระเงิน กรุณารอสักครู่');
-        setPaymentStatus('pending');
-      }
-    } catch (error: any) {
-      console.error('Error checking payment status:', error);
-      toast.error('เกิดข้อผิดพลาดในการตรวจสอบสถานะ');
-      setPaymentStatus('pending');
-    }
-  };
-
-  const copyPromptPayNumber = () => {
-    const promptPayNumber = "0861234567";
-    navigator.clipboard.writeText(promptPayNumber);
-    toast.success("คัดลอกหมายเลขพร้อมเพย์แล้ว");
-  };
-
-  if (paymentStatus === 'completed') {
+  if (settingsLoading) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <CardTitle className="text-green-700">ชำระเงินสำเร็จ!</CardTitle>
-          <CardDescription>
-            การชำระเงินของคุณได้รับการยืนยันแล้ว
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-center text-sm text-gray-600">
-            หมายเลขออเดอร์: {orderId}
-          </p>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            กำลังโหลดข้อมูลการชำระเงิน...
+          </div>
         </CardContent>
       </Card>
     );
   }
 
+  if (showQR && orderId) {
+    return (
+      <div className="space-y-6">
+        <PromptPayQR 
+          amount={totalAmount} 
+          orderId={orderId}
+          promptPayNumber={settings.promptpay_number || ''}
+        />
+        
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            หลังจากชำระเงินแล้ว ระบบจะตรวจสอบการชำระเงินโดยอัตโนมัติภายใน 1-3 ชั่วโมงทำการ
+          </AlertDescription>
+        </Alert>
+
+        <div className="text-center">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowQR(false)}
+          >
+            เลือกวิธีการชำระเงินอื่น
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      {paymentStatus === 'idle' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <QrCode className="mr-2 h-5 w-5" />
-              ชำระเงินผ่าน PromptPay
-            </CardTitle>
-            <CardDescription>
-              ชำระเงินอย่างรวดเร็วและปลอดภัยผ่าน QR Code
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">ยอดรวมที่ต้องชำระ</h4>
-                <p className="text-2xl font-bold text-blue-700">
-                  {totalAmount.toLocaleString()} บาท
-                </p>
-              </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <QrCode className="h-5 w-5" />
+          PromptPay QR Code
+        </CardTitle>
+        <CardDescription>
+          ชำระเงินผ่าน QR Code ด้วยแอปธนาคาร รวดเร็วและปลอดภัย
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="p-4 bg-blue-50 rounded-lg">
+          <h4 className="font-semibold text-blue-800 mb-2">ยอดรวมที่ต้องชำระ</h4>
+          <p className="text-2xl font-bold text-blue-700">
+            {totalAmount.toLocaleString()} บาท
+          </p>
+        </div>
 
+        {settings.promptpay_number && (
+          <div className="p-4 bg-green-50 rounded-lg">
+            <h4 className="font-semibold text-green-800 mb-2">หมายเลข PromptPay</h4>
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-green-700">{settings.promptpay_number}</p>
               <Button 
-                onClick={generatePromptPayQR}
-                disabled={isLoading}
-                className="w-full"
-                size="lg"
+                variant="ghost" 
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(settings.promptpay_number || '');
+                  toast.success('คัดลอกหมายเลข PromptPay แล้ว');
+                }}
               >
-                {isLoading ? 'กำลังสร้าง QR Code...' : 'สร้าง QR Code สำหรับชำระเงิน'}
+                <Copy className="h-4 w-4" />
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {(paymentStatus === 'pending' || paymentStatus === 'checking') && qrCodeUrl && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center">สแกน QR Code เพื่อชำระเงิน</CardTitle>
-            <CardDescription className="text-center">
-              กรุณาสแกน QR Code นี้ด้วยแอปธนาคารของคุณ
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex justify-center">
-              <div className="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300">
-                <img 
-                  src={qrCodeUrl} 
-                  alt="PromptPay QR Code"
-                  className="w-48 h-48"
-                />
-              </div>
-            </div>
+        <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+          <h4 className="font-semibold text-green-800 mb-2">ข้อดีของ PromptPay:</h4>
+          <ul className="text-sm text-green-700 space-y-1">
+            <li>• ไม่มีค่าธรรมเนียม</li>
+            <li>• รับเงินทันที</li>
+            <li>• ปลอดภัยและเชื่อถือได้</li>
+            <li>• ใช้ได้กับทุกธนาคาร</li>
+          </ul>
+        </div>
 
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                <p className="text-green-800 font-semibold">ยอดเงิน: {totalAmount.toLocaleString()} บาท</p>
-                <p className="text-green-700 text-sm">หมายเลขออเดอร์: {orderId}</p>
-              </div>
+        <Button 
+          onClick={createPromptPayOrder}
+          disabled={isLoading || !settings.promptpay_number}
+          className="w-full"
+          size="lg"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              กำลังสร้าง QR Code...
+            </>
+          ) : (
+            <>
+              <QrCode className="mr-2 h-4 w-4" />
+              สร้าง QR Code สำหรับชำระเงิน
+            </>
+          )}
+        </Button>
 
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
-                <div>
-                  <p className="text-sm text-gray-600">หมายเลขพร้อมเพย์</p>
-                  <p className="font-mono font-semibold">0861234567</p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={copyPromptPayNumber}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
+        {!settings.promptpay_number && (
+          <Alert>
+            <AlertDescription>
+              ยังไม่มีการตั้งค่าหมายเลข PromptPay กรุณาติดต่อผู้ดูแลระบบ
+            </AlertDescription>
+          </Alert>
+        )}
 
-              <Alert>
-                <Clock className="h-4 w-4" />
-                <AlertDescription>
-                  QR Code นี้จะหมดอายุใน 15 นาที หลังจากชำระเงินแล้ว กรุณากดปุ่ม "ตรวจสอบการชำระเงิน"
-                </AlertDescription>
-              </Alert>
-
-              <Button 
-                onClick={checkPaymentStatus}
-                disabled={paymentStatus === 'checking'}
-                className="w-full"
-                variant="outline"
-              >
-                {paymentStatus === 'checking' ? 'กำลังตรวจสอบ...' : 'ตรวจสอบการชำระเงิน'}
-              </Button>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">วิธีการชำระเงิน:</h4>
-              <ol className="text-sm text-blue-700 space-y-1">
-                <li>1. เปิดแอปธนาคารหรือแอปกระเป๋าเงินอิเล็กทรอนิกส์</li>
-                <li>2. เลือกเมนู "สแกน QR" หรือ "PromptPay"</li>
-                <li>3. สแกน QR Code ด้านบน</li>
-                <li>4. ตรวจสอบข้อมูลและยืนยันการโอน</li>
-                <li>5. กดปุ่ม "ตรวจสอบการชำระเงิน" หลังโอนเงินแล้ว</li>
-              </ol>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        <p className="text-xs text-muted-foreground text-center">
+          หลังจากกดปุ่มแล้ว จะแสดง QR Code สำหรับสแกนชำระเงิน
+        </p>
+      </CardContent>
+    </Card>
   );
 };
 
