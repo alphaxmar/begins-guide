@@ -9,10 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useUsers, useUpdateUserRole } from "@/hooks/useUsers";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PageHeader } from "@/components/ui/page-header";
-import { Search, UserCheck, Shield, Crown } from "lucide-react";
+import { Search, UserCheck, Shield, Crown, AlertCircle } from "lucide-react";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import UserRoleDialog from '@/components/admin/UserRoleDialog';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AdminUsersPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,7 +21,7 @@ const AdminUsersPage = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
 
-  const { data: users, isLoading } = useUsers();
+  const { data: users, isLoading, error, refetch } = useUsers();
   const updateUserRole = useUpdateUserRole();
 
   const filteredUsers = users?.filter(user => {
@@ -63,14 +64,51 @@ const AdminUsersPage = () => {
     }
   };
 
-  const handleRoleChange = (userId: string, newRole: 'user' | 'admin' | 'partner' | 'vip') => {
-    updateUserRole.mutate({ userId, newRole });
+  const handleRoleChange = async (userId: string, newRole: 'user' | 'admin' | 'partner' | 'vip') => {
+    console.log('AdminUsersPage: Role change requested', { userId, newRole });
+    
+    try {
+      await updateUserRole.mutateAsync({ userId, newRole });
+      setIsRoleDialogOpen(false);
+      setSelectedUser(null);
+      // Refetch users to update the display
+      refetch();
+    } catch (error) {
+      console.error('Role change failed:', error);
+      // Error handling is done in the mutation's onError
+    }
   };
 
   const openRoleDialog = (user: any) => {
+    console.log('Opening role dialog for user:', user.id);
     setSelectedUser(user);
     setIsRoleDialogOpen(true);
   };
+
+  if (error) {
+    return (
+      <div className="py-8">
+        <PageHeader 
+          title="จัดการผู้ใช้งาน"
+          description="ดูและจัดการข้อมูลผู้ใช้งานในระบบ"
+        />
+        <Alert className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้: {error.message}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetch()}
+              className="ml-2"
+            >
+              ลองใหม่
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="py-8">
@@ -132,6 +170,7 @@ const AdminUsersPage = () => {
                       <div>
                         <p className="font-medium">{user.full_name || 'ไม่ระบุชื่อ'}</p>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">ID: {user.id}</p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -156,6 +195,7 @@ const AdminUsersPage = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => openRoleDialog(user)}
+                        disabled={updateUserRole.isPending}
                       >
                         เปลี่ยนสิทธิ์
                       </Button>
@@ -177,8 +217,12 @@ const AdminUsersPage = () => {
       <UserRoleDialog
         user={selectedUser}
         isOpen={isRoleDialogOpen}
-        onClose={() => setIsRoleDialogOpen(false)}
+        onClose={() => {
+          setIsRoleDialogOpen(false);
+          setSelectedUser(null);
+        }}
         onRoleChange={handleRoleChange}
+        isLoading={updateUserRole.isPending}
       />
     </div>
   );

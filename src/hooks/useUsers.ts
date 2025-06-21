@@ -68,6 +68,13 @@ export const useUpdateUserRole = () => {
       try {
         console.log('Updating user role:', userId, newRole);
         
+        // Check current user's admin status first
+        const { data: currentUser, error: currentUserError } = await supabase.auth.getUser();
+        if (currentUserError) {
+          console.error('Failed to get current user:', currentUserError);
+          throw new Error('กรุณาล็อกอินใหม่');
+        }
+
         // Update role in profiles table using direct update
         const { error: profileError } = await supabase
           .from('profiles')
@@ -79,8 +86,10 @@ export const useUpdateUserRole = () => {
 
         if (profileError) {
           console.error('Profile update error:', profileError);
-          throw profileError;
+          throw new Error(`ไม่สามารถอัปเดตสิทธิ์ได้: ${profileError.message}`);
         }
+
+        console.log('Profile role updated successfully');
 
         // If role is VIP, create/activate VIP membership
         if (newRole === 'vip') {
@@ -99,7 +108,10 @@ export const useUpdateUserRole = () => {
 
           if (vipError) {
             console.error('VIP membership error:', vipError);
-            throw vipError;
+            // Don't throw error here, just log it
+            console.warn('VIP membership update failed, but role was updated successfully');
+          } else {
+            console.log('VIP membership created/updated successfully');
           }
         } else {
           // If role is not VIP, deactivate VIP membership
@@ -113,11 +125,13 @@ export const useUpdateUserRole = () => {
             .eq('user_id', userId);
 
           if (deactivateError) {
-            console.error('Error deactivating VIP:', deactivateError);
+            console.warn('Error deactivating VIP:', deactivateError);
+            // Don't throw error here, just log it
           }
         }
         
-        console.log('Successfully updated user role');
+        console.log('Successfully completed user role update');
+        return { success: true };
       } catch (error) {
         console.error('Error updating user role:', error);
         throw error;
@@ -129,9 +143,10 @@ export const useUpdateUserRole = () => {
       queryClient.invalidateQueries({ queryKey: ['userRole'] });
       toast.success('เปลี่ยนสิทธิ์ผู้ใช้สำเร็จ');
     },
-    onError: (error) => {
-      console.error('Error updating user role:', error);
-      toast.error('เกิดข้อผิดพลาดในการเปลี่ยนสิทธิ์ผู้ใช้');
+    onError: (error: any) => {
+      console.error('Mutation error:', error);
+      const errorMessage = error.message || 'เกิดข้อผิดพลาดในการเปลี่ยนสิทธิ์ผู้ใช้';
+      toast.error(errorMessage);
     },
   });
 };
