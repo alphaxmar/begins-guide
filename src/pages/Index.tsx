@@ -9,6 +9,7 @@ import { ArrowRight, BookOpen, Download, Users, Star, CheckCircle, Target, Light
 
 const Index = () => {
   const { data: vipPackages, isLoading } = useVipPackages();
+  const activeVipPackages = vipPackages?.filter(pkg => pkg.is_active) || [];
 
   return (
     <div className="min-h-screen">
@@ -66,11 +67,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* VIP Package Highlight - Moved up and made more prominent */}
+      {/* VIP Package Highlight - Improved layout for multiple packages */}
       <section className="py-20 bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
               <Badge className="mb-6 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg px-6 py-2">
                 <Crown className="mr-2 h-5 w-5" />
                 แนะนำพิเศษ
@@ -84,13 +85,67 @@ const Index = () => {
               </p>
             </div>
 
-            {/* VIP Package Display */}
-            {!isLoading && vipPackages && vipPackages.length > 0 && (
-              <div className="max-w-lg mx-auto mb-12">
-                <VipPackageCard package={vipPackages[0]} />
+            {/* VIP Packages Display - Handle multiple packages */}
+            {!isLoading && activeVipPackages.length > 0 && (
+              <div className="mb-16">
+                {activeVipPackages.length === 1 ? (
+                  // Single package - center it
+                  <div className="max-w-lg mx-auto">
+                    <VipPackageCard package={activeVipPackages[0]} />
+                  </div>
+                ) : activeVipPackages.length === 2 ? (
+                  // Two packages - side by side
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    {activeVipPackages.map((pkg) => (
+                      <VipPackageCard key={pkg.id} package={pkg} />
+                    ))}
+                  </div>
+                ) : (
+                  // Three or more packages - grid layout with featured package
+                  <div className="space-y-8">
+                    {/* Featured package (first one) */}
+                    <div className="max-w-lg mx-auto">
+                      <div className="relative">
+                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                          <Badge className="bg-red-500 text-white text-sm px-4 py-1 animate-pulse">
+                            🔥 แนะนำ
+                          </Badge>
+                        </div>
+                        <VipPackageCard package={activeVipPackages[0]} />
+                      </div>
+                    </div>
+                    
+                    {/* Other packages */}
+                    {activeVipPackages.length > 1 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {activeVipPackages.slice(1).map((pkg) => (
+                          <VipPackageCard key={pkg.id} package={pkg} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Loading state */}
+            {isLoading && (
+              <div className="flex justify-center items-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+                <span className="ml-3 text-gray-600">กำลังโหลดแพ็กเกจ...</span>
+              </div>
+            )}
+
+            {/* No packages state */}
+            {!isLoading && activeVipPackages.length === 0 && (
+              <div className="text-center py-16">
+                <Crown className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีแพ็กเกจ VIP</h3>
+                <p className="text-gray-500">แพ็กเกจ VIP จะเปิดให้บริการเร็วๆ นี้</p>
               </div>
             )}
             
+            {/* Benefits Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               <Card className="border-2 border-yellow-200 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
@@ -150,30 +205,30 @@ const Index = () => {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-8">คุณเจอปัญหาเหล่านี้ไหม?</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="border-red-200">
+              <Card className="border-red-200 hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 text-center">
-                  <div className="text-red-500 mb-4">😕</div>
+                  <div className="text-4xl mb-4">😕</div>
                   <h3 className="font-semibold mb-2 text-red-700">ขาดไอเดีย</h3>
                   <p className="text-sm text-gray-600">ไม่มีไอเดียธุรกิจที่ชัดเจน</p>
                 </CardContent>
               </Card>
-              <Card className="border-orange-200">
+              <Card className="border-orange-200 hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 text-center">
-                  <div className="text-orange-500 mb-4">🤔</div>
+                  <div className="text-4xl mb-4">🤔</div>
                   <h3 className="font-semibold mb-2 text-orange-700">ขาดความรู้</h3>
                   <p className="text-sm text-gray-600">ไม่รู้เรื่องการตลาดและการเงิน</p>
                 </CardContent>
               </Card>
-              <Card className="border-blue-200">
+              <Card className="border-blue-200 hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 text-center">
-                  <div className="text-blue-500 mb-4">🛠️</div>
+                  <div className="text-4xl mb-4">🛠️</div>
                   <h3 className="font-semibold mb-2 text-blue-700">ขาดเครื่องมือ</h3>
                   <p className="text-sm text-gray-600">ไม่มีแผนการหรือเครื่องมือ</p>
                 </CardContent>
               </Card>
-              <Card className="border-purple-200">
+              <Card className="border-purple-200 hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 text-center">
-                  <div className="text-purple-500 mb-4">😵‍💫</div>
+                  <div className="text-4xl mb-4">😵‍💫</div>
                   <h3 className="font-semibold mb-2 text-purple-700">รู้สึกท่วมท้น</h3>
                   <p className="text-sm text-gray-600">ข้อมูลเยอะแต่ไม่รู้เริ่มจากไหน</p>
                 </CardContent>
@@ -293,12 +348,12 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section className="py-16">
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">สิ่งที่คุณจะได้รับ</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="text-center hover:shadow-lg transition-shadow border-t-4 border-t-blue-500">
                 <CardHeader>
                   <BookOpen className="h-12 w-12 mx-auto mb-4 text-blue-500" />
                   <CardTitle>บทความความรู้ฟรี</CardTitle>
@@ -310,7 +365,7 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="text-center hover:shadow-lg transition-shadow border-t-4 border-t-green-500">
                 <CardHeader>
                   <Users className="h-12 w-12 mx-auto mb-4 text-green-500" />
                   <CardTitle>คอร์สจากผู้เชี่ยวชาญ</CardTitle>
@@ -322,7 +377,7 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="text-center hover:shadow-lg transition-shadow border-t-4 border-t-purple-500">
                 <CardHeader>
                   <Download className="h-12 w-12 mx-auto mb-4 text-purple-500" />
                   <CardTitle>เครื่องมือที่ใช้ได้จริง</CardTitle>
