@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useUsers, useUpdateUserRole } from "@/hooks/useUsers";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PageHeader } from "@/components/ui/page-header";
-import { Search, UserCheck, Shield, Crown, AlertCircle, RefreshCw } from "lucide-react";
+import { Search, UserCheck, Shield, Crown, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import UserRoleDialog from '@/components/admin/UserRoleDialog';
