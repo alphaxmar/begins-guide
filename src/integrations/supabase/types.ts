@@ -920,6 +920,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      check_admin_role_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       confirm_stripe_payment: {
         Args: {
           p_stripe_session_id: string

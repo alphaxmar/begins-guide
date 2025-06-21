@@ -20,7 +20,7 @@ export const useUsers = () => {
       try {
         console.log('Fetching users with stats...');
         
-        // Use a simpler approach that works with existing RLS
+        // Now we can use the profiles table directly with the new safe RLS policies
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select(`
@@ -49,7 +49,7 @@ export const useUsers = () => {
           console.warn('Purchase stats error:', statsError);
         }
 
-        // Combine data
+        // Combine data with proper typing
         const usersWithStats: UserWithStats[] = (profiles || []).map(profile => {
           const userPurchases = purchaseStats?.filter(p => p.user_id === profile.id) || [];
           const totalPurchases = userPurchases.length;

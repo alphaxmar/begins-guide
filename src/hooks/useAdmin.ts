@@ -15,23 +15,18 @@ export const useAdmin = () => {
       }
       
       try {
-        console.log('Checking admin role using RPC function...');
+        console.log('Checking admin role using new safe function...');
         
-        // Use direct SQL query to check admin role to avoid type issues
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+        // Use the new safe admin check function
+        const { data, error } = await supabase.rpc('check_admin_role_safe');
         
         if (error) {
           console.error('Error checking admin role:', error);
           return false;
         }
         
-        const isAdminUser = data?.role === 'admin';
-        console.log('Admin check result:', isAdminUser);
-        return isAdminUser;
+        console.log('Admin check result:', data);
+        return data || false;
       } catch (error) {
         console.error('Admin role check error:', error);
         return false;
