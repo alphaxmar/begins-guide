@@ -33,64 +33,87 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
       return;
     }
 
+    // ตรวจสอบข้อมูลก่อนส่ง
+    if (!productIds || productIds.length === 0) {
+      toast.error('ไม่พบข้อมูลสินค้า');
+      return;
+    }
+
+    if (!totalAmount || totalAmount <= 0) {
+      toast.error('จำนวนเงินไม่ถูกต้อง');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      console.log('Creating PromptPay order with data:', {
-        product_ids: productIds,
-        amount: totalAmount
-      });
+      console.log('=== Starting PromptPay Order Creation ===');
+      console.log('Product IDs:', productIds);
+      console.log('Total Amount:', totalAmount);
+      console.log('User:', user ? 'Logged in' : 'Guest');
 
-      // สร้าง request body
-      const requestBody = {
+      // เตรียมข้อมูลสำหรับส่ง
+      const requestData = {
         product_ids: productIds,
         amount: totalAmount
       };
 
-      console.log('Request body:', JSON.stringify(requestBody));
+      console.log('Request data prepared:', requestData);
 
-      // สร้าง headers
+      // เตรียม headers
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
 
       // เพิ่ม Authorization header ถ้ามีผู้ใช้ล็อกอิน
       if (user) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-          headers.Authorization = `Bearer ${session.access_token}`;
-          console.log('Added Authorization header');
+        try {
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError) {
+            console.error('Session error:', sessionError);
+          } else if (session?.access_token) {
+            headers.Authorization = `Bearer ${session.access_token}`;
+            console.log('Authorization header added');
+          } else {
+            console.log('No access token found in session');
+          }
+        } catch (authError) {
+          console.error('Auth error:', authError);
         }
       }
 
-      console.log('Headers:', headers);
+      console.log('Final headers:', Object.keys(headers));
 
-      // เรียก Edge Function
+      // เรียก Edge Function โดยใช้ supabase.functions.invoke
+      console.log('Calling Edge Function...');
       const { data, error } = await supabase.functions.invoke('create-promptpay-payment', {
-        body: requestBody,
-        headers
+        body: requestData,
+        headers: headers
       });
 
-      console.log('Function response:', { data, error });
+      console.log('Edge Function response:', { data, error });
 
       if (error) {
-        console.error('Function error:', error);
-        throw new Error(error.message || 'เกิดข้อผิดพลาดในการเรียกใช้ function');
+        console.error('Edge Function error:', error);
+        throw new Error(error.message || 'เกิดข้อผิดพลาดในการเรียกใช้ Edge Function');
       }
 
       if (!data) {
-        throw new Error('ไม่ได้รับข้อมูลจาก function');
+        throw new Error('ไม่ได้รับข้อมูลจาก Edge Function');
       }
 
       if (!data.payment_ref) {
-        throw new Error('ไม่ได้รับหมายเลขอ้างอิง');
+        console.error('Invalid response data:', data);
+        throw new Error('ไม่ได้รับหมายเลขอ้างอิงการชำระเงิน');
       }
 
+      console.log('PromptPay order created successfully:', data.payment_ref);
       setOrderId(data.payment_ref);
       setShowQR(true);
       toast.success('สร้าง QR Code สำเร็จ กรุณาชำระเงินตามจำนวนที่กำหนด');
     } catch (error: any) {
       console.error('Error creating PromptPay payment:', error);
-      toast.error('เกิดข้อผิดพลาดในการสร้าง QR Code: ' + (error.message || 'Unknown error'));
+      const errorMessage = error.message || 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ';
+      toast.error(`เกิดข้อผิดพลาดในการสร้าง QR Code: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -187,7 +210,7 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
 
         <Button 
           onClick={createPromptPayOrder}
-          disabled={isLoading || !settings.promptpay_number}
+          disabled={isLoading || !settings.promptpay_number || !productIds.length || totalAmount <= 0}
           className="w-full"
           size="lg"
         >
@@ -208,6 +231,14 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
           <Alert>
             <AlertDescription>
               ยังไม่มีการตั้งค่าหมายเลข PromptPay กรุณาติดต่อผู้ดูแลระบบ
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {(!productIds.length || totalAmount <= 0) && (
+          <Alert>
+            <AlertDescription>
+              ข้อมูลสินค้าหรือจำนวนเงินไม่ถูกต้อง กรุณาตรวจสอบตะกร้าสินค้าของคุณ
             </AlertDescription>
           </Alert>
         )}
