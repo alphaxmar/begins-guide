@@ -1,7 +1,7 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogIn, User, LogOut, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useVipStatus } from '@/hooks/useVipStatus';
@@ -56,6 +56,16 @@ const Header = () => {
           <Link to="/products" className="text-foreground/60 transition-colors hover:text-foreground/80">
             ผลิตภัณฑ์
           </Link>
+          {user && isVip && (
+            <Link 
+              to="/ai-tools" 
+              className="text-foreground/60 transition-colors hover:text-foreground/80 flex items-center gap-1"
+            >
+              <Brain className="h-4 w-4" />
+              AI Tools
+              <Badge className="bg-yellow-500 text-white text-xs ml-1">VIP</Badge>
+            </Link>
+          )}
         </nav>
         <div className="flex items-center gap-4">
           {/* Shopping Cart */}
@@ -104,6 +114,13 @@ const Header = () => {
                   <User className="mr-2 h-4 w-4" />
                   <span>โปรไฟล์</span>
                 </DropdownMenuItem>
+                {isVip && (
+                  <DropdownMenuItem onClick={() => navigate('/ai-tools')}>
+                    <Brain className="mr-2 h-4 w-4 text-yellow-600" />
+                    <span>AI Tools</span>
+                    <Badge className="ml-auto bg-yellow-500 text-white text-xs">VIP</Badge>
+                  </DropdownMenuItem>
+                )}
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate('/admin')}>
                     <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
