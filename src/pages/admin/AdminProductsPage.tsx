@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -131,50 +130,50 @@ const AdminProductsPage = () => {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: string) => {
-      const product = products?.find(p => p.id === productId);
-      if (product) {
-        // ลบรูปภาพ
-        if (product.image_url) {
-          try {
-            const imagePath = new URL(product.image_url).pathname.split('/product_images/')[1];
-            if (imagePath) {
-              await supabase.storage.from('product_images').remove([imagePath]);
-            }
-          } catch (e) {
-            console.warn("Could not delete product image:", e);
-          }
-        }
-        
-        // ลบไฟล์เทมเพลต
-        if (product.template_file_path) {
-          await supabase.storage.from('product_files').remove([product.template_file_path]);
-        }
-      }
-
+      console.log(`Starting deletion process for product: ${productId}`);
+      
+      // ลบสินค้าจากฐานข้อมูล (foreign key constraints จะจัดการการลบข้อมูลที่เกี่ยวข้องให้อัตโนมัติ)
       const { error } = await supabase.from('products').delete().eq('id', productId);
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error('Error deleting product:', error);
+        throw new Error(error.message);
+      }
+      
+      console.log(`Product ${productId} deleted successfully`);
     },
-    onSuccess: () => {
+    onSuccess: (_, productId) => {
+      console.log(`Delete mutation succeeded for product: ${productId}`);
       toast.success("ลบสินค้าเรียบร้อยแล้ว");
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-      setSelectedProducts([]);
+      setSelectedProducts(prev => prev.filter(id => id !== productId));
     },
     onError: (error) => {
+      console.error('Delete mutation failed:', error);
       toast.error(`เกิดข้อผิดพลาดในการลบสินค้า: ${error.message}`);
     }
   });
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async (productIds: string[]) => {
+      console.log(`Starting bulk deletion for products: ${productIds.join(', ')}`);
+      
+      // ลบสินค้าหลายรายการพร้อมกัน
       const { error } = await supabase.from('products').delete().in('id', productIds);
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error('Error in bulk delete:', error);
+        throw new Error(error.message);
+      }
+      
+      console.log(`Bulk deletion completed for ${productIds.length} products`);
     },
     onSuccess: () => {
+      console.log(`Bulk delete mutation succeeded for ${selectedProducts.length} products`);
       toast.success(`ลบสินค้า ${selectedProducts.length} รายการเรียบร้อยแล้ว`);
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       setSelectedProducts([]);
     },
     onError: (error) => {
+      console.error('Bulk delete mutation failed:', error);
       toast.error(`เกิดข้อผิดพลาดในการลบสินค้า: ${error.message}`);
     }
   });
@@ -208,14 +207,16 @@ const AdminProductsPage = () => {
   });
 
   const handleDelete = (id: string, title: string) => {
-    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า "${title}"?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) {
+    console.log(`User confirmed deletion of product: ${id} (${title})`);
+    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า "${title}"?\n\nการกระทำนี้จะลบข้อมูลที่เกี่ยวข้องทั้งหมด เช่น คำสั่งซื้อ การซื้อของผู้ใช้ และบทเรียน และไม่สามารถย้อนกลับได้`)) {
       deleteProductMutation.mutate(id);
     }
   };
 
   const handleBulkDelete = () => {
     if (selectedProducts.length === 0) return;
-    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า ${selectedProducts.length} รายการ?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) {
+    console.log(`User initiated bulk delete for: ${selectedProducts.join(', ')}`);
+    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า ${selectedProducts.length} รายการ?\n\nการกระทำนี้จะลบข้อมูลที่เกี่ยวข้องทั้งหมด และไม่สามารถย้อนกลับได้`)) {
       bulkDeleteMutation.mutate(selectedProducts);
     }
   };
@@ -400,9 +401,14 @@ const AdminProductsPage = () => {
               เลือกแล้ว {selectedProducts.length} รายการ
             </span>
             <div className="flex gap-2">
-              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={handleBulkDelete}
+                disabled={bulkDeleteMutation.isPending}
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
-                ลบรายการที่เลือก
+                {bulkDeleteMutation.isPending ? 'กำลังลบ...' : 'ลบรายการที่เลือก'}
               </Button>
             </div>
           </div>
@@ -617,9 +623,10 @@ const AdminProductsPage = () => {
                               <DropdownMenuItem 
                                 onClick={() => handleDelete(product.id, product.title)} 
                                 className="text-red-500 focus:text-red-500 focus:bg-red-50"
+                                disabled={deleteProductMutation.isPending}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                ลบสินค้า
+                                {deleteProductMutation.isPending ? 'กำลังลบ...' : 'ลบสินค้า'}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
