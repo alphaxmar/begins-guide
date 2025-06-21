@@ -99,7 +99,7 @@ const Index = () => {
                           </Badge>
                         </div>
                       )}
-                      <VipPackageCard package={pkg} />
+                      <VipPackageCard {...pkg} />
                     </div>
                   ))}
                 </div>
