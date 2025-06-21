@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -20,10 +19,10 @@ export const useUsers = () => {
       try {
         console.log('Fetching users with stats using admin function...');
         
-        // Try to use the admin function first
-        const { data: adminData, error: adminError } = await supabase.rpc('get_users_with_stats_admin');
+        // Try to use the admin function first (correct function name)
+        const { data: adminData, error: adminError } = await supabase.rpc('get_users_with_stats');
         
-        if (!adminError && adminData) {
+        if (!adminError && adminData && Array.isArray(adminData)) {
           console.log('Successfully fetched users via admin function:', adminData.length);
           return adminData.map(user => ({
             id: user.id,
