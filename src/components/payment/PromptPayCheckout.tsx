@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaymentSettings } from '@/hooks/usePaymentSettings';
@@ -59,35 +58,10 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
 
       console.log('Request data prepared:', requestData);
 
-      // เตรียม headers
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      // เพิ่ม Authorization header ถ้ามีผู้ใช้ล็อกอิน
-      if (user) {
-        try {
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          if (sessionError) {
-            console.error('Session error:', sessionError);
-          } else if (session?.access_token) {
-            headers.Authorization = `Bearer ${session.access_token}`;
-            console.log('Authorization header added');
-          } else {
-            console.log('No access token found in session');
-          }
-        } catch (authError) {
-          console.error('Auth error:', authError);
-        }
-      }
-
-      console.log('Final headers:', Object.keys(headers));
-
-      // เรียก Edge Function โดยใช้ supabase.functions.invoke
+      // เรียก Edge Function โดยใช้ supabase.functions.invoke แบบที่ถูกต้อง
       console.log('Calling Edge Function...');
       const { data, error } = await supabase.functions.invoke('create-promptpay-payment', {
-        body: requestData,
-        headers: headers
+        body: requestData
       });
 
       console.log('Edge Function response:', { data, error });
