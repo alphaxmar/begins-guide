@@ -40,21 +40,34 @@ const PromptPayCheckout: React.FC<PromptPayCheckoutProps> = ({
 
     setIsLoading(true);
     try {
+      console.log('Creating PromptPay order with data:', {
+        product_ids: productIds,
+        amount: totalAmount
+      });
+
       const { data, error } = await supabase.functions.invoke('create-promptpay-payment', {
         body: {
           product_ids: productIds,
           amount: totalAmount
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         }
       });
 
-      if (error) throw error;
+      console.log('Function response:', { data, error });
+
+      if (error) {
+        console.error('Function error:', error);
+        throw error;
+      }
 
       setOrderId(data.payment_ref);
       setShowQR(true);
       toast.success('สร้าง QR Code สำเร็จ กรุณาชำระเงินตามจำนวนที่กำหนด');
     } catch (error: any) {
       console.error('Error creating PromptPay payment:', error);
-      toast.error('เกิดข้อผิดพลาดในการสร้าง QR Code');
+      toast.error('เกิดข้อผิดพลาดในการสร้าง QR Code: ' + (error.message || 'Unknown error'));
     } finally {
       setIsLoading(false);
     }

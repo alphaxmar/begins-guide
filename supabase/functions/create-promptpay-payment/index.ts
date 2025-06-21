@@ -31,13 +31,15 @@ serve(async (req) => {
       throw new Error("Authorization header required");
     }
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
 
     if (authError || !user) {
-      throw new Error("Invalid user");
+      console.error("Auth error:", authError);
+      throw new Error("Invalid user authentication");
     }
+
+    console.log("User authenticated:", user.id);
 
     // ดึงข้อมูล PromptPay จากการตั้งค่า
     const { data: paymentSettings, error: settingsError } = await supabaseClient
@@ -46,11 +48,17 @@ serve(async (req) => {
       .eq('id', 1)
       .single();
 
-    if (settingsError || !paymentSettings?.promptpay_number) {
+    if (settingsError) {
+      console.error("Settings error:", settingsError);
+      throw new Error("Failed to fetch payment settings");
+    }
+
+    if (!paymentSettings?.promptpay_number) {
       throw new Error("PromptPay number not configured");
     }
 
     const promptPayNumber = paymentSettings.promptpay_number;
+    console.log("PromptPay number:", promptPayNumber);
 
     // สร้างคำสั่งซื้อ
     const { data: order, error: orderError } = await supabaseClient
@@ -65,8 +73,11 @@ serve(async (req) => {
       .single();
 
     if (orderError || !order) {
+      console.error("Order error:", orderError);
       throw new Error("Failed to create order");
     }
+
+    console.log("Order created:", order.id);
 
     // สร้าง order items
     const { data: products, error: productsError } = await supabaseClient
@@ -75,6 +86,7 @@ serve(async (req) => {
       .in('id', product_ids);
 
     if (productsError || !products) {
+      console.error("Products error:", productsError);
       throw new Error("Failed to fetch products");
     }
 
@@ -90,12 +102,15 @@ serve(async (req) => {
       .insert(orderItems);
 
     if (itemsError) {
+      console.error("Items error:", itemsError);
       throw new Error("Failed to create order items");
     }
 
-    // สร้าง PromptPay QR Code URL
-    const qrData = `00020101021230320000005802TH5909${promptPayNumber}63${amount.toString().padStart(4, '0')}0406${order.id.slice(0, 6)}`;
+    // สร้าง PromptPay QR Code data แบบง่าย
+    const qrData = `00020101021129370016A000000677010111011${promptPayNumber.length.toString().padStart(2, '0')}${promptPayNumber}53037645802TH5916BEGINS GUIDE LTD6007Bangkok62410007${order.id.slice(0, 8)}6304`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+
+    console.log("QR Code URL generated:", qrCodeUrl);
 
     return new Response(
       JSON.stringify({ 

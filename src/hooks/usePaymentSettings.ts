@@ -21,6 +21,8 @@ export const usePaymentSettings = () => {
     try {
       setIsLoading(true);
       
+      console.log('Fetching payment settings...');
+      
       const { data, error } = await supabase
         .from('payment_settings')
         .select('*')
@@ -30,7 +32,7 @@ export const usePaymentSettings = () => {
       if (error) {
         console.error('Error fetching payment settings:', error);
         // Use fallback data if fetch fails
-        setSettings({
+        const fallbackSettings = {
           promptpay_number: '0962358979',
           bank_name: 'ธนาคารกรุงเทพ',
           bank_account_number: '138-4-41680-4',
@@ -38,14 +40,17 @@ export const usePaymentSettings = () => {
           bank_branch: '',
           stripe_enabled: true,
           omise_enabled: true
-        });
+        };
+        console.log('Using fallback settings:', fallbackSettings);
+        setSettings(fallbackSettings);
       } else {
+        console.log('Payment settings fetched successfully:', data);
         setSettings(data);
       }
     } catch (error) {
       console.error('Error fetching payment settings:', error);
       // Use fallback data
-      setSettings({
+      const fallbackSettings = {
         promptpay_number: '0962358979',
         bank_name: 'ธนาคารกรุงเทพ',
         bank_account_number: '138-4-41680-4',
@@ -53,7 +58,9 @@ export const usePaymentSettings = () => {
         bank_branch: '',
         stripe_enabled: true,
         omise_enabled: true
-      });
+      };
+      console.log('Using fallback settings after error:', fallbackSettings);
+      setSettings(fallbackSettings);
     } finally {
       setIsLoading(false);
     }
@@ -62,6 +69,8 @@ export const usePaymentSettings = () => {
   const updateSettings = async (newSettings: Partial<PaymentSettings>) => {
     try {
       setIsLoading(true);
+      
+      console.log('Updating payment settings:', newSettings);
       
       const { error } = await supabase
         .from('payment_settings')
@@ -80,6 +89,7 @@ export const usePaymentSettings = () => {
       // Update local state
       setSettings(prev => ({ ...prev, ...newSettings }));
       toast.success('บันทึกการตั้งค่าสำเร็จ');
+      console.log('Payment settings updated successfully');
       return true;
     } catch (error) {
       console.error('Error updating payment settings:', error);
