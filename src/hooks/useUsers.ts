@@ -36,6 +36,9 @@ export const useUsers = () => {
       }
     },
     retry: 1,
+    // ลด staleTime เพื่อให้ data fresh ขึ้น
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -130,18 +133,35 @@ export const useUpdateUserRole = () => {
         }
         
         console.log('=== Role update completed successfully ===');
-        return { success: true };
+        return { success: true, userId, newRole };
       } catch (error) {
         console.error('=== Role update failed ===');
         console.error('Error:', error);
         throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate all related queries
+    onSuccess: (data) => {
+      console.log('Mutation success, refreshing data...');
+      
+      // Invalidate and refetch users data immediately
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
+      
+      // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['vipStatus'] });
       queryClient.invalidateQueries({ queryKey: ['userRole'] });
+      
+      // Force update the cache with optimistic update
+      queryClient.setQueryData(['users'], (oldData: UserWithStats[] | undefined) => {
+        if (!oldData) return oldData;
+        
+        return oldData.map(user => 
+          user.id === data.userId 
+            ? { ...user, role: data.newRole }
+            : user
+        );
+      });
+      
       toast.success('เปลี่ยนสิทธิ์ผู้ใช้สำเร็จแล้ว!');
     },
     onError: (error: any) => {

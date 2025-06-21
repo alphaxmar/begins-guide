@@ -1,4 +1,5 @@
 
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,10 +81,11 @@ const AdminUsersPage = () => {
       // Show success message
       toast.success(`เปลี่ยนสิทธิ์เป็น ${getRoleText(newRole)} สำเร็จแล้ว`);
       
-      // Refresh the users list
+      // Force refresh the users list after a short delay
       setTimeout(() => {
+        console.log('Force refreshing users data...');
         refetch();
-      }, 1000);
+      }, 500);
       
     } catch (error) {
       console.error('AdminUsersPage: Role change failed:', error);
