@@ -9,9 +9,15 @@ interface ModernProductFormProps {
   product: Tables<'products'>;
   onSubmit: (values: ProductFormValues) => void;
   isLoading: boolean;
+  showLessonsSection?: boolean;
 }
 
-const ModernProductForm = ({ product, onSubmit, isLoading }: ModernProductFormProps) => {
+const ModernProductForm = ({ 
+  product, 
+  onSubmit, 
+  isLoading, 
+  showLessonsSection = true 
+}: ModernProductFormProps) => {
   return (
     <div className="space-y-6">
       {/* Product Information Card */}
@@ -46,8 +52,8 @@ const ModernProductForm = ({ product, onSubmit, isLoading }: ModernProductFormPr
         </CardContent>
       </Card>
 
-      {/* Lessons Section - Only show for courses */}
-      <ProductLessonsSection product={product} />
+      {/* Lessons Section - Only show for courses and when enabled */}
+      {showLessonsSection && <ProductLessonsSection product={product} />}
     </div>
   );
 };

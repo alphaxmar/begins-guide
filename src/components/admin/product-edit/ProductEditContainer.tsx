@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,9 +11,10 @@ import ModernProductForm from "./ModernProductForm";
 interface ProductEditContainerProps {
   product: Tables<'products'>;
   slug: string;
+  showLessonsSection?: boolean;
 }
 
-const ProductEditContainer = ({ product, slug }: ProductEditContainerProps) => {
+const ProductEditContainer = ({ product, slug, showLessonsSection = true }: ProductEditContainerProps) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -128,6 +130,7 @@ const ProductEditContainer = ({ product, slug }: ProductEditContainerProps) => {
         product={product}
         onSubmit={handleSubmit}
         isLoading={updateProductMutation.isPending}
+        showLessonsSection={showLessonsSection}
       />
     </ModernProductEditLayout>
   );

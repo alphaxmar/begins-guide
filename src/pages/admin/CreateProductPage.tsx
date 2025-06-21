@@ -3,13 +3,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import { Tables } from "@/integrations/supabase/types";
+import ModernProductEditLayout from "@/components/admin/product-edit/ModernProductEditLayout";
+import ModernProductForm from "@/components/admin/product-edit/ModernProductForm";
+import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
 
 const CreateProductPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [createdProduct, setCreatedProduct] = useState<Tables<'products'> | null>(null);
 
   const createProductMutation = useMutation({
     mutationFn: async (values: ProductFormValues) => {
@@ -111,25 +116,25 @@ const CreateProductPage = () => {
       }
     },
     onSuccess: (data) => {
-      toast.success("สร้างสินค้าใหม่เรียบร้อยแล้ว!");
+      toast.success("✅ สร้างสินค้าใหม่เรียบร้อยแล้ว!", {
+        description: `สินค้า "${data.title}" ถูกสร้างเรียบร้อยแล้ว`,
+        duration: 3000,
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
 
       console.log("Product created successfully:", data);
       console.log("Product type:", data?.product_type);
       console.log("Product slug:", data?.slug);
 
-      if (data && data.product_type === 'course') {
-        console.log("Navigating to lessons page for course:", data.slug);
-        // นำทางไปหน้าจัดการบทเรียนทันทีสำหรับคอร์ส
-        navigate(`/admin/products/${data.slug}/lessons`);
-      } else {
-        console.log("Navigating to products list for non-course product");
-        navigate("/admin/products");
-      }
+      // Set the created product to enable lessons management
+      setCreatedProduct(data);
     },
     onError: (error) => {
       console.error("Product creation error:", error);
-      toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
+      toast.error(`❌ เกิดข้อผิดพลาดในการสร้างสินค้า`, {
+        description: error.message,
+        duration: 4000,
+      });
     },
   });
 
@@ -138,10 +143,43 @@ const CreateProductPage = () => {
     createProductMutation.mutate(values);
   };
 
+  const handleFinishAndGoBack = () => {
+    navigate("/admin/products");
+  };
+
+  // If product is created, show the modern edit layout with lessons management
+  if (createdProduct) {
+    return (
+      <ModernProductEditLayout product={createdProduct}>
+        <ModernProductForm 
+          product={createdProduct}
+          onSubmit={(values) => {
+            // For already created product, just show success and allow continuing to edit
+            toast.success("✅ ข้อมูลสินค้าได้รับการอัปเดตแล้ว!");
+          }}
+          isLoading={false}
+        />
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={handleFinishAndGoBack}
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
+          >
+            เสร็จสิ้น - กลับไปรายการสินค้า
+          </button>
+        </div>
+      </ModernProductEditLayout>
+    );
+  }
+
+  // Initial creation form
   return (
     <div className="py-8">
       <div className="max-w-4xl mx-auto">
-        <ProductForm onSubmit={handleSubmit} isLoading={createProductMutation.isPending} submitButtonText="สร้างสินค้า"/>
+        <ProductForm 
+          onSubmit={handleSubmit} 
+          isLoading={createProductMutation.isPending} 
+          submitButtonText="สร้างสินค้า"
+        />
       </div>
     </div>
   );
