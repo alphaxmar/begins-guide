@@ -1,15 +1,10 @@
 
-import { ReactNode } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 
-interface AdminLayoutProps {
-  children: ReactNode;
-}
-
-const AdminLayout = ({ children }: AdminLayoutProps) => {
+const AdminLayout = () => {
   const location = useLocation();
   const isSubPage = location.pathname !== '/admin' && location.pathname !== '/admin/';
 
@@ -28,7 +23,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </Link>
             </div>
           )}
-          {children}
+          <Outlet />
         </div>
       </div>
     </div>
