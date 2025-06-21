@@ -62,17 +62,23 @@ const PRODUCT_TYPE_CONFIG = {
 const ProductCard: React.FC<ProductCardProps> = ({ title, description, price, imageUrl, slug, product_type }) => {
   const typeConfig = PRODUCT_TYPE_CONFIG[product_type] || PRODUCT_TYPE_CONFIG.course;
   const IconComponent = typeConfig.icon;
+  const isFree = price === 0;
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col">
       <Link to={`/products/${slug}`} className="block">
         <div className="relative">
           <img src={imageUrl} alt={title} className="w-full h-48 object-cover" />
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2 flex gap-1">
             <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${typeConfig.color}`}>
               <IconComponent className="h-3 w-3" />
               {typeConfig.label}
             </div>
+            {isFree && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                ฟรี
+              </div>
+            )}
           </div>
         </div>
       </Link>
@@ -86,10 +92,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ title, description, price, im
       </CardContent>
       <CardFooter className="flex justify-between items-center pt-4">
         <p className="text-xl font-bold text-primary">
-          {price === 0 ? 'ฟรี' : `${price.toLocaleString()} บาท`}
+          {isFree ? 'ฟรี' : `${price.toLocaleString()} บาท`}
         </p>
         <Button asChild>
-          <Link to={`/products/${slug}`}>ดูรายละเอียด</Link>
+          <Link to={`/products/${slug}`}>
+            {isFree ? 'รับฟรี' : 'ดูรายละเอียด'}
+          </Link>
         </Button>
       </CardFooter>
     </Card>
