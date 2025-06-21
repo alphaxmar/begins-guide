@@ -10,7 +10,7 @@ import { productSchema } from "@/lib/validators/product";
 import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Package, FileText, Video, Download, Users, Wrench, GraduationCap, Settings, Calendar } from "lucide-react";
+import { Package, FileText, Video, Download, Users, Wrench, GraduationCap, Settings } from "lucide-react";
 import ProductAssetInputs from "./product-form/ProductAssetInputs";
 import CourseDetailsInputs from "./product-form/CourseDetailsInputs";
 import ProductMetadataInputs from "./product-form/ProductMetadataInputs";
@@ -281,7 +281,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 การตั้งค่าเพิ่มเติม
               </CardTitle>
               <CardDescription>
-                ตั้งค่าหมวดหมู่ วันที่ และการดาวน์โหลดสำหรับสินค้า
+                ตั้งค่าหมวดหมู่และการดาวน์โหลดสำหรับสินค้า
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -327,13 +327,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
                         type="number" 
                         placeholder="0" 
                         min="0"
-                        step="0.01"
+                        step="1"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                       />
                     </FormControl>
                     <FormDescription>
-                      ราคาขายของสินค้าในหน่วยบาท (สามารถใส่ทศนิยมได้)
+                      ราคาขายของสินค้าในหน่วยบาท (จำนวนเต็มเท่านั้น)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

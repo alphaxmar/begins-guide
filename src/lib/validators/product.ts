@@ -6,7 +6,7 @@ export const productSchema = z.object({
   slug: z.string().min(3, { message: "Slug ต้องมีอย่างน้อย 3 ตัวอักษร" })
     .regex(/^[a-z0-9-]+$/, { message: "Slug สามารถมีได้แค่ตัวอักษรเล็ก, ตัวเลข, และขีดกลาง (-)" }),
   description: z.string().optional(),
-  price: z.coerce.number().min(0, { message: "ราคาต้องไม่ติดลบ" }),
+  price: z.coerce.number().int({ message: "ราคาต้องเป็นจำนวนเต็ม" }).min(0, { message: "ราคาต้องไม่ติดลบ" }),
   product_type: z.enum(["course", "template", "ebook", "video", "software", "service", "membership"], { 
     required_error: "กรุณาเลือกประเภทสินค้า" 
   }),

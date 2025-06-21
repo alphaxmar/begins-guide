@@ -31,72 +31,28 @@ const ProductMetadataInputs: React.FC<ProductMetadataInputsProps> = ({ control, 
       />
 
       {productType === 'course' && (
-        <>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={control}
-              name="start_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>วันที่เริ่มต้นคอร์ส</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="datetime-local" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    วันที่เริ่มต้นคอร์ส (ไม่บังคับ)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="end_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>วันที่สิ้นสุดคอร์ส</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="datetime-local" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    วันที่สิ้นสุดคอร์ส (ไม่บังคับ)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={control}
-            name="certificate_enabled"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">
-                    เปิดใช้งานประกาศนียบัตร
-                  </FormLabel>
-                  <FormDescription>
-                    ออกประกาศนียบัตรให้ผู้เรียนที่เรียนจบคอร์ส
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </>
+        <FormField
+          control={control}
+          name="certificate_enabled"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">
+                  เปิดใช้งานประกาศนียบัตร
+                </FormLabel>
+                <FormDescription>
+                  ออกประกาศนียบัตรให้ผู้เรียนที่เรียนจบคอร์ส
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
       )}
 
       {(productType === 'template' || productType === 'ebook' || productType === 'software') && (
