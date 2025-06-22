@@ -1,9 +1,11 @@
-
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthPage from '@/pages/AuthPage';
 import Index from '@/pages/Index';
+import Articles from '@/pages/Articles';
+import ProPage from '@/pages/ProPage';
+import ProgramPage from '@/pages/ProgramPage';
 import PricingPage from '@/pages/PricingPage';
 import ProfilePage from '@/pages/ProfilePage';
 import CohortPage from '@/pages/CohortPage';
@@ -36,6 +38,13 @@ function App() {
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/" element={<Index />} />
+      
+      {/* New pages */}
+      <Route path="/articles" element={<Articles />} />
+      <Route path="/pro" element={<ProPage />} />
+      <Route path="/program" element={<ProgramPage />} />
+      
+      {/* Existing pages */}
       <Route path="/pricing" element={<PricingPage />} />
       
       {/* User Routes */}
