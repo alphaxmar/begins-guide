@@ -6,6 +6,7 @@ import Index from '@/pages/Index';
 import Articles from '@/pages/Articles';
 import ProPage from '@/pages/ProPage';
 import ProgramPage from '@/pages/ProgramPage';
+import MicroSaasCoursePage from '@/pages/MicroSaasCoursePage';
 import PricingPage from '@/pages/PricingPage';
 import ProfilePage from '@/pages/ProfilePage';
 import CohortPage from '@/pages/CohortPage';
@@ -43,6 +44,7 @@ function App() {
       <Route path="/articles" element={<Articles />} />
       <Route path="/pro" element={<ProPage />} />
       <Route path="/program" element={<ProgramPage />} />
+      <Route path="/micro-saas-course" element={<MicroSaasCoursePage />} />
       
       {/* Existing pages */}
       <Route path="/pricing" element={<PricingPage />} />
