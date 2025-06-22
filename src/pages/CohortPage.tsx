@@ -23,7 +23,7 @@ const CohortPage: React.FC = () => {
         .from("products")
         .select("*")
         .eq("slug", productSlug)
-        .eq("product_type", "cohort_program")
+        .eq("product_type", "cohort_program" as any)
         .maybeSingle();
 
       if (error) throw error;

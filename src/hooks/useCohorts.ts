@@ -34,6 +34,16 @@ export interface LiveSession {
   week_number?: number;
 }
 
+export interface CohortEnrollment {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  cohort_id: string;
+  enrolled_at: string;
+  status: 'active' | 'completed' | 'dropped';
+}
+
 // Hook for fetching cohorts by product
 export const useCohortsByProduct = (productId?: string) => {
   return useQuery({
@@ -42,13 +52,13 @@ export const useCohortsByProduct = (productId?: string) => {
       if (!productId) return [];
       
       const { data, error } = await supabase
-        .from("cohorts")
+        .from("cohorts" as any)
         .select("*")
         .eq("product_id", productId)
         .order("start_date", { ascending: true });
 
       if (error) throw error;
-      return data as Cohort[];
+      return (data || []) as Cohort[];
     },
     enabled: !!productId,
   });
@@ -61,15 +71,18 @@ export const useUserCohortEnrollment = (cohortId?: string) => {
     queryFn: async () => {
       if (!cohortId) return null;
       
+      const { data: user } = await supabase.auth.getUser();
+      if (!user?.user?.id) return null;
+
       const { data, error } = await supabase
-        .from("cohort_enrollments")
+        .from("cohort_enrollments" as any)
         .select("*")
         .eq("cohort_id", cohortId)
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+        .eq("user_id", user.user.id)
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      return data as CohortEnrollment | null;
     },
     enabled: !!cohortId,
   });
@@ -83,13 +96,13 @@ export const useLiveSessionsByCohort = (cohortId?: string) => {
       if (!cohortId) return [];
       
       const { data, error } = await supabase
-        .from("live_sessions")
+        .from("live_sessions" as any)
         .select("*")
         .eq("cohort_id", cohortId)
         .order("scheduled_at", { ascending: true });
 
       if (error) throw error;
-      return data as LiveSession[];
+      return (data || []) as LiveSession[];
     },
     enabled: !!cohortId,
   });
@@ -102,7 +115,7 @@ export const useCreateCohortEnrollment = () => {
   return useMutation({
     mutationFn: async ({ cohortId, userId }: { cohortId: string; userId: string }) => {
       const { data, error } = await supabase
-        .from("cohort_enrollments")
+        .from("cohort_enrollments" as any)
         .insert({
           cohort_id: cohortId,
           user_id: userId,
@@ -111,7 +124,7 @@ export const useCreateCohortEnrollment = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as CohortEnrollment;
     },
     onSuccess: () => {
       toast.success("ลงทะเบียนสำเร็จ!");
