@@ -6,6 +6,7 @@ import AuthPage from '@/pages/AuthPage';
 import Index from '@/pages/Index';
 import PricingPage from '@/pages/PricingPage';
 import ProfilePage from '@/pages/ProfilePage';
+import CohortPage from '@/pages/CohortPage';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import UserProtectedRoute from '@/components/UserProtectedRoute';
@@ -39,6 +40,9 @@ function App() {
       
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
+
+      {/* Cohort Routes */}
+      <Route path="/cohort/:productSlug" element={<UserProtectedRoute><CohortPage /></UserProtectedRoute>} />
 
       {/* Admin Routes */}
       <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>

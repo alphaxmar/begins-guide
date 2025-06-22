@@ -34,7 +34,7 @@ const ProductPricingInputs: React.FC<ProductPricingInputsProps> = ({ control, fo
             <FormLabel>ประเภทสินค้า</FormLabel>
             <Select onValueChange={(value) => {
               field.onChange(value);
-              if (value === 'course') {
+              if (value === 'course' || value === 'cohort_program') {
                 form.setValue('template_file', undefined);
               }
             }} defaultValue={field.value}>
@@ -46,6 +46,7 @@ const ProductPricingInputs: React.FC<ProductPricingInputsProps> = ({ control, fo
               <SelectContent>
                 <SelectItem value="course">คอร์ส</SelectItem>
                 <SelectItem value="template">เทมเพลต</SelectItem>
+                <SelectItem value="cohort_program">Signature Course (Cohort Program)</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />

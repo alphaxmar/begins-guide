@@ -7,7 +7,7 @@ export const productSchema = z.object({
     .regex(/^[a-z0-9-]+$/, { message: "Slug สามารถมีได้แค่ตัวอักษรเล็ก, ตัวเลข, และขีดกลาง (-)" }),
   description: z.string().optional(),
   price: z.coerce.number().int({ message: "ราคาต้องเป็นจำนวนเต็ม" }).min(0, { message: "ราคาต้องไม่ติดลบ" }),
-  product_type: z.enum(["course", "template", "ebook", "video", "software", "service", "membership"], { 
+  product_type: z.enum(["course", "template", "ebook", "video", "software", "service", "membership", "cohort_program"], { 
     required_error: "กรุณาเลือกประเภทสินค้า" 
   }),
   image_url: z.string().url({ message: "URL รูปภาพไม่ถูกต้อง" }).optional().or(z.literal('')),
