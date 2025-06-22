@@ -29,16 +29,16 @@ const VipPackageCard: React.FC<VipPackageCardProps> = (pkg) => {
     // Convert VIP package to cart item format
     const cartItem = {
       id: pkg.id,
-      title: pkg.name,
+      title: `Begins.guide PRO - ${pkg.name}`,
       price: pkg.price,
       product_type: 'vip_package',
       image_url: null,
-      slug: `vip-${pkg.id}`,
+      slug: `pro-${pkg.id}`,
       description: pkg.description || ''
     };
 
     addToCart(cartItem);
-    toast.success('เพิ่มแพ็กเกจ VIP ลงตะกร้าแล้ว');
+    toast.success('เพิ่มแพ็กเกจ PRO ลงตะกร้าแล้ว');
   };
 
   if (!pkg.is_active) {
@@ -57,8 +57,9 @@ const VipPackageCard: React.FC<VipPackageCardProps> = (pkg) => {
             {pkg.duration_months ? `${pkg.duration_months} เดือน` : 'ตลอดชีวิต'}
           </Badge>
           <CardTitle className="text-2xl font-bold text-gray-900">
-            {pkg.name}
+            Begins.guide PRO
           </CardTitle>
+          <p className="text-lg font-semibold text-yellow-600">{pkg.name}</p>
           <p className="text-gray-600">{pkg.description}</p>
         </div>
       </CardHeader>

@@ -838,28 +838,37 @@ export type Database = {
       vip_memberships: {
         Row: {
           created_at: string
+          current_period_end_at: string | null
           end_date: string | null
           id: string
           is_active: boolean
           start_date: string
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          current_period_end_at?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           start_date?: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          current_period_end_at?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           start_date?: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1019,6 +1028,14 @@ export type Database = {
         Args: { p_lesson_ids: string[] }
         Returns: undefined
       }
+      update_subscription_status: {
+        Args: {
+          p_stripe_subscription_id: string
+          p_status: Database["public"]["Enums"]["subscription_status"]
+          p_current_period_end?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       article_status: "draft" | "published"
@@ -1037,6 +1054,14 @@ export type Database = {
         | "software"
         | "service"
         | "membership"
+      subscription_status:
+        | "active"
+        | "trialing"
+        | "past_due"
+        | "canceled"
+        | "incomplete"
+        | "incomplete_expired"
+        | "unpaid"
       user_role: "user" | "admin" | "partner" | "vip"
     }
     CompositeTypes: {
@@ -1170,6 +1195,15 @@ export const Constants = {
         "software",
         "service",
         "membership",
+      ],
+      subscription_status: [
+        "active",
+        "trialing",
+        "past_due",
+        "canceled",
+        "incomplete",
+        "incomplete_expired",
+        "unpaid",
       ],
       user_role: ["user", "admin", "partner", "vip"],
     },

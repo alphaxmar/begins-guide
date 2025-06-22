@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { useVipStatus } from '@/hooks/useVipStatus';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,7 +31,7 @@ const AIToolsPage = () => {
     );
   }
 
-  // Block non-VIP users
+  // Block non-PRO users
   if (!isVip) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -43,12 +42,12 @@ const AIToolsPage = () => {
               เครื่องมือ AI Power Tools
             </h1>
             <p className="text-xl text-gray-600 mb-8">
-              เครื่องมือนี้เฉพาะสำหรับสมาชิก VIP เท่านั้น
+              เครื่องมือนี้เฉพาะสำหรับสมาชิก PRO เท่านั้น
             </p>
             <Card className="border-yellow-200 bg-yellow-50 max-w-md mx-auto">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-                  อัปเกรดเป็น VIP เพื่อเข้าถึง:
+                  อัปเกรดเป็น PRO เพื่อเข้าถึง:
                 </h3>
                 <ul className="text-sm text-yellow-700 space-y-1 mb-4">
                   <li>• AI ช่วยคิดไอเดียธุรกิจ</li>
@@ -59,9 +58,9 @@ const AIToolsPage = () => {
                   <li>• เครื่องมือไอเดียการตลาด</li>
                 </ul>
                 <Button asChild className="w-full bg-yellow-600 hover:bg-yellow-700">
-                  <a href="/products?type=vip">
+                  <a href="/pricing">
                     <Crown className="mr-2 h-4 w-4" />
-                    อัปเกรดเป็น VIP
+                    อัปเกรดเป็น PRO
                   </a>
                 </Button>
               </CardContent>
@@ -72,7 +71,7 @@ const AIToolsPage = () => {
     );
   }
 
-  // VIP content
+  // PRO content (keep existing PRO tools content)
   const aiTools = [
     {
       id: 1,
@@ -143,7 +142,7 @@ const AIToolsPage = () => {
             <div className="flex items-center justify-center mb-4">
               <Badge className="bg-yellow-500 text-white text-lg px-6 py-2">
                 <Crown className="mr-2 h-5 w-5" />
-                VIP เท่านั้น
+                PRO เท่านั้น
               </Badge>
             </div>
             <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
@@ -240,7 +239,7 @@ const AIToolsPage = () => {
               <CardContent className="p-6">
                 <p className="text-yellow-800 text-sm">
                   <Crown className="inline h-4 w-4 mr-1" />
-                  เครื่องมือ AI Power Tools เป็นสิทธิพิเศษสำหรับสมาชิก VIP เท่านั้น 
+                  เครื่องมือ AI Power Tools เป็นสิทธิพิเศษสำหรับสมาชิก PRO เท่านั้น 
                   เครื่องมือเหล่านี้จะช่วยให้คุณประหยัดเวลาและได้ไอเดียที่ดีกว่าในการเริ่มต้นธุรกิจ
                 </p>
               </CardContent>

@@ -23,6 +23,7 @@ import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ProfilePage from "./pages/ProfilePage";
+import PricingPage from "./pages/PricingPage";
 import NotFound from "./pages/NotFound";
 import AIToolsPage from "./pages/AIToolsPage";
 
@@ -83,6 +84,7 @@ const App = () => (
                 <Route path="auth" element={<AuthPage />} />
                 <Route path="reset-password" element={<ResetPasswordPage />} />
                 <Route path="update-password" element={<UpdatePasswordPage />} />
+                <Route path="pricing" element={<PricingPage />} />
                 
                 {/* User protected routes */}
                 <Route path="profile" element={

@@ -57,6 +57,9 @@ const Header = () => {
           <Link to="/products" className="text-foreground/60 transition-colors hover:text-foreground/80">
             ผลิตภัณฑ์
           </Link>
+          <Link to="/pricing" className="text-foreground/60 transition-colors hover:text-foreground/80">
+            ราคา
+          </Link>
           {user && isVip && (
             <Link 
               to="/ai-tools" 
@@ -64,7 +67,7 @@ const Header = () => {
             >
               <Brain className="h-4 w-4" />
               AI Tools
-              <Badge className="bg-yellow-500 text-white text-xs ml-1">VIP</Badge>
+              <Badge className="bg-yellow-500 text-white text-xs ml-1">PRO</Badge>
             </Link>
           )}
         </nav>
@@ -105,7 +108,7 @@ const Header = () => {
                     </p>
                     {isVip && (
                       <Badge className="bg-yellow-500 hover:bg-yellow-600 mt-1 w-fit">
-                        VIP
+                        PRO
                       </Badge>
                     )}
                   </div>
@@ -119,7 +122,7 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/ai-tools')}>
                     <Brain className="mr-2 h-4 w-4 text-yellow-600" />
                     <span>AI Tools</span>
-                    <Badge className="ml-auto bg-yellow-500 text-white text-xs">VIP</Badge>
+                    <Badge className="ml-auto bg-yellow-500 text-white text-xs">PRO</Badge>
                   </DropdownMenuItem>
                 )}
                 {isAdmin && (
@@ -136,12 +139,17 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild>
-              <Link to="/auth">
-                <LogIn className="mr-2 h-4 w-4" />
-                เข้าสู่ระบบ
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" asChild>
+                <Link to="/pricing">PRO</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/auth">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  เข้าสู่ระบบ
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
       </div>

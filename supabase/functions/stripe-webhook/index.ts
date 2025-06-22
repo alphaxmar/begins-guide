@@ -54,59 +54,147 @@ serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session;
         console.log("Processing checkout.session.completed:", session.id);
 
-        // Confirm payment in database
+        // Handle subscription checkout
+        if (session.mode === 'subscription' && session.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          
+          // Create or update VIP membership for subscription
+          const { error: vipError } = await supabaseService
+            .from('vip_memberships')
+            .upsert({
+              user_id: session.client_reference_id,
+              stripe_subscription_id: subscription.id,
+              status: 'active',
+              current_period_end_at: new Date(subscription.current_period_end * 1000).toISOString(),
+              is_active: true,
+              start_date: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id'
+            });
+
+          if (vipError) {
+            console.error('Error creating VIP membership:', vipError);
+            throw vipError;
+          }
+
+          // Update user role to vip
+          const { error: roleError } = await supabaseService
+            .from('profiles')
+            .update({ role: 'vip' })
+            .eq('id', session.client_reference_id);
+
+          if (roleError) {
+            console.error('Error updating user role:', roleError);
+          }
+        } else {
+          // Handle one-time payment (existing logic)
+          const { error } = await supabaseService
+            .rpc('confirm_stripe_payment', {
+              p_stripe_session_id: session.id,
+              p_stripe_payment_intent_id: session.payment_intent as string
+            });
+
+          if (error) {
+            console.error('Error confirming payment:', error);
+            throw error;
+          }
+        }
+
+        break;
+      }
+
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        console.log(`Processing ${event.type}:`, subscription.id);
+
         const { error } = await supabaseService
-          .rpc('confirm_stripe_payment', {
-            p_stripe_session_id: session.id,
-            p_stripe_payment_intent_id: session.payment_intent as string
+          .rpc('update_subscription_status', {
+            p_stripe_subscription_id: subscription.id,
+            p_status: subscription.status as any,
+            p_current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
           });
 
         if (error) {
-          console.error('Error confirming payment:', error);
+          console.error('Error updating subscription:', error);
           throw error;
         }
 
-        // Send purchase confirmation email
-        try {
-          const { data: orderData } = await supabaseService
-            .from('orders')
-            .select(`
-              id,
-              user_id,
-              total_amount,
-              profiles!inner(full_name),
-              order_items(
-                product_id,
-                price,
-                products(title)
-              )
-            `)
-            .eq('stripe_session_id', session.id)
-            .single();
+        break;
+      }
 
-          if (orderData) {
-            const { error: emailError } = await supabaseService.functions.invoke('send-email-notifications', {
-              body: {
-                type: 'purchase_confirmation',
-                to: session.customer_details?.email || '',
-                data: {
-                  user_name: orderData.profiles.full_name || 'ลูกค้า',
-                  order_id: orderData.id,
-                  products: orderData.order_items.map((item: any) => ({
-                    title: item.products.title,
-                    price: item.price
-                  })),
-                  total_amount: orderData.total_amount
-                }
-              }
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        console.log("Processing customer.subscription.deleted:", subscription.id);
+
+        const { error } = await supabaseService
+          .rpc('update_subscription_status', {
+            p_stripe_subscription_id: subscription.id,
+            p_status: 'canceled'
+          });
+
+        if (error) {
+          console.error('Error canceling subscription:', error);
+          throw error;
+        }
+
+        // Update user role back to user
+        const { data: membership } = await supabaseService
+          .from('vip_memberships')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single();
+
+        if (membership) {
+          await supabaseService
+            .from('profiles')
+            .update({ role: 'user' })
+            .eq('id', membership.user_id);
+        }
+
+        break;
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+        console.log("Processing invoice.payment_succeeded:", invoice.id);
+
+        if (invoice.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+          
+          const { error } = await supabaseService
+            .rpc('update_subscription_status', {
+              p_stripe_subscription_id: subscription.id,
+              p_status: subscription.status as any,
+              p_current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
             });
 
-            if (emailError) {
-              console.error('Error sending purchase confirmation email:', emailError);
-            }
+          if (error) {
+            console.error('Error updating subscription after payment:', error);
           }
-        } catch (emailErr) {
-          console.error('Error processing purchase confirmation email:', emailErr);
+        }
+
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        console.log("Processing invoice.payment_failed:", invoice.id);
+
+        if (invoice.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+          
+          const { error } = await supabaseService
+            .rpc('update_subscription_status', {
+              p_stripe_subscription_id: subscription.id,
+              p_status: subscription.status as any,
+              p_current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
+            });
+
+          if (error) {
+            console.error('Error updating subscription after failed payment:', error);
+          }
         }
 
         break;
@@ -116,7 +204,7 @@ serve(async (req) => {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         console.log("Processing payment_intent.payment_failed:", paymentIntent.id);
 
-        // Update order status to failed
+        // Update order status to failed (for one-time payments)
         const { error } = await supabaseService
           .from('orders')
           .update({ 
