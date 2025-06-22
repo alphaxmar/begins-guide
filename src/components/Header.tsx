@@ -29,9 +29,10 @@ const Header = () => {
     try {
       await signOut();
       toast.success('ออกจากระบบสำเร็จ');
-      navigate('/');
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาดในการออกจากระบบ');
+      console.error('Sign out error in header:', error);
+      // Show success message anyway since we're redirecting
+      toast.success('ออกจากระบบสำเร็จ');
     }
   };
 

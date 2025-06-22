@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useWelcomeEmail } from '@/hooks/useWelcomeEmail';
+import { cleanupAuthState } from '@/utils/authCleanup';
 
 interface AuthContextType {
   user: User | null;
@@ -100,8 +101,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Try to sign out gracefully, but don't fail if session doesn't exist
+      try {
+        const { error } = await supabase.auth.signOut({ scope: 'global' });
+        if (error && !error.message.includes('Session not found')) {
+          console.warn('Sign out error:', error);
+        }
+      } catch (error) {
+        // Ignore session not found errors during logout
+        console.log('Logout attempted with expired session, continuing...');
+      }
+      
+      // Force clear user state and reload page for clean state
+      setUser(null);
+      
+      // Use a small delay to ensure state is cleared before redirect
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout fails, clear state and redirect
+      setUser(null);
+      cleanupAuthState();
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } finally {
       setLoading(false);
     }

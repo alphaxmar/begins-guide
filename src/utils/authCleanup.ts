@@ -4,7 +4,8 @@ export const cleanupAuthState = () => {
   const authKeys = Object.keys(localStorage).filter(key => 
     key.includes('supabase') || 
     key.includes('auth') ||
-    key.includes('session')
+    key.includes('session') ||
+    key.startsWith('sb-')
   );
   
   authKeys.forEach(key => {
@@ -15,10 +16,13 @@ export const cleanupAuthState = () => {
   const sessionKeys = Object.keys(sessionStorage).filter(key => 
     key.includes('supabase') || 
     key.includes('auth') ||
-    key.includes('session')
+    key.includes('session') ||
+    key.startsWith('sb-')
   );
   
   sessionKeys.forEach(key => {
     sessionStorage.removeItem(key);
   });
+
+  console.log('Auth state cleanup completed');
 };
