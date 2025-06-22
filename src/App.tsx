@@ -1,148 +1,81 @@
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthPage from '@/pages/AuthPage';
+import HomePage from '@/pages/HomePage';
+import PricingPage from '@/pages/PricingPage';
+import ProfilePage from '@/pages/ProfilePage';
+import ContactPage from '@/pages/ContactPage';
+import TermsPage from '@/pages/TermsPage';
+import PrivacyPage from '@/pages/PrivacyPage';
+import NotFoundPage from '@/pages/NotFoundPage';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import UserProtectedRoute from '@/components/UserProtectedRoute';
+import AdminLayout from '@/layouts/AdminLayout';
+import DashboardPage from '@/pages/admin/DashboardPage';
+import AdminUsersPage from '@/pages/admin/AdminUsersPage';
+import AdminReportsPage from '@/pages/admin/AdminReportsPage';
+import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
+import AdminProductsPage from '@/pages/admin/AdminProductsPage';
+import AdminArticlesPage from '@/pages/admin/AdminArticlesPage';
+import AdminDiscountCodesPage from '@/pages/admin/AdminDiscountCodesPage';
+import AdminPaymentSettingsPage from '@/pages/admin/AdminPaymentSettingsPage';
+import AdminEmailTemplatesPage from '@/pages/admin/AdminEmailTemplatesPage';
+import ProMembershipsPage from '@/pages/admin/ProMembershipsPage';
+import ProPackagesPage from '@/pages/admin/ProPackagesPage';
 
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { CartProvider } from "@/contexts/CartContext";
-import Layout from "@/components/Layout";
-import Index from "./pages/Index";
-import Articles from "./pages/Articles";
-import ArticleDetail from "./pages/ArticleDetail";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import CoursesPage from "./pages/CoursesPage";
-import CoursePage from "./pages/CoursePage";
-import ModernCoursePage from "./pages/ModernCoursePage";
-import VipCoursesPage from "./pages/VipCoursesPage";
-import VipTemplatesPage from "./pages/VipTemplatesPage";
-import CartPage from "./pages/CartPage";
-import CheckoutPage from "./pages/CheckoutPage";
-import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
-import AuthPage from "./pages/AuthPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import UpdatePasswordPage from "./pages/UpdatePasswordPage";
-import ProfilePage from "./pages/ProfilePage";
-import PricingPage from "./pages/PricingPage";
-import NotFound from "./pages/NotFound";
-import AIToolsPage from "./pages/AIToolsPage";
+function App() {
+  const { initializeAuth, user } = useAuth();
+  const location = useLocation();
 
-// Admin pages
-import AdminLayout from "./components/admin/AdminLayout";
-import DashboardPage from "./pages/admin/DashboardPage";
-import AdminArticlesPage from "./pages/admin/AdminArticlesPage";
-import CreateArticle from "./pages/CreateArticle";
-import EditArticle from "./pages/EditArticle";
-import AdminProductsPage from "./pages/admin/AdminProductsPage";
-import CreateProductPage from "./pages/admin/CreateProductPage";
-import EditProductPage from "./pages/admin/EditProductPage";
-import ManageLessonsPage from "./pages/admin/ManageLessonsPage";
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
-import VipPackagesPage from "./pages/admin/VipPackagesPage";
-import VipManagementPage from "./pages/admin/VipManagementPage";
-import DiscountCodesPage from "./pages/admin/DiscountCodesPage";
-import AdminReportsPage from "./pages/admin/AdminReportsPage";
-import AdminEmailPage from "./pages/admin/AdminEmailPage";
-import AdminPaymentSettingsPage from "./pages/admin/AdminPaymentSettingsPage";
-import ImportArticlesPage from "./pages/admin/ImportArticlesPage";
-import ImportProductsPage from "./pages/admin/ImportProductsPage";
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
-import ProtectedRoute from "./components/ProtectedRoute";
-import UserProtectedRoute from "./components/UserProtectedRoute";
+  // Redirect to profile if logged in and on /auth
+  if (user && location.pathname === '/auth') {
+    return <Navigate to="/profile" replace />;
+  }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-    },
-  },
-});
+  return (
+    
+      <Routes>
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        
+        {/* User Routes */}
+        <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <CartProvider>
-            <Toaster />
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Index />} />
-                <Route path="articles" element={<Articles />} />
-                <Route path="articles/:slug" element={<ArticleDetail />} />
-                <Route path="products" element={<Products />} />
-                <Route path="products/:slug" element={<ProductDetail />} />
-                <Route path="courses" element={<CoursesPage />} />
-                <Route path="courses/:slug" element={<CoursePage />} />
-                <Route path="learn/:slug" element={<ModernCoursePage />} />
-                <Route path="cart" element={<CartPage />} />
-                <Route path="checkout" element={<CheckoutPage />} />
-                <Route path="checkout/success" element={<CheckoutSuccessPage />} />
-                <Route path="auth" element={<AuthPage />} />
-                <Route path="reset-password" element={<ResetPasswordPage />} />
-                <Route path="update-password" element={<UpdatePasswordPage />} />
-                <Route path="pricing" element={<PricingPage />} />
-                
-                {/* User protected routes */}
-                <Route path="profile" element={
-                  <UserProtectedRoute>
-                    <ProfilePage />
-                  </UserProtectedRoute>
-                } />
-                <Route path="vip/courses" element={
-                  <UserProtectedRoute>
-                    <VipCoursesPage />
-                  </UserProtectedRoute>
-                } />
-                <Route path="vip/templates" element={
-                  <UserProtectedRoute>
-                    <VipTemplatesPage />
-                  </UserProtectedRoute>
-                } />
-                <Route path="ai-tools" element={
-                  <UserProtectedRoute>
-                    <AIToolsPage />
-                  </UserProtectedRoute>
-                } />
-              </Route>
-
-              {/* Admin routes */}
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<DashboardPage />} />
-                <Route path="articles" element={<AdminArticlesPage />} />
-                <Route path="articles/create" element={<CreateArticle />} />
-                <Route path="articles/:id/edit" element={<EditArticle />} />
-                <Route path="products" element={<AdminProductsPage />} />
-                <Route path="products/create" element={<CreateProductPage />} />
-                <Route path="products/:id/edit" element={<EditProductPage />} />
-                <Route path="products/:id/lessons" element={<ManageLessonsPage />} />
-                <Route path="users" element={<AdminUsersPage />} />
-                <Route path="orders" element={<AdminOrdersPage />} />
-                <Route path="vip-packages" element={<VipPackagesPage />} />
-                <Route path="vip-management" element={<VipManagementPage />} />
-                <Route path="discount-codes" element={<DiscountCodesPage />} />
-                <Route path="reports" element={<AdminReportsPage />} />
-                <Route path="email" element={<AdminEmailPage />} />
-                <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
-                <Route path="import/articles" element={<ImportArticlesPage />} />
-                <Route path="import/products" element={<ImportProductsPage />} />
-              </Route>
-
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </CartProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        {/* Admin Routes */}
+        <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
+          <Route index element={<DashboardPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="reports" element={<AdminReportsPage />} />
+          <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="products" element={<AdminProductsPage />} />
+          <Route path="articles" element={<AdminArticlesPage />} />
+          <Route path="discount-codes" element={<AdminDiscountCodesPage />} />
+          <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
+          <Route path="email-templates" element={<AdminEmailTemplatesPage />} />
+          
+          {/* Updated PRO routes */}
+          <Route path="pro-memberships" element={<ProMembershipsPage />} />
+          <Route path="pro-packages" element={<ProPackagesPage />} />
+          
+          {/* Legacy routes for backward compatibility */}
+          <Route path="vip-management" element={<Navigate to="/admin/pro-memberships" replace />} />
+          <Route path="vip-packages" element={<Navigate to="/admin/pro-packages" replace />} />
+        </Route>
+        
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    
+  );
+}
 
 export default App;

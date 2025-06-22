@@ -47,7 +47,7 @@ const UserRoleDialog = ({ user, isOpen, onClose, onRoleChange, isLoading = false
     const roleNames = {
       'user': 'ผู้ใช้ทั่วไป',
       'partner': 'พาร์ทเนอร์',
-      'vip': 'สมาชิก VIP',
+      'vip': 'สมาชิก PRO', // Updated to PRO
       'admin': 'ผู้ดูแลระบบ'
     };
     return roleNames[role as keyof typeof roleNames] || role;
@@ -105,7 +105,7 @@ const UserRoleDialog = ({ user, isOpen, onClose, onRoleChange, isLoading = false
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                การเปลี่ยนเป็นสมาชิก VIP จะสร้างสมาชิกภาพ VIP ให้ผู้ใช้คนนี้อัตโนมัติ 
+                การเปลี่ยนเป็นสมาชิก PRO จะสร้างสมาชิกภาพ PRO ให้ผู้ใช้คนนี้อัตโนมัติ 
                 และเขาจะสามารถเข้าถึงเนื้อหาและคอร์สทั้งหมดได้
               </AlertDescription>
             </Alert>
