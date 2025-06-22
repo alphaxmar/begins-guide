@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Check, ArrowRight, Users, Clock, Target, Star, TrendingUp, Award, Shield, Play, BookOpen, Calendar, MessageCircle, FileText, Zap, Trophy, Heart, CheckCircle2, Mail, Phone, Video } from "lucide-react";
+import { Crown, Check, ArrowRight, Users, Clock, Target, Star, TrendingUp, Award, Shield, Play, BookOpen, Calendar, MessageCircle, FileText, Zap, Trophy, Heart, CheckCircle2, Mail, Phone, Video, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -148,7 +147,7 @@ const ProgramPage = () => {
 
   const testimonials = [
     {
-      name: "คุณนิรันดร์ เศรษฐกิจ",
+      name: "คุณนิรันดร์ เศษฐกิจ",
       role: "ผู้ก่อตั้ง TechStart Co.",
       content: "โปรแกรมนี้เปลี่ยนชีวิตผมจริงๆ จากไม่มีไอเดียอะไรเลย มาเป็นเจ้าของธุรกิจที่มีรายได้เดือนละ 200,000 บาทภายใน 6 เดือน การมี mentor และ community ที่คอยช่วยเหลือทำให้ผมไม่รู้สึกโดดเดี่ยว",
       result: "รายได้ 200,000 บาท/เดือน",
