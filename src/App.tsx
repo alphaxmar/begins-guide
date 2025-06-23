@@ -50,6 +50,7 @@ function App() {
       <Route path="/articles" element={<Articles />} />
       <Route path="/articles/10-thai-micro-saas-ideas-2025" element={<MicroSaasIdeasArticle />} />
       <Route path="/articles/how-to-get-first-100-customers-organic-marketing" element={<OrganicMarketingArticle />} />
+      <Route path="/articles/what-is-no-code-business-the-whole-truth" element={<NoCodeBusinessArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages */}
