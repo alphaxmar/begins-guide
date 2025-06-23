@@ -40,6 +40,7 @@ import BasicTaxForThaiBusinessOwnersArticle from '@/pages/BasicTaxForThaiBusines
 import OfficeWorkerTo6FigureFashionBrandArticle from '@/pages/OfficeWorkerTo6FigureFashionBrandArticle';
 import WhyPersonalBrandingIsPowerfulArticle from '@/pages/WhyPersonalBrandingIsPowerfulArticle';
 import LovableReviewArticle from '@/pages/LovableReviewArticle';
+import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityArticle';
 
 function App() {
   const { user } = useAuth();
