@@ -40,6 +40,7 @@ import OfficeWorkerTo6FigureFashionBrandArticle from '@/pages/OfficeWorkerTo6Fig
 import WhyPersonalBrandingIsPowerfulArticle from '@/pages/WhyPersonalBrandingIsPowerfulArticle';
 import LovableReviewArticle from '@/pages/LovableReviewArticle';
 import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityArticle';
+import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArticle';
 
 function App() {
   const { user } = useAuth();
