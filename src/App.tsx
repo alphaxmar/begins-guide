@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,6 +36,7 @@ import ProPackagesPage from '@/pages/admin/ProPackagesPage';
 import AiToolsForEntrepreneursArticle from '@/pages/AiToolsForEntrepreneursArticle';
 import HealjaiCaseStudyArticle from '@/pages/HealjaiCaseStudyArticle';
 import Seo101ForBusyOwnersArticle from '@/pages/Seo101ForBusyOwnersArticle';
+import BasicTaxForThaiBusinessOwnersArticle from '@/pages/BasicTaxForThaiBusinessOwnersArticle';
 
 function App() {
   const { user } = useAuth();
@@ -59,6 +61,7 @@ function App() {
       <Route path="/articles/5-ai-tools-for-entrepreneurs-2025" element={<AiToolsForEntrepreneursArticle />} />
       <Route path="/articles/case-study-healjai-me-matching-platform-15-days" element={<HealjaiCaseStudyArticle />} />
       <Route path="/articles/seo-101-for-busy-business-owners" element={<Seo101ForBusyOwnersArticle />} />
+      <Route path="/articles/basic-tax-for-thai-business-owners" element={<BasicTaxForThaiBusinessOwnersArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages - keep existing routes the same */}
