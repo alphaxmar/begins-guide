@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,6 +68,7 @@ function App() {
       <Route path="/articles/interview-office-worker-to-6-figure-fashion-brand" element={<OfficeWorkerTo6FigureFashionBrandArticle />} />
       <Route path="/articles/why-personal-branding-is-powerful-for-small-business" element={<WhyPersonalBrandingIsPowerfulArticle />} />
       <Route path="/articles/what-is-lovable-nocode-tool-review" element={<LovableReviewArticle />} />
+      <Route path="/articles/how-to-build-online-community-turn-customers-into-fans" element={<HowToBuildOnlineCommunityArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages */}
