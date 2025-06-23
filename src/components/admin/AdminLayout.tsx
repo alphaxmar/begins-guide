@@ -4,7 +4,11 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 
-const AdminLayout = () => {
+interface AdminLayoutProps {
+  children?: React.ReactNode;
+}
+
+const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const isSubPage = location.pathname !== '/admin' && location.pathname !== '/admin/';
 
@@ -23,7 +27,7 @@ const AdminLayout = () => {
               </Link>
             </div>
           )}
-          <Outlet />
+          {children || <Outlet />}
         </div>
       </div>
     </div>

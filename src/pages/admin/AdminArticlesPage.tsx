@@ -94,147 +94,147 @@ const AdminArticlesPage = () => {
     );
   }
 
-  const adminContent = (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">จัดการบทความ</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowImporter(!showImporter)}
-          >
-            {showImporter ? 'ซ่อน' : 'แสดง'} เครื่องมือนำเข้า
-          </Button>
-          <Button asChild>
-            <Link to="/create-article">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              เขียนบทความใหม่
-            </Link>
-          </Button>
+  return (
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">จัดการบทความ</h1>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowImporter(!showImporter)}
+            >
+              {showImporter ? 'ซ่อน' : 'แสดง'} เครื่องมือนำเข้า
+            </Button>
+            <Button asChild>
+              <Link to="/create-article">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                เขียนบทความใหม่
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {showImporter && (
-        <ArticleImporter />
-      )}
+        {showImporter && (
+          <ArticleImporter />
+        )}
 
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <LoadingSpinner />
-        </div>
-      ) : (
-        <div className="grid gap-6">
-          {articles && articles.length > 0 ? (
-            articles.map((article) => (
-              <Card key={article.id}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-xl">{article.title}</CardTitle>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>/{article.slug}</span>
-                      {article.categories && (
-                        <Badge variant="secondary">
-                          {article.categories.name}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {articles && articles.length > 0 ? (
+              articles.map((article) => (
+                <Card key={article.id}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="space-y-1 flex-1">
+                      <CardTitle className="text-xl">{article.title}</CardTitle>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>/{article.slug}</span>
+                        {article.categories && (
+                          <Badge variant="secondary">
+                            {article.categories.name}
+                          </Badge>
+                        )}
+                        <Badge 
+                          variant={article.status === 'published' ? 'default' : 'secondary'}
+                        >
+                          {article.status === 'published' ? 'เผยแพร่' : 'ร่าง'}
                         </Badge>
-                      )}
-                      <Badge 
-                        variant={article.status === 'published' ? 'default' : 'secondary'}
-                      >
-                        {article.status === 'published' ? 'เผยแพร่' : 'ร่าง'}
-                      </Badge>
-                      {article.is_featured_on_hub && (
-                        <Badge variant="outline" className="text-yellow-600">
-                          <Pin className="mr-1 h-3 w-3" />
-                          แนะนำ
-                        </Badge>
-                      )}
+                        {article.is_featured_on_hub && (
+                          <Badge variant="outline" className="text-yellow-600">
+                            <Pin className="mr-1 h-3 w-3" />
+                            แนะนำ
+                          </Badge>
+                        )}
+                      </div>
                     </div>
+                  </CardHeader>
+                  <CardContent>
+                    {article.excerpt && (
+                      <p className="text-muted-foreground mb-4 line-clamp-2">
+                        {article.excerpt}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <ArticleStatusToggle 
+                          articleSlug={article.slug}
+                          currentStatus={article.status as 'draft' | 'published'}
+                        />
+                        <ArticlePinToggle 
+                          articleSlug={article.slug}
+                          isPinned={article.is_featured_on_hub || false}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link to={`/articles/${article.slug}`}>
+                            <Eye className="h-4 w-4 mr-1" />
+                            ดู
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link to={`/admin/articles/${article.slug}/edit`}>
+                            <Edit className="h-4 w-4 mr-1" />
+                            แก้ไข
+                          </Link>
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              ลบ
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>ยืนยันการลบบทความ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                การดำเนินการนี้ไม่สามารถย้อนกลับได้ บทความ "{article.title}" จะถูกลบออกจากระบบถาวร
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteArticleMutation.mutate(article.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                ลบบทความ
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground mb-4">ยังไม่มีบทความในระบบ</p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    คุณสามารถเริ่มต้นได้โดย:
+                  </p>
+                  <div className="flex justify-center gap-2">
+                    <Button asChild>
+                      <Link to="/create-article">เขียนบทความใหม่</Link>
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowImporter(true)}>
+                      นำเข้าจาก Static Pages
+                    </Button>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {article.excerpt && (
-                    <p className="text-muted-foreground mb-4 line-clamp-2">
-                      {article.excerpt}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <ArticleStatusToggle 
-                        articleSlug={article.slug}
-                        currentStatus={article.status as 'draft' | 'published'}
-                      />
-                      <ArticlePinToggle 
-                        articleSlug={article.slug}
-                        isPinned={article.is_featured_on_hub || false}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/articles/${article.slug}`}>
-                          <Eye className="h-4 w-4 mr-1" />
-                          ดู
-                        </Link>
-                      </Button>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/admin/articles/${article.slug}/edit`}>
-                          <Edit className="h-4 w-4 mr-1" />
-                          แก้ไข
-                        </Link>
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            ลบ
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>ยืนยันการลบบทความ?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              การดำเนินการนี้ไม่สามารถย้อนกลับได้ บทความ "{article.title}" จะถูกลบออกจากระบบถาวร
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteArticleMutation.mutate(article.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              ลบบทความ
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">ยังไม่มีบทความในระบบ</p>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  คุณสามารถเริ่มต้นได้โดย:
-                </p>
-                <div className="flex justify-center gap-2">
-                  <Button asChild>
-                    <Link to="/create-article">เขียนบทความใหม่</Link>
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowImporter(true)}>
-                    นำเข้าจาก Static Pages
-                  </Button>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+            )}
+          </div>
+        )}
+      </div>
+    </AdminLayout>
   );
-
-  return <AdminLayout>{adminContent}</AdminLayout>;
 };
 
 export default AdminArticlesPage;
