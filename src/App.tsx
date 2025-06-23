@@ -32,6 +32,7 @@ import AdminPaymentSettingsPage from '@/pages/admin/AdminPaymentSettingsPage';
 import AdminEmailPage from '@/pages/admin/AdminEmailPage';
 import ProMembershipsPage from '@/pages/admin/ProMembershipsPage';
 import ProPackagesPage from '@/pages/admin/ProPackagesPage';
+import AiToolsForEntrepreneursArticle from '@/pages/AiToolsForEntrepreneursArticle';
 
 function App() {
   const { user } = useAuth();
@@ -53,9 +54,10 @@ function App() {
       <Route path="/articles/how-to-get-first-100-customers-organic-marketing" element={<OrganicMarketingArticle />} />
       <Route path="/articles/what-is-no-code-business-the-whole-truth" element={<NoCodeBusinessArticle />} />
       <Route path="/articles/how-to-price-digital-products-4-strategies" element={<PricingDigitalProductsArticle />} />
+      <Route path="/articles/5-ai-tools-for-entrepreneurs-2025" element={<AiToolsForEntrepreneursArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
-      {/* Other pages */}
+      {/* Other pages - keep existing routes the same */}
       <Route path="/pro" element={<ProPage />} />
       <Route path="/program" element={<ProgramPage />} />
       <Route path="/micro-saas-course" element={<MicroSaasCoursePage />} />
@@ -71,7 +73,7 @@ function App() {
       {/* Cohort Routes */}
       <Route path="/cohort/:productSlug" element={<UserProtectedRoute><CohortPage /></UserProtectedRoute>} />
 
-      {/* Admin Routes */}
+      {/* Admin Routes - keep existing admin routes the same */}
       <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
