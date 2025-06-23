@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, BookOpen, Crown, Zap, Users, Shield, TrendingUp, Star, Play, CheckCircle2, Mail } from "lucide-react";
+import { ArrowRight, BookOpen, Crown, Zap, Users, Shield, TrendingUp, Star, Play, CheckCircle2, Mail, Target, Rocket, Handshake } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NewsletterSignup from "@/components/NewsletterSignup";
@@ -34,8 +34,14 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link to="/pricing">
                   <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 py-3">
-                    ดูรายละเอียด Begins.guide PRO
+                    สำรวจ Begins.guide PRO
                     <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/articles">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-purple-600 px-8 py-3">
+                    เริ่มเรียนรู้ฟรี
+                    <BookOpen className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
               </div>
@@ -74,105 +80,77 @@ const Index = () => {
         </section>
 
         <div className="container mx-auto px-4 py-12">
-          {/* Problem & Solution */}
-          <section className="mb-16">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8">
-                กำลังเจอปัญหาเหล่านี้อยู่ใช่ไหม?
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div className="space-y-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-lg">ขาดไอเดียธุรกิจที่เป็นรูปธรรม</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-lg">ไม่รู้จะเริ่มต้นจากจุดไหน</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-lg">กลัวความเสี่ยงและการลงทุนผิดพลาด</span>
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-lg">ขาดเครื่องมือและความรู้ที่เป็นระบบ</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-lg">ไม่มีใครคอยแนะนำและให้กำลังใจ</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-lg">รู้สึกท่วมท้นกับข้อมูลมากมาย</span>
-                  </div>
-                </div>
-              </div>
-              
-              <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold mb-4 text-green-800">
-                    Begins.guide ช่วยแก้ปัญหาเหล่านี้ได้ทุกข้อ
-                  </h3>
-                  <p className="text-lg text-green-700">
-                    ด้วยระบบเรียนรู้ที่เป็นขั้นตอน เครื่องมือ AI ที่ช่วยลดเวลา และชุมชนที่คอยสนับสนุน
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          {/* The Ecosystem Showcase */}
-          <section className="mb-16">
-            <div className="max-w-6xl mx-auto">
+          {/* The Triage Hub Section - เลือกเส้นทางที่เหมาะกับคุณ */}
+          <section className="mb-20">
+            <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">เลือกเส้นทางที่เหมาะกับคุณ</h2>
-                <p className="text-xl text-gray-600">3 ทางเลือกสำหรับการเริ่มต้นธุรกิจของคุณ</p>
+                <p className="text-xl text-gray-600">4 ทางเลือกสำหรับการเริ่มต้นธุรกิจของคุณ</p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Free Content */}
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="text-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* เรียนรู้ด้วยตัวเอง */}
+                <Card className="hover:shadow-lg transition-shadow h-full">
+                  <CardHeader className="text-center pb-4">
                     <div className="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
                       <BookOpen className="h-8 w-8" />
                     </div>
-                    <CardTitle className="text-xl">เรียนรู้ฟรี</CardTitle>
-                    <CardDescription>เริ่มต้นเส้นทางของคุณ</CardDescription>
+                    <CardTitle className="text-lg">เรียนรู้ด้วยตัวเอง</CardTitle>
+                    <CardDescription className="text-sm">สำหรับผู้ที่ชอบเรียนรู้เอง</CardDescription>
                   </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-gray-600 mb-6">
-                      เริ่มต้นเส้นทางของคุณด้วยคลังบทความและวิดีโอคุณภาพสูงฟรี
+                  <CardContent className="text-center pt-0">
+                    <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+                      เริ่มต้นด้วยบทความและวิดีโอฟรี เรียนรู้พื้นฐานการทำธุรกิจและค้นหาไอเดีย
                     </p>
                     <Link to="/articles">
-                      <Button variant="outline" className="w-full">
-                        อ่านบทความทั้งหมด
+                      <Button variant="outline" className="w-full" size="sm">
+                        เริ่มเรียนรู้ฟรี
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                   </CardContent>
                 </Card>
 
-                {/* PRO Membership */}
-                <Card className="border-purple-200 hover:shadow-lg transition-shadow relative">
+                {/* คอร์สและเครื่องมือ */}
+                <Card className="hover:shadow-lg transition-shadow h-full">
+                  <CardHeader className="text-center pb-4">
+                    <div className="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Target className="h-8 w-8" />
+                    </div>
+                    <CardTitle className="text-lg">คอร์สและเครื่องมือ</CardTitle>
+                    <CardDescription className="text-sm">สำหรับผู้ที่ต้องการเนื้อหาเฉพาะ</CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center pt-0">
+                    <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+                      เรียนคอร์สเฉพาะด้าน เช่น Micro-SaaS หรือซื้อเครื่องมือที่ต้องการใช้งาน
+                    </p>
+                    <Link to="/micro-saas-course">
+                      <Button variant="outline" className="w-full" size="sm">
+                        ดูคอร์สทั้งหมด
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+
+                {/* Begins.guide PRO - Featured */}
+                <Card className="border-purple-200 bg-purple-50 hover:shadow-lg transition-shadow relative h-full">
                   <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-500">
                     แนะนำ
                   </Badge>
-                  <CardHeader className="text-center">
+                  <CardHeader className="text-center pb-4">
                     <div className="w-16 h-16 bg-purple-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
                       <Crown className="h-8 w-8" />
                     </div>
-                    <CardTitle className="text-xl">PRO Membership</CardTitle>
-                    <CardDescription>สำหรับการเรียนรู้อย่างจริงจัง</CardDescription>
+                    <CardTitle className="text-lg text-purple-800">Begins.guide PRO</CardTitle>
+                    <CardDescription className="text-sm text-purple-600">สำหรับผู้ที่ต้องการทุกอย่าง</CardDescription>
                   </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-gray-600 mb-6">
-                      เข้าถึงทุกคอร์ส, ทุกเทมเพลต, และผู้ช่วย AI ทั้งหมดเพื่อการเติบโตที่ไม่สิ้นสุด
+                  <CardContent className="text-center pt-0">
+                    <p className="text-purple-700 mb-6 text-sm leading-relaxed">
+                      เข้าถึงทุกคอร์ส ทุกเครื่องมือ และ AI Tools ทั้งหมดในราคาเดียว
                     </p>
                     <Link to="/pricing">
-                      <Button className="w-full bg-purple-500 hover:bg-purple-600">
+                      <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white" size="sm">
                         อัปเกรดเป็น PRO
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
@@ -180,31 +158,80 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                {/* Signature Course */}
-                <Card className="border-yellow-200 hover:shadow-lg transition-shadow relative">
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black">
-                    Premium
-                  </Badge>
-                  <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Star className="h-8 w-8" />
+                {/* พาร์ทเนอร์ทางธุรกิจ */}
+                <Card className="border-orange-200 bg-orange-50 hover:shadow-lg transition-shadow h-full">
+                  <CardHeader className="text-center pb-4">
+                    <div className="w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Handshake className="h-8 w-8" />
                     </div>
-                    <CardTitle className="text-xl">โปรแกรมเรือธง</CardTitle>
-                    <CardDescription>สำหรับผลลัพธ์ที่แน่นอน</CardDescription>
+                    <CardTitle className="text-lg text-orange-800">พาร์ทเนอร์ทางธุรกิจ</CardTitle>
+                    <CardDescription className="text-sm text-orange-600">สำหรับองค์กรและนักลงทุน</CardDescription>
                   </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-gray-600 mb-6">
-                      โปรแกรมโค้ชชิ่ง 90 วัน สำหรับผู้ที่ต้องการสร้างธุรกิจให้สำเร็จอย่างก้าวกระโดด
+                  <CardContent className="text-center pt-0">
+                    <p className="text-orange-700 mb-6 text-sm leading-relaxed">
+                      บริการให้คำปรึกษาและพัฒนา MVP แบบครบวงจรสำหรับโปรเจกต์ขนาดใหญ่
                     </p>
-                    <Link to="/program">
-                      <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white">
-                        ดูรายละเอียดโปรแกรม
+                    <Link to="/services/mvp-launchpad">
+                      <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white" size="sm">
+                        ปรึกษาโปรเจกต์
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </section>
+
+          {/* Featured Program Section */}
+          <section className="mb-20">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">โปรแกรมแนะนำ</h2>
+                <p className="text-xl text-gray-600">ผลิตภัณฑ์เด่นที่จะช่วยเปลี่ยนชีวิตคุณ</p>
+              </div>
+              
+              <Card className="overflow-hidden bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+                  <div className="space-y-6">
+                    <Badge className="bg-blue-500 text-white">โปรแกรมเรือธง</Badge>
+                    <h3 className="text-3xl font-bold text-gray-900">
+                      Zero to Launch Blueprint
+                    </h3>
+                    <p className="text-xl text-gray-600 leading-relaxed">
+                      โปรแกรมโค้ชชิ่ง 90 วัน ที่จะพาคุณจากการมีแค่ไอเดีย ไปสู่การมีธุรกิจที่ทำเงินได้จริง
+                    </p>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <span>Live Group Coaching ทุกสัปดาห์</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <span>ชุมชนส่วนตัวสำหรับผู้เรียน</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <span>เทมเพลตและเครื่องมือพิเศษ</span>
+                      </div>
+                    </div>
+                    
+                    <Link to="/program">
+                      <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                        ดูรายละเอียดโปรแกรม
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                  </div>
+                  
+                  <div className="flex items-center justify-center">
+                    <div className="w-full h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                      <Play className="h-16 w-16 text-white" />
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
           </section>
 
