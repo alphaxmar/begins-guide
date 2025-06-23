@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
@@ -439,7 +438,7 @@ const HowToBuildCoursePlatformArticle = () => {
                               และเรียนรู้กลยุทธ์การตลาดจาก Community ของเรา
                             </p>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                               <div className="bg-white rounded-lg p-4 border border-gray-200">
                                 <BookOpen className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                                 <h4 className="font-bold text-gray-900 mb-1">เข้าถึงทุกคอร์ส</h4>
