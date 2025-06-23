@@ -5,6 +5,7 @@ import AuthPage from '@/pages/AuthPage';
 import Index from '@/pages/Index';
 import Articles from '@/pages/Articles';
 import ArticleDetail from '@/pages/ArticleDetail';
+import MicroSaasIdeasArticle from '@/pages/MicroSaasIdeasArticle';
 import ProPage from '@/pages/ProPage';
 import ProgramPage from '@/pages/ProgramPage';
 import MicroSaasCoursePage from '@/pages/MicroSaasCoursePage';
@@ -45,6 +46,7 @@ function App() {
       
       {/* Articles routes */}
       <Route path="/articles" element={<Articles />} />
+      <Route path="/articles/10-thai-micro-saas-ideas-2025" element={<MicroSaasIdeasArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages */}
