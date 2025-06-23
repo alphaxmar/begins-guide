@@ -27,7 +27,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </Link>
             </div>
           )}
-          {children || <Outlet />}
+          <div className="py-6">
+            {children || <Outlet />}
+          </div>
         </div>
       </div>
     </div>
