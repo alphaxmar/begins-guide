@@ -66,12 +66,14 @@ function App() {
       <Route path="/articles/how-to-price-digital-products-4-strategies" element={<PricingDigitalProductsArticle />} />
       <Route path="/articles/5-ai-tools-for-entrepreneurs-2025" element={<AiToolsForEntrepreneursArticle />} />
       <Route path="/articles/case-study-healjai-me-matching-platform-15-days" element={<HealjaiCaseStudyArticle />} />
+      <Route path="/articles/case-study-build-sellplan-store-in-7-days-with-nocode" element={<CaseStudyBuildSellplanStoreArticle />} />
       <Route path="/articles/seo-101-for-busy-business-owners" element={<Seo101ForBusyOwnersArticle />} />
       <Route path="/articles/basic-tax-for-thai-business-owners" element={<BasicTaxForThaiBusinessOwnersArticle />} />
       <Route path="/articles/interview-office-worker-to-6-figure-fashion-brand" element={<OfficeWorkerTo6FigureFashionBrandArticle />} />
       <Route path="/articles/why-personal-branding-is-powerful-for-small-business" element={<WhyPersonalBrandingIsPowerfulArticle />} />
       <Route path="/articles/what-is-lovable-nocode-tool-review" element={<LovableReviewArticle />} />
       <Route path="/articles/how-to-build-online-community-turn-customers-into-fans" element={<HowToBuildOnlineCommunityArticle />} />
+      <Route path="/articles/how-to-build-course-platform-with-nocode" element={<HowToBuildCoursePlatformArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages */}
