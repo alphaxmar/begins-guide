@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ArticleCard from "@/components/ArticleCard";
@@ -343,7 +342,7 @@ const Articles = () => {
                     <Card key={article.slug || article.id} className="hover:shadow-xl transition-shadow border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
                       <ArticleCard
                         {...article}
-                        imageUrl={article.cover_image_url || article.image_url || "/placeholder.svg"}
+                        imageUrl={article.cover_image_url || "/placeholder.svg"}
                         excerpt={article.excerpt || ""}
                         category={article.category || ""}
                       />
@@ -384,7 +383,7 @@ const Articles = () => {
                     <Card key={article.slug || article.id} className="hover:shadow-lg transition-shadow bg-white">
                       <ArticleCard
                         {...article}
-                        imageUrl={article.cover_image_url || article.image_url || "/placeholder.svg"}
+                        imageUrl={article.cover_image_url || "/placeholder.svg"}
                         excerpt={article.excerpt || ""}
                         category={article.category || ""}
                       />
@@ -425,7 +424,7 @@ const Articles = () => {
                         <ArticleCard
                           key={article.slug || article.id}
                           {...article}
-                          imageUrl={article.cover_image_url || article.image_url || "/placeholder.svg"}
+                          imageUrl={article.cover_image_url || "/placeholder.svg"}
                           excerpt={article.excerpt || ""}
                           category={article.category || ""}
                         />
@@ -487,7 +486,7 @@ const Articles = () => {
                       <ArticleCard
                         key={article.slug || article.id}
                         {...article}
-                        imageUrl={article.cover_image_url || article.image_url || "/placeholder.svg"}
+                        imageUrl={article.cover_image_url || "/placeholder.svg"}
                         excerpt={article.excerpt || ""}
                         category={article.category || ""}
                       />
