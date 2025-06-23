@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,6 +39,7 @@ import Seo101ForBusyOwnersArticle from '@/pages/Seo101ForBusyOwnersArticle';
 import BasicTaxForThaiBusinessOwnersArticle from '@/pages/BasicTaxForThaiBusinessOwnersArticle';
 import OfficeWorkerTo6FigureFashionBrandArticle from '@/pages/OfficeWorkerTo6FigureFashionBrandArticle';
 import WhyPersonalBrandingIsPowerfulArticle from '@/pages/WhyPersonalBrandingIsPowerfulArticle';
+import LovableReviewArticle from '@/pages/LovableReviewArticle';
 
 function App() {
   const { user } = useAuth();
@@ -65,6 +67,7 @@ function App() {
       <Route path="/articles/basic-tax-for-thai-business-owners" element={<BasicTaxForThaiBusinessOwnersArticle />} />
       <Route path="/articles/interview-office-worker-to-6-figure-fashion-brand" element={<OfficeWorkerTo6FigureFashionBrandArticle />} />
       <Route path="/articles/why-personal-branding-is-powerful-for-small-business" element={<WhyPersonalBrandingIsPowerfulArticle />} />
+      <Route path="/articles/what-is-lovable-nocode-tool-review" element={<LovableReviewArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages */}
