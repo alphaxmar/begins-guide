@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 import { useAdmin } from "@/hooks/useAdmin";
 import ArticleForm, { ArticleFormValues } from "@/components/ArticleForm";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 type ArticleMutationSuccess = {
   slug: string;
@@ -38,16 +39,21 @@ const CreateArticle = () => {
           title: newArticle.title,
           slug: newArticle.slug,
           content: newArticle.content,
+          excerpt: newArticle.excerpt,
           author_id: user.id,
           cover_image_url: newArticle.cover_image_url || null,
+          category_id: newArticle.category_id || null,
           status: newArticle.status,
-          category: newArticle.category || null,
+          is_featured_on_hub: newArticle.is_featured_on_hub,
+          recommended_product_id: newArticle.recommended_product_id || null,
+          seo_title: newArticle.seo_title || null,
+          seo_description: newArticle.seo_description || null,
         }])
         .select('slug, status')
         .single();
       
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation for slug
+        if (error.code === '23505') {
           throw new Error("Slug นี้มีอยู่แล้ว กรุณาเปลี่ยนใหม่");
         }
         throw error;
@@ -57,11 +63,12 @@ const CreateArticle = () => {
     onSuccess: (data) => {
       toast.success("สร้างบทความสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
       
       if (data && data.status === 'published') {
         navigate(`/articles/${data.slug}`);
       } else {
-        navigate('/admin');
+        navigate('/admin/articles');
       }
     },
     onError: (error) => {
@@ -74,18 +81,24 @@ const CreateArticle = () => {
   };
 
   if (authLoading || adminLoading || !isAdmin) {
-    return <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>;
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>
+      </AdminLayout>
+    );
   }
 
   return (
-    <div className="py-12 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">เขียนบทความใหม่</h1>
-      <ArticleForm
-        onSubmit={onSubmit}
-        isPending={mutation.isPending}
-        submitButtonText="สร้างบทความ"
-      />
-    </div>
+    <AdminLayout>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">เขียนบทความใหม่</h1>
+        <ArticleForm
+          onSubmit={onSubmit}
+          isPending={mutation.isPending}
+          submitButtonText="สร้างบทความ"
+        />
+      </div>
+    </AdminLayout>
   );
 };
 

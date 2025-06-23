@@ -9,6 +9,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/integrations/supabase/types";
 import ArticleForm, { ArticleFormValues } from "@/components/ArticleForm";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 const fetchArticleForEdit = async (slug: string) => {
   const { data, error } = await supabase
@@ -29,7 +30,7 @@ const EditArticle = () => {
   const queryClient = useQueryClient();
 
   const { data: article, isLoading: isArticleLoading } = useQuery<Tables<'articles'>>({
-    queryKey: ['article', slug],
+    queryKey: ['article-edit', slug],
     queryFn: () => fetchArticleForEdit(slug!),
     enabled: !!slug && !!isAdmin,
   });
@@ -52,9 +53,14 @@ const EditArticle = () => {
             .update({
                 title: updatedArticle.title,
                 content: updatedArticle.content,
+                excerpt: updatedArticle.excerpt,
                 cover_image_url: updatedArticle.cover_image_url || null,
-                category: updatedArticle.category || null,
+                category_id: updatedArticle.category_id || null,
                 status: updatedArticle.status,
+                is_featured_on_hub: updatedArticle.is_featured_on_hub,
+                recommended_product_id: updatedArticle.recommended_product_id || null,
+                seo_title: updatedArticle.seo_title || null,
+                seo_description: updatedArticle.seo_description || null,
             })
             .eq("slug", slug)
             .select('slug, status')
@@ -66,12 +72,14 @@ const EditArticle = () => {
     onSuccess: (data) => {
         toast.success("อัปเดตบทความสำเร็จ!");
         queryClient.invalidateQueries({ queryKey: ["articles"] });
+        queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
         queryClient.invalidateQueries({ queryKey: ["article", slug] });
+        queryClient.invalidateQueries({ queryKey: ["article-edit", slug] });
       
         if (data && data.status === 'published') {
             navigate(`/articles/${data.slug}`);
         } else {
-            navigate('/admin');
+            navigate('/admin/articles');
         }
     },
     onError: (error) => {
@@ -85,46 +93,59 @@ const EditArticle = () => {
 
   const isLoading = authLoading || adminLoading || !isAdmin;
   if (isLoading) {
-    return <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>;
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>
+      </AdminLayout>
+    );
   }
 
   if (isArticleLoading) {
     return (
-        <div className="py-12 max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8">กำลังแก้ไขบทความ...</h1>
-            <div className="space-y-8">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-40 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-32" />
-            </div>
+      <AdminLayout>
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">กำลังแก้ไขบทความ...</h1>
+          <div className="space-y-8">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-32" />
+          </div>
         </div>
+      </AdminLayout>
     );
   }
 
-  // Prepare initial values for the form, ensuring no nulls are passed for controlled components
+  // Prepare initial values for the form
   const initialFormValues = article ? {
     title: article.title,
     slug: article.slug,
     content: article.content || '',
+    excerpt: article.excerpt || '',
     cover_image_url: article.cover_image_url || '',
-    category: article.category || '',
+    category_id: article.category_id || '',
     status: article.status as 'draft' | 'published',
+    is_featured_on_hub: article.is_featured_on_hub || false,
+    recommended_product_id: article.recommended_product_id || '',
+    seo_title: article.seo_title || '',
+    seo_description: article.seo_description || '',
   } : undefined;
 
   return (
-    <div className="py-12 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">แก้ไขบทความ</h1>
-      <ArticleForm
-        onSubmit={onSubmit}
-        isPending={mutation.isPending}
-        submitButtonText="บันทึกการเปลี่ยนแปลง"
-        initialValues={initialFormValues}
-        isSlugDisabled={true}
-      />
-    </div>
+    <AdminLayout>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">แก้ไขบทความ</h1>
+        <ArticleForm
+          onSubmit={onSubmit}
+          isPending={mutation.isPending}
+          submitButtonText="บันทึกการเปลี่ยนแปลง"
+          initialValues={initialFormValues}
+          isSlugDisabled={true}
+        />
+      </div>
+    </AdminLayout>
   );
 };
 
