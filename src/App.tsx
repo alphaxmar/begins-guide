@@ -8,6 +8,7 @@ import ProPage from '@/pages/ProPage';
 import ProgramPage from '@/pages/ProgramPage';
 import MicroSaasCoursePage from '@/pages/MicroSaasCoursePage';
 import MvpLaunchpadPage from '@/pages/MvpLaunchpadPage';
+import NoCodeWebpreneurPage from '@/pages/NoCodeWebpreneurPage';
 import PricingPage from '@/pages/PricingPage';
 import ProfilePage from '@/pages/ProfilePage';
 import CohortPage from '@/pages/CohortPage';
@@ -47,6 +48,7 @@ function App() {
       <Route path="/program" element={<ProgramPage />} />
       <Route path="/micro-saas-course" element={<MicroSaasCoursePage />} />
       <Route path="/services/mvp-launchpad" element={<MvpLaunchpadPage />} />
+      <Route path="/no-code-webpreneur" element={<NoCodeWebpreneurPage />} />
       
       {/* Existing pages */}
       <Route path="/pricing" element={<PricingPage />} />
