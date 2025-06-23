@@ -13,13 +13,18 @@ export type Database = {
         Row: {
           author_id: string | null
           category: string | null
+          category_id: string | null
           content: string | null
           cover_image_url: string | null
           created_at: string
           excerpt: string | null
           id: string
           image_url: string | null
+          is_featured_on_hub: boolean | null
           is_pinned_on_hub: boolean | null
+          recommended_product_id: string | null
+          seo_description: string | null
+          seo_title: string | null
           slug: string
           status: Database["public"]["Enums"]["article_status"]
           title: string
@@ -28,13 +33,18 @@ export type Database = {
         Insert: {
           author_id?: string | null
           category?: string | null
+          category_id?: string | null
           content?: string | null
           cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          is_featured_on_hub?: boolean | null
           is_pinned_on_hub?: boolean | null
+          recommended_product_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug: string
           status?: Database["public"]["Enums"]["article_status"]
           title: string
@@ -43,16 +53,69 @@ export type Database = {
         Update: {
           author_id?: string | null
           category?: string | null
+          category_id?: string | null
           content?: string | null
           cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          is_featured_on_hub?: boolean | null
           is_pinned_on_hub?: boolean | null
+          recommended_product_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["article_status"]
           title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_recommended_product_id_fkey"
+            columns: ["recommended_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
           updated_at?: string
         }
         Relationships: []

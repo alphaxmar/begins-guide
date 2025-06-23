@@ -10,23 +10,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const fetchPinnedArticles = async () => {
+type Article = Tables<'articles'> & {
+  categories?: Tables<'categories'>;
+};
+
+const fetchFeaturedArticles = async () => {
   const { data, error } = await supabase
     .from("articles")
-    .select("*")
+    .select(`
+      *,
+      categories(*)
+    `)
     .eq("status", "published")
-    .eq("is_pinned_on_hub", true)
+    .eq("is_featured_on_hub", true)
     .order("created_at", { ascending: false })
     .limit(3);
 
   if (error) throw new Error(error.message);
-  return data;
+  return data as Article[];
 };
 
 const FeaturedArticlesSection = () => {
-  const { data: pinnedArticles, isLoading } = useQuery<Tables<'articles'>[]>({
-    queryKey: ["homepage-pinned-articles"],
-    queryFn: fetchPinnedArticles,
+  const { data: featuredArticles, isLoading } = useQuery<Article[]>({
+    queryKey: ["homepage-featured-articles"],
+    queryFn: fetchFeaturedArticles,
   });
 
   return (
@@ -50,9 +57,9 @@ const FeaturedArticlesSection = () => {
               </Card>
             ))}
           </div>
-        ) : pinnedArticles && pinnedArticles.length > 0 ? (
+        ) : featuredArticles && featuredArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {pinnedArticles.map((article) => (
+            {featuredArticles.map((article) => (
               <Card key={article.slug} className="hover:shadow-lg transition-shadow">
                 <Link to={`/articles/${article.slug}`}>
                   <div 
@@ -65,7 +72,9 @@ const FeaturedArticlesSection = () => {
                   />
                 </Link>
                 <CardContent className="p-6">
-                  <Badge className="mb-3">{article.category || "บทความ"}</Badge>
+                  <Badge className="mb-3">
+                    {article.categories?.name || "บทความ"}
+                  </Badge>
                   <Link to={`/articles/${article.slug}`}>
                     <h3 className="font-bold text-lg mb-2 hover:text-primary transition-colors line-clamp-2">
                       {article.title}

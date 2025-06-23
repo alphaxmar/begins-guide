@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ArticleCard from "@/components/ArticleCard";
@@ -16,258 +17,157 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+type Article = Tables<'articles'> & {
+  categories?: Tables<'categories'>;
+};
+
+type Category = Tables<'categories'>;
+
 const fetchArticles = async () => {
   const { data, error } = await supabase
     .from("articles")
-    .select("*")
+    .select(`
+      *,
+      categories(*)
+    `)
     .eq("status", "published")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
-  return data;
+  return data as Article[];
 };
 
-const fetchPinnedArticles = async () => {
+const fetchFeaturedArticles = async () => {
   const { data, error } = await supabase
     .from("articles")
-    .select("*")
+    .select(`
+      *,
+      categories(*)
+    `)
     .eq("status", "published")
-    .eq("is_pinned_on_hub", true)
+    .eq("is_featured_on_hub", true)
     .order("created_at", { ascending: false })
     .limit(4);
 
   if (error) throw new Error(error.message);
-  return data;
+  return data as Article[];
 };
 
 const fetchCaseStudyArticles = async () => {
   const { data, error } = await supabase
     .from("articles")
-    .select("*")
+    .select(`
+      *,
+      categories(*)
+    `)
     .eq("status", "published")
-    .eq("category", "Case Studies")
+    .eq("categories.slug", "case-studies")
     .order("created_at", { ascending: false })
     .limit(6);
 
   if (error) throw new Error(error.message);
-  return data;
+  return data as Article[];
 };
 
-// Mock data for articles that exist in routes but not in database
-const mockArticles = [
-  {
-    id: "mock-1",
-    title: "10 ไอเดียธุรกิจ Micro-SaaS ที่ทำได้จริงในปี 2025",
-    excerpt: "ไอเดียธุรกิจ SaaS ขนาดเล็กที่ไม่ต้องลงทุนเยอะ แต่มีโอกาสทำเงินสูง พร้อมวิธีการเริ่มต้นที่เป็นรูปธรรม",
-    category: "ไอเดียธุรกิจ",
-    slug: "micro-saas-business-ideas-2025",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-23T10:00:00Z"
-  },
-  {
-    id: "mock-2", 
-    title: "วิธีตั้งราคาสินค้าดิจิทัลให้ขายดีและกำไรสูง",
-    excerpt: "กลยุทธ์การตั้งราคาที่จะทำให้สินค้าดิจิทัลของคุณขายได้ดี พร้อมเทคนิคการทดสอบราคาที่เหมาะสม",
-    category: "การตลาด",
-    slug: "pricing-digital-products-strategies",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-22T10:00:00Z"
-  },
-  {
-    id: "mock-3",
-    title: "สร้างธุรกิจแรกด้วย No-Code: ความจริงทั้งหมดที่ต้องรู้",
-    excerpt: "คู่มือฉบับสมบูรณ์สำหรับการเริ่มต้นธุรกิจด้วยเครื่องมือ No-Code พร้อมข้อดี-ข้อเสียที่ต้องรู้",
-    category: "No-Code",
-    slug: "no-code-business-complete-guide",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-21T10:00:00Z"
-  },
-  {
-    id: "mock-4",
-    title: "Lovable คืออะไร? รีวิว No-Code Tool ที่จะมาปฏิวัติการทำเว็บ",
-    excerpt: "รีวิวเชิงลึก Lovable แพลตฟอร์มสร้างเว็บแอป No-Code ที่ใช้ AI ช่วยในการพัฒนา พร้อมข้อดี-ข้อเสีย",
-    category: "เครื่องมือ",
-    slug: "lovable-review-no-code-platform",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-20T10:00:00Z"
-  },
-  {
-    id: "mock-5",
-    title: "5 เครื่องมือ AI ที่ผู้ประกอบการทุกคนต้องมีในปี 2025",
-    excerpt: "รวมเครื่องมือ AI ที่จะช่วยให้ธุรกิจของคุณทำงานได้เร็วขึ้น มีประสิทธิภาพมากขึ้น และประหยัดต้นทุน",
-    category: "เครื่องมือ",
-    slug: "ai-tools-for-entrepreneurs-2025",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-19T10:00:00Z"
-  },
-  {
-    id: "mock-6",
-    title: "ทำไม Personal Branding คือการตลาดที่ทรงพลังที่สุด",
-    excerpt: "เหตุผลที่การสร้างแบรนด์ส่วนตัวคือกลยุทธ์การตลาดที่ดีที่สุดสำหรับผู้ประกอบการยุคใหม่",
-    category: "การตลาด",
-    slug: "why-personal-branding-is-powerful",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-18T10:00:00Z"
-  },
-  {
-    id: "mock-7",
-    title: "ภาษีเบื้องต้นที่เจ้าของธุรกิจไทยต้องรู้",
-    excerpt: "คู่มือภาษีพื้นฐานสำหรับผู้ประกอบการใหม่ ครอบคลุมตั้งแต่การจดทะเบียนไปจนถึงการยื่นแบบ",
-    category: "การเงินและกฎหมาย",
-    slug: "basic-tax-guide-for-thai-business-owners",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-17T10:00:00Z"
-  },
-  {
-    id: "mock-8",
-    title: "Case Study: ผมสร้างเว็บขายแบบบ้านออนไลน์ (sellplan.store) ด้วย No-Code",
-    excerpt: "เรื่องราวการสร้างธุรกิจขายแบบบ้านออนไลน์ด้วยเครื่องมือ No-Code พร้อมผลลัพธ์และบทเรียนที่ได้",
-    category: "Case Studies",
-    slug: "case-study-build-sell-plan-store",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-15T10:00:00Z"
-  },
-  {
-    id: "mock-9",
-    title: "Case Study: ผมสร้างเว็บแอปจองคิวร้านกาแฟด้วย No-Code ใน 7 วัน",
-    excerpt: "บันทึกการสร้างเว็บแอปจองคิวสำหรับร้านกาแฟด้วย No-Code ภายใน 7 วัน พร้อมต้นทุนและผลลัพธ์จริง",
-    category: "Case Studies", 
-    slug: "case-study-nocode-cafe-booking-7-days",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-14T10:00:00Z"
-  },
-  {
-    id: "mock-10",
-    title: "Case Study: ผมสร้างเว็บแอปแมชชิ่งนักบำบัด (healjai.me) และนี่คือผลลัพธ์",
-    excerpt: "เรื่องราวการสร้างแพลตฟอร์มเชื่อมต่อผู้ป่วยกับนักบำบัด พร้อมการวิเคราะห์ความสำเร็จและความท้าทาย",
-    category: "Case Studies",
-    slug: "healjai-case-study", 
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-13T10:00:00Z"
-  },
-  {
-    id: "mock-11",
-    title: "Case Study: ผมสร้างเว็บแอปค้นหาแฟรนไชส์ด้วย AI และนี่คือสิ่งที่เกิดขึ้น",
-    excerpt: "การทดลองสร้างแพลตฟอร์มค้นหาแฟรนไชส์ด้วยความช่วยเหลือของ AI พร้อมบทเรียนและข้อผิดพลาดที่เกิดขึ้น",
-    category: "Case Studies",
-    slug: "case-study-ai-franchise-finder",
-    cover_image_url: "/placeholder.svg", 
-    created_at: "2025-06-12T10:00:00Z"
-  },
-  {
-    id: "mock-12",
-    title: "บทสัมภาษณ์: จากพนักงานออฟฟิศสู่เจ้าของแบรนด์เสื้อผ้า 6 หลัก",
-    excerpt: "เรื่องราวสู้ชีวิตของคนธรรมดาที่เปลี่ยนจากพนักงานออฟฟิศมาเป็นเจ้าของแบรนด์เสื้อผ้าที่มีรายได้ 6 หลัก",
-    category: "Case Studies",
-    slug: "office-worker-to-6-figure-fashion-brand",
-    cover_image_url: "/placeholder.svg",
-    created_at: "2025-06-11T10:00:00Z"
-  }
-];
+const fetchCategories = async () => {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("is_active", true)
+    .order("display_order", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data as Category[];
+};
+
+const fetchArticlesByCategory = async (categoryId: string) => {
+  const { data, error } = await supabase
+    .from("articles")
+    .select(`
+      *,
+      categories(*)
+    `)
+    .eq("status", "published")
+    .eq("category_id", categoryId)
+    .order("created_at", { ascending: false })
+    .limit(4);
+
+  if (error) throw new Error(error.message);
+  return data as Article[];
+};
 
 const Articles = () => {
-  const { data: articles, isLoading } = useQuery<Tables<'articles'>[]>({
+  const { data: articles, isLoading } = useQuery<Article[]>({
     queryKey: ["articles"],
     queryFn: fetchArticles,
   });
 
-  const { data: pinnedArticles, isLoading: pinnedLoading } = useQuery<Tables<'articles'>[]>({
-    queryKey: ["pinned-articles"],
-    queryFn: fetchPinnedArticles,
+  const { data: featuredArticles, isLoading: featuredLoading } = useQuery<Article[]>({
+    queryKey: ["featured-articles"],
+    queryFn: fetchFeaturedArticles,
   });
 
-  const { data: caseStudyArticles, isLoading: caseStudyLoading } = useQuery<Tables<'articles'>[]>({
+  const { data: caseStudyArticles, isLoading: caseStudyLoading } = useQuery<Article[]>({
     queryKey: ["case-study-articles"],
     queryFn: fetchCaseStudyArticles,
+  });
+
+  const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
   });
 
   const { isAdmin } = useAdmin();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Combine real articles with mock articles
-  const allArticles = useMemo(() => {
-    const realArticles = articles || [];
-    return [...realArticles, ...mockArticles.map(article => ({
-      ...article,
-      status: 'published' as const,
-      author_id: null,
-      updated_at: article.created_at,
-      content: null,
-      image_url: article.cover_image_url,
-      is_pinned_on_hub: false
-    }))];
-  }, [articles]);
-
-  const categories = useMemo(() => {
-    const allCategories = allArticles
-      .map((article) => article.category)
-      .filter(Boolean);
-    return ["all", ...Array.from(new Set(allCategories as string[]))];
-  }, [allArticles]);
-
+  // Filter articles based on search and category
   const filteredArticles = useMemo(() => {
-    return allArticles.filter((article) => {
+    if (!articles) return [];
+    
+    return articles.filter((article) => {
       const matchesCategory =
-        selectedCategory === "all" || article.category === selectedCategory;
+        selectedCategory === "all" || 
+        (article.categories && article.categories.slug === selectedCategory);
       const matchesSearch =
         article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (article.excerpt || "")
           .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (article.content || "")
+          .toLowerCase()
           .includes(searchTerm.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [allArticles, searchTerm, selectedCategory]);
-
-  // Group articles by category for the Deep Dive section
-  const articlesByCategory = useMemo(() => {
-    const grouped: { [key: string]: typeof allArticles } = {};
-    
-    allArticles.forEach((article) => {
-      const category = article.category || "อื่นๆ";
-      if (!grouped[category]) {
-        grouped[category] = [];
-      }
-      grouped[category].push(article);
-    });
-
-    // Sort articles within each category and limit to 4
-    Object.keys(grouped).forEach((category) => {
-      grouped[category] = grouped[category]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 4);
-    });
-
-    return grouped;
-  }, [allArticles]);
+  }, [articles, searchTerm, selectedCategory]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search functionality is already handled by the filteredArticles useMemo
   };
 
-  // Get suggested pinned articles if no real pinned articles exist
-  const displayPinnedArticles = useMemo(() => {
-    if (pinnedArticles && pinnedArticles.length > 0) {
-      return pinnedArticles;
-    }
-    // Return suggested articles for "Start Here" section
-    return mockArticles.filter(article => 
-      ['no-code-business-complete-guide', 'why-personal-branding-is-powerful', 'basic-tax-guide-for-thai-business-owners'].includes(article.slug)
-    ).slice(0, 3);
-  }, [pinnedArticles]);
-
-  // Get case study articles (combine real + mock)
-  const displayCaseStudyArticles = useMemo(() => {
-    const realCaseStudies = caseStudyArticles || [];
-    const mockCaseStudies = mockArticles.filter(article => article.category === "Case Studies");
-    return [...realCaseStudies, ...mockCaseStudies].slice(0, 6);
-  }, [caseStudyArticles]);
+  // Get articles by category for Deep Dive section
+  const { data: categoryArticlesData } = useQuery({
+    queryKey: ["category-articles", categories],
+    queryFn: async () => {
+      if (!categories || categories.length === 0) return {};
+      
+      const categoryArticles: { [key: string]: Article[] } = {};
+      
+      for (const category of categories) {
+        if (category.slug !== 'case-studies') { // Skip case studies as it has its own section
+          const articles = await fetchArticlesByCategory(category.id);
+          categoryArticles[category.slug] = articles;
+        }
+      }
+      
+      return categoryArticles;
+    },
+    enabled: !!categories && categories.length > 0,
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -325,7 +225,7 @@ const Articles = () => {
                 <p className="text-xl text-gray-600">บทความเสาหลักที่สำคัญที่สุดที่ทุกคนควรต้องอ่าน</p>
               </div>
               
-              {pinnedLoading ? (
+              {featuredLoading ? (
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: 3 }).map((_, index) => (
                     <div key={index} className="space-y-4">
@@ -336,24 +236,27 @@ const Articles = () => {
                     </div>
                   ))}
                 </div>
-              ) : displayPinnedArticles.length > 0 ? (
+              ) : featuredArticles && featuredArticles.length > 0 ? (
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  {displayPinnedArticles.map((article) => (
-                    <Card key={article.slug || article.id} className="hover:shadow-xl transition-shadow border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
+                  {featuredArticles.map((article) => (
+                    <div key={article.id} className="hover:shadow-xl transition-shadow border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg">
                       <ArticleCard
-                        {...article}
-                        imageUrl={article.cover_image_url || "/placeholder.svg"}
+                        title={article.title}
                         excerpt={article.excerpt || ""}
-                        category={article.category || ""}
+                        category={article.categories?.name || "บทความ"}
+                        imageUrl={article.cover_image_url || "/placeholder.svg"}
+                        slug={article.slug}
+                        created_at={article.created_at}
+                        content={article.content}
                       />
-                    </Card>
+                    </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-600">ยังไม่มีบทความที่ปักหมุดไว้</p>
+                  <p className="text-gray-600">ยังไม่มีบทความที่แนะนำ</p>
                   {isAdmin && (
-                    <p className="text-sm text-gray-500 mt-2">ไปที่หน้าจัดการบทความเพื่อปักหมุดบทความสำคัญ</p>
+                    <p className="text-sm text-gray-500 mt-2">ไปที่หน้าจัดการบทความเพื่อเลือกบทความแนะนำ</p>
                   )}
                 </div>
               )}
@@ -377,17 +280,20 @@ const Articles = () => {
                     </div>
                   ))}
                 </div>
-              ) : displayCaseStudyArticles.length > 0 ? (
+              ) : caseStudyArticles && caseStudyArticles.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {displayCaseStudyArticles.map((article) => (
-                    <Card key={article.slug || article.id} className="hover:shadow-lg transition-shadow bg-white">
+                  {caseStudyArticles.map((article) => (
+                    <div key={article.id} className="hover:shadow-lg transition-shadow bg-white rounded-lg">
                       <ArticleCard
-                        {...article}
-                        imageUrl={article.cover_image_url || "/placeholder.svg"}
+                        title={article.title}
                         excerpt={article.excerpt || ""}
-                        category={article.category || ""}
+                        category={article.categories?.name || "Case Study"}
+                        imageUrl={article.cover_image_url || "/placeholder.svg"}
+                        slug={article.slug}
+                        created_at={article.created_at}
+                        content={article.content}
                       />
-                    </Card>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -404,35 +310,57 @@ const Articles = () => {
                 <p className="text-xl text-gray-600">สำรวจความรู้แบบจัดหมวดหมู่เพื่อการเรียนรู้ที่เป็นระบบ</p>
               </div>
 
-              {Object.entries(articlesByCategory).map(([category, categoryArticles]) => {
-                if (category === "Case Studies") return null; // Skip since we have a dedicated section
-                
-                return (
-                  <div key={category} className="mb-12">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-2xl font-bold">{category}</h3>
-                      <Button variant="outline" asChild>
-                        <Link to={`/articles?category=${encodeURIComponent(category)}`}>
-                          ดูทั้งหมด
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
+              {categoriesLoading ? (
+                <div className="space-y-12">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index}>
+                      <Skeleton className="h-8 w-48 mb-6" />
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                        {Array.from({ length: 4 }).map((_, articleIndex) => (
+                          <Skeleton key={articleIndex} className="h-64 w-full" />
+                        ))}
+                      </div>
                     </div>
+                  ))}
+                </div>
+              ) : categories && categoryArticlesData ? (
+                categories
+                  .filter(category => category.slug !== 'case-studies')
+                  .map((category) => {
+                    const categoryArticles = categoryArticlesData[category.slug] || [];
                     
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                      {categoryArticles.map((article) => (
-                        <ArticleCard
-                          key={article.slug || article.id}
-                          {...article}
-                          imageUrl={article.cover_image_url || "/placeholder.svg"}
-                          excerpt={article.excerpt || ""}
-                          category={article.category || ""}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+                    if (categoryArticles.length === 0) return null;
+                    
+                    return (
+                      <div key={category.id} className="mb-12">
+                        <div className="flex justify-between items-center mb-6">
+                          <h3 className="text-2xl font-bold">{category.name}</h3>
+                          <Button variant="outline" asChild>
+                            <Link to={`/articles?category=${category.slug}`}>
+                              ดูทั้งหมด
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                        
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                          {categoryArticles.map((article) => (
+                            <ArticleCard
+                              key={article.id}
+                              title={article.title}
+                              excerpt={article.excerpt || ""}
+                              category={article.categories?.name || category.name}
+                              imageUrl={article.cover_image_url || "/placeholder.svg"}
+                              slug={article.slug}
+                              created_at={article.created_at}
+                              content={article.content}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+              ) : null}
             </section>
 
             {/* Section 5: Filter & Search Results (when searching) */}
@@ -454,9 +382,10 @@ const Articles = () => {
                         <SelectValue placeholder="เลือกหมวดหมู่" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category === "all" ? "ทุกหมวดหมู่" : category}
+                        <SelectItem value="all">ทุกหมวดหมู่</SelectItem>
+                        {categories?.map((category) => (
+                          <SelectItem key={category.id} value={category.slug}>
+                            {category.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -465,7 +394,7 @@ const Articles = () => {
                 </div>
 
                 <h2 className="text-2xl font-bold mb-6">
-                  ผลการค้นหา {searchTerm && `"${searchTerm}"`}
+                  ผลการค้นหา "{searchTerm}"
                   {filteredArticles.length > 0 && ` (${filteredArticles.length} บทความ)`}
                 </h2>
 
@@ -484,11 +413,14 @@ const Articles = () => {
                   <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {filteredArticles.map((article) => (
                       <ArticleCard
-                        key={article.slug || article.id}
-                        {...article}
-                        imageUrl={article.cover_image_url || "/placeholder.svg"}
+                        key={article.id}
+                        title={article.title}
                         excerpt={article.excerpt || ""}
-                        category={article.category || ""}
+                        category={article.categories?.name || "บทความ"}
+                        imageUrl={article.cover_image_url || "/placeholder.svg"}
+                        slug={article.slug}
+                        created_at={article.created_at}
+                        content={article.content}
                       />
                     ))}
                   </div>

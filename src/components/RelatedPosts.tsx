@@ -1,9 +1,15 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { Tables } from "@/integrations/supabase/types";
+
+type Article = Tables<'articles'> & {
+  categories?: Tables<'categories'>;
+};
 
 interface RelatedPostsProps {
   currentSlug: string;
@@ -11,101 +17,110 @@ interface RelatedPostsProps {
   limit?: number;
 }
 
-const RelatedPosts: React.FC<RelatedPostsProps> = ({ 
-  currentSlug, 
-  category, 
-  limit = 3 
-}) => {
-  const { data: relatedPosts, isLoading } = useQuery({
+const RelatedPosts = ({ currentSlug, category, limit = 3 }: RelatedPostsProps) => {
+  const { data: relatedPosts, isLoading } = useQuery<Article[]>({
     queryKey: ['related-posts', currentSlug, category],
     queryFn: async () => {
       let query = supabase
         .from('articles')
-        .select('id, title, excerpt, slug, image_url, created_at')
+        .select(`
+          *,
+          categories(*)
+        `)
         .eq('status', 'published')
         .neq('slug', currentSlug)
         .limit(limit);
 
-      // ถ้ามี category ให้กรองตาม category ก่อน
+      // If category is provided, filter by category name
       if (category) {
-        query = query.eq('category', category);
+        query = query.eq('categories.name', category);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-
-      // ถ้าผลลัพธ์น้อยกว่า limit และมี category ให้ค้นหาเพิ่มจากบทความอื่น
-      if (data && data.length < limit && category) {
-        const remaining = limit - data.length;
-        const { data: additionalPosts } = await supabase
-          .from('articles')
-          .select('id, title, excerpt, slug, image_url, created_at')
-          .eq('status', 'published')
-          .neq('slug', currentSlug)
-          .neq('category', category)
-          .limit(remaining)
-          .order('created_at', { ascending: false });
-
-        if (additionalPosts) {
-          data.push(...additionalPosts);
-        }
-      }
-
-      return data || [];
+      return data as Article[];
     },
   });
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold">บทความที่เกี่ยวข้อง</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {Array.from({ length: limit }).map((_, index) => (
-            <Card key={index}>
-              <Skeleton className="h-48 rounded-t-lg" />
-              <CardHeader>
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>บทความที่เกี่ยวข้อง</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!relatedPosts || relatedPosts.length === 0) {
-    return null;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>บทความอื่นๆ ที่น่าสนใจ</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            สำรวจบทความอื่นๆ ในคลังความรู้ของเรา
+          </p>
+          <Button asChild variant="outline">
+            <Link to="/articles">
+              ดูบทความทั้งหมด
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold">บทความที่เกี่ยวข้อง</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {relatedPosts.map((post) => (
-          <Card key={post.id} className="hover:shadow-lg transition-shadow">
-            <Link to={`/articles/${post.slug}`}>
-              {post.image_url && (
-                <img 
-                  src={post.image_url} 
-                  alt={post.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
+    <Card>
+      <CardHeader>
+        <CardTitle>บทความที่เกี่ยวข้อง</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {relatedPosts.map((post) => (
+            <div key={post.id} className="group">
+              <Link to={`/articles/${post.slug}`}>
+                <h4 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                  {post.title}
+                </h4>
+              </Link>
+              {post.excerpt && (
+                <p className="text-muted-foreground text-sm line-clamp-2">
+                  {post.excerpt}
+                </p>
               )}
-              <CardHeader>
-                <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
-                {post.excerpt && (
-                  <CardDescription className="line-clamp-3">
-                    {post.excerpt}
-                  </CardDescription>
-                )}
-              </CardHeader>
+              {post.categories && (
+                <span className="inline-block text-xs text-primary mt-2">
+                  {post.categories.name}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 pt-4 border-t">
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/articles">
+              ดูบทความทั้งหมด
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
-          </Card>
-        ))}
-      </div>
-    </div>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
