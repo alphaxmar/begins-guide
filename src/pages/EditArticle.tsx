@@ -9,7 +9,6 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/integrations/supabase/types";
 import ArticleForm, { ArticleFormValues } from "@/components/ArticleForm";
-import AdminLayout from "@/components/admin/AdminLayout";
 
 const fetchArticleForEdit = async (slug: string) => {
   const { data, error } = await supabase
@@ -94,15 +93,15 @@ const EditArticle = () => {
   const isLoading = authLoading || adminLoading || !isAdmin;
   if (isLoading) {
     return (
-      <AdminLayout>
+      <div className="container mx-auto py-8">
         <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>
-      </AdminLayout>
+      </div>
     );
   }
 
   if (isArticleLoading) {
     return (
-      <AdminLayout>
+      <div className="container mx-auto py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">กำลังแก้ไขบทความ...</h1>
           <div className="space-y-8">
@@ -114,7 +113,7 @@ const EditArticle = () => {
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
@@ -134,7 +133,7 @@ const EditArticle = () => {
   } : undefined;
 
   return (
-    <AdminLayout>
+    <div className="container mx-auto py-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">แก้ไขบทความ</h1>
         <ArticleForm
@@ -145,7 +144,7 @@ const EditArticle = () => {
           isSlugDisabled={true}
         />
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

@@ -82,14 +82,14 @@ const CreateArticle = () => {
 
   if (authLoading || adminLoading || !isAdmin) {
     return (
-      <AdminLayout>
+      <div className="container mx-auto py-8">
         <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>
-      </AdminLayout>
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
+    <div className="container mx-auto py-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">เขียนบทความใหม่</h1>
         <ArticleForm
@@ -98,7 +98,7 @@ const CreateArticle = () => {
           submitButtonText="สร้างบทความ"
         />
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

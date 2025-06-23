@@ -40,7 +40,11 @@ interface ArticleFormProps {
 }
 
 type Category = Tables<'categories'>;
-type Product = Tables<'products'>;
+type ProductForDropdown = {
+  id: string;
+  title: string;
+  product_type: string;
+};
 
 const ArticleForm = ({
   onSubmit,
@@ -79,8 +83,8 @@ const ArticleForm = ({
   });
 
   // Fetch products for recommended product dropdown
-  const { data: products } = useQuery<Product[]>({
-    queryKey: ['products'],
+  const { data: products } = useQuery<ProductForDropdown[]>({
+    queryKey: ['products-dropdown'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('products')
