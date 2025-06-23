@@ -19,6 +19,7 @@ export type Database = {
           excerpt: string | null
           id: string
           image_url: string | null
+          is_pinned_on_hub: boolean | null
           slug: string
           status: Database["public"]["Enums"]["article_status"]
           title: string
@@ -33,6 +34,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          is_pinned_on_hub?: boolean | null
           slug: string
           status?: Database["public"]["Enums"]["article_status"]
           title: string
@@ -47,6 +49,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          is_pinned_on_hub?: boolean | null
           slug?: string
           status?: Database["public"]["Enums"]["article_status"]
           title?: string

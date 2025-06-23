@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -33,6 +32,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import ArticleSearchAndFilter from "@/components/admin/ArticleSearchAndFilter";
 import ArticleBulkActions from "@/components/admin/ArticleBulkActions";
 import ArticleStatusToggle from "@/components/admin/ArticleStatusToggle";
+import ArticlePinToggle from "@/components/admin/ArticlePinToggle";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -275,9 +275,10 @@ const AdminArticlesPage = () => {
                     />
                   </TableHead>
                   <TableHead className="w-20">รูปปก</TableHead>
-                  <TableHead className="w-[40%]">หัวข้อ / ผู้เขียน</TableHead>
+                  <TableHead className="w-[30%]">หัวข้อ / ผู้เขียน</TableHead>
                   <TableHead>สถานะ</TableHead>
                   <TableHead>หมวดหมู่</TableHead>
+                  <TableHead>ปักหมุด</TableHead>
                   <TableHead>วันที่อัปเดต</TableHead>
                   <TableHead className="text-right">การกระทำ</TableHead>
                 </TableRow>
@@ -315,6 +316,12 @@ const AdminArticlesPage = () => {
                         />
                       </TableCell>
                       <TableCell>{article.category || '-'}</TableCell>
+                      <TableCell>
+                        <ArticlePinToggle
+                          articleSlug={article.slug}
+                          isPinned={article.is_pinned_on_hub || false}
+                        />
+                      </TableCell>
                       <TableCell>{format(new Date(article.updated_at), 'dd MMM yyyy HH:mm')}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
@@ -359,7 +366,7 @@ const AdminArticlesPage = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
+                    <TableCell colSpan={8} className="h-24 text-center">
                       {searchQuery || statusFilter !== "all" || categoryFilter !== "all" ? 
                         "ไม่พบบทความที่ตรงกับเงื่อนไขการค้นหา" : 
                         "ยังไม่มีบทความ"
