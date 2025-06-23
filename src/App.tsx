@@ -8,6 +8,7 @@ import Articles from '@/pages/Articles';
 import ArticleDetail from '@/pages/ArticleDetail';
 import MicroSaasIdeasArticle from '@/pages/MicroSaasIdeasArticle';
 import OrganicMarketingArticle from '@/pages/OrganicMarketingArticle';
+import NoCodeBusinessArticle from '@/pages/NoCodeBusinessArticle';
 import ProPage from '@/pages/ProPage';
 import ProgramPage from '@/pages/ProgramPage';
 import MicroSaasCoursePage from '@/pages/MicroSaasCoursePage';
