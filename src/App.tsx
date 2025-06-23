@@ -37,6 +37,7 @@ import AiToolsForEntrepreneursArticle from '@/pages/AiToolsForEntrepreneursArtic
 import HealjaiCaseStudyArticle from '@/pages/HealjaiCaseStudyArticle';
 import Seo101ForBusyOwnersArticle from '@/pages/Seo101ForBusyOwnersArticle';
 import BasicTaxForThaiBusinessOwnersArticle from '@/pages/BasicTaxForThaiBusinessOwnersArticle';
+import OfficeWorkerTo6FigureFashionBrandArticle from '@/pages/OfficeWorkerTo6FigureFashionBrandArticle';
 
 function App() {
   const { user } = useAuth();
@@ -62,6 +63,7 @@ function App() {
       <Route path="/articles/case-study-healjai-me-matching-platform-15-days" element={<HealjaiCaseStudyArticle />} />
       <Route path="/articles/seo-101-for-busy-business-owners" element={<Seo101ForBusyOwnersArticle />} />
       <Route path="/articles/basic-tax-for-thai-business-owners" element={<BasicTaxForThaiBusinessOwnersArticle />} />
+      <Route path="/articles/interview-office-worker-to-6-figure-fashion-brand" element={<OfficeWorkerTo6FigureFashionBrandArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages - keep existing routes the same */}
