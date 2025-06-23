@@ -33,6 +33,7 @@ import AdminEmailPage from '@/pages/admin/AdminEmailPage';
 import ProMembershipsPage from '@/pages/admin/ProMembershipsPage';
 import ProPackagesPage from '@/pages/admin/ProPackagesPage';
 import AiToolsForEntrepreneursArticle from '@/pages/AiToolsForEntrepreneursArticle';
+import HealjaiCaseStudyArticle from '@/pages/HealjaiCaseStudyArticle';
 
 function App() {
   const { user } = useAuth();
@@ -55,6 +56,7 @@ function App() {
       <Route path="/articles/what-is-no-code-business-the-whole-truth" element={<NoCodeBusinessArticle />} />
       <Route path="/articles/how-to-price-digital-products-4-strategies" element={<PricingDigitalProductsArticle />} />
       <Route path="/articles/5-ai-tools-for-entrepreneurs-2025" element={<AiToolsForEntrepreneursArticle />} />
+      <Route path="/articles/case-study-healjai-me-matching-platform-15-days" element={<HealjaiCaseStudyArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
       
       {/* Other pages - keep existing routes the same */}
