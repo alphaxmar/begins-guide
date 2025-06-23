@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ArticleCard from "@/components/ArticleCard";
@@ -80,12 +81,12 @@ const Articles = () => {
                   คลังความรู้สำหรับผู้ประกอบการยุคใหม่
                 </h1>
                 <p className="text-xl mb-8 text-green-100">
-                  เริ่มต้นเส้นทางของคุณสู่การเป็นเจ้าของธุรกิจ ด้วยบทความเชิงลึก, คู่มือ, และวิดีโอคุณภาพสูง ทั้งหมดนี้ฟรี!
+                  ทุกสิ่งที่คุณต้องรู้เพื่อเปลี่ยนไอเดียให้เป็นธุรกิจที่ยั่งยืน รวบรวมไว้ที่นี่แล้ว
                 </p>
                 
                 <div className="max-w-md mx-auto mb-8">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4">รับบทความใหม่และเคล็ดลับพิเศษส่งตรงถึงอีเมลคุณก่อนใคร</h3>
+                    <h3 className="text-lg font-semibold mb-4">รับเคล็ดลับและบทความใหม่ก่อนใคร ส่งตรงถึงอีเมลคุณ</h3>
                     <NewsletterSignup />
                   </div>
                 </div>
@@ -107,7 +108,7 @@ const Articles = () => {
             {featuredArticles.length > 0 && (
               <section className="mb-16">
                 <div className="text-center mb-12">
-                  <h2 className="text-3xl font-bold mb-4">บทความแนะนำ</h2>
+                  <h2 className="text-3xl font-bold mb-4">เริ่มต้นที่นี่: บทความแนะนำสำหรับคุณ</h2>
                   <p className="text-xl text-gray-600">บทความคุณภาพสูงที่จะเปลี่ยนมุมมองการทำธุรกิจของคุณ</p>
                 </div>
                 
@@ -191,11 +192,11 @@ const Articles = () => {
               )}
             </section>
 
-            {/* Section 5: Final Call-to-Action */}
+            {/* Section 5: Main Call-to-Action */}
             <section className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl p-12 text-center">
               <h2 className="text-3xl font-bold mb-4">ชอบเนื้อหาฟรีของเราใช่ไหม?</h2>
               <p className="text-xl mb-8 text-yellow-100">
-                ยกระดับไปอีกขั้นด้วยสิทธิ์เข้าถึงทุกอย่างแบบไม่จำกัด รวมถึงเครื่องมือ AI และคอร์สออนไลน์พิเศษ
+                ยกระดับการเรียนรู้ของคุณไปอีกขั้นด้วยสิทธิ์เข้าถึงทุกคอร์ส, ทุกเทมเพลต, และผู้ช่วย AI ทั้งหมด
               </p>
               <Button asChild size="lg" className="bg-white text-yellow-600 hover:bg-gray-100 font-bold px-8">
                 <Link to="/pro">

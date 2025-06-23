@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AuthPage from '@/pages/AuthPage';
 import Index from '@/pages/Index';
 import Articles from '@/pages/Articles';
+import ArticleDetail from '@/pages/ArticleDetail';
 import ProPage from '@/pages/ProPage';
 import ProgramPage from '@/pages/ProgramPage';
 import MicroSaasCoursePage from '@/pages/MicroSaasCoursePage';
@@ -42,8 +43,11 @@ function App() {
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/" element={<Index />} />
       
-      {/* New pages */}
+      {/* Articles routes */}
       <Route path="/articles" element={<Articles />} />
+      <Route path="/articles/:slug" element={<ArticleDetail />} />
+      
+      {/* Other pages */}
       <Route path="/pro" element={<ProPage />} />
       <Route path="/program" element={<ProgramPage />} />
       <Route path="/micro-saas-course" element={<MicroSaasCoursePage />} />

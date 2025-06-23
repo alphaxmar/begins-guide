@@ -1,3 +1,4 @@
+
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +8,21 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import RelatedPosts from "@/components/RelatedPosts";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import SocialShare from "@/components/SocialShare";
+import { Badge } from "@/components/ui/badge";
+import { Clock, User } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -26,10 +42,21 @@ const ArticleDetail = () => {
     },
   });
 
+  // Calculate estimated reading time (approximate)
+  const calculateReadingTime = (content: string) => {
+    const wordsPerMinute = 200; // Average reading speed
+    const wordCount = content.split(' ').length;
+    return Math.ceil(wordCount / wordsPerMinute);
+  };
+
   if (isLoading) {
     return (
-      <div className="flex justify-center py-8">
-        <LoadingSpinner />
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex justify-center items-center">
+          <LoadingSpinner />
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -38,44 +65,207 @@ const ArticleDetail = () => {
     return <Navigate to="/404" replace />;
   }
 
+  const readingTime = article.content ? calculateReadingTime(article.content) : 5;
+  const currentUrl = window.location.href;
+
   return (
-    <div className="py-8">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardContent className="prose max-w-none">
-                <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
-                <p className="text-muted-foreground mb-4">
-                  {format(new Date(article.created_at), 'dd MMMM yyyy', { locale: th })}
-                </p>
-                {article.image_url && (
-                  <img
-                    src={article.image_url}
-                    alt={article.title}
-                    className="w-full rounded-md mb-4"
-                  />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 bg-gray-50 py-8">
+        <div className="container mx-auto px-4">
+          {/* Breadcrumbs */}
+          <div className="mb-6">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">หน้าแรก</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/articles">คลังความรู้</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                {article.category && (
+                  <>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href={`/articles?category=${article.category}`}>
+                        {article.category}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                  </>
                 )}
-                <div dangerouslySetInnerHTML={{ __html: article.content || '' }} />
-              </CardContent>
-            </Card>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{article.title}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <RelatedPosts 
-              currentSlug={article.slug} 
-              category={article.category || undefined}
-              limit={4}
-            />
-            
-            <div className="sticky top-8">
-              <NewsletterSignup />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              <Card className="mb-8">
+                <CardContent className="p-0">
+                  {/* Header Area */}
+                  <div className="p-8 pb-6">
+                    {article.category && (
+                      <Badge variant="secondary" className="mb-4">
+                        {article.category}
+                      </Badge>
+                    )}
+                    
+                    <h1 className="text-4xl font-bold mb-6 leading-tight">
+                      {article.title}
+                    </h1>
+                    
+                    {/* Article Metadata */}
+                    <div className="flex flex-wrap items-center gap-6 text-muted-foreground mb-6 pb-6 border-b">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>ทีมงาน Begins.guide</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>{format(new Date(article.created_at), 'dd MMMM yyyy', { locale: th })}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        <span>อ่าน {readingTime} นาที</span>
+                      </div>
+                      <SocialShare 
+                        url={currentUrl}
+                        title={article.title}
+                        description={article.excerpt || ''}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Featured Image */}
+                  {article.cover_image_url && (
+                    <div className="px-8 mb-8">
+                      <img
+                        src={article.cover_image_url}
+                        alt={article.title}
+                        className="w-full rounded-lg"
+                      />
+                    </div>
+                  )}
+
+                  {/* Main Content Area */}
+                  <div className="px-8 pb-8">
+                    <div className="prose max-w-none prose-lg prose-gray">
+                      <div dangerouslySetInnerHTML={{ __html: article.content || '' }} />
+                    </div>
+
+                    {/* Inline Call-to-Action (Lead Magnet) */}
+                    <div className="my-12 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-8 text-center">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                        เรียนรู้ได้เร็วยิ่งขึ้น
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        ดาวน์โหลดฟรี! Checklist สรุปขั้นตอน "{article.title}" เพื่อนำไปใช้ได้ทันที
+                      </p>
+                      <div className="max-w-md mx-auto">
+                        <NewsletterSignup />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Post-Content Area */}
+              <div className="space-y-8">
+                {/* Author Box */}
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-xl">BG</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg mb-2">ทีมงาน Begins.guide</h4>
+                        <p className="text-gray-600 mb-4">
+                          ทีมผู้เชี่ยวชาญด้านการสร้างธุรกิจและ No-Code ที่มีประสบการณ์การสอนและให้คำปรึกษามากกว่า 5 ปี
+                        </p>
+                        <div className="flex gap-4">
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to="/articles">บทความทั้งหมด</Link>
+                          </Button>
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to="/pro">เรียนรู้เพิ่มเติม</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Related Articles */}
+                <RelatedPosts 
+                  currentSlug={article.slug} 
+                  category={article.category || undefined}
+                  limit={4}
+                />
+
+                {/* Main Call-to-Action */}
+                <Card className="bg-gradient-to-r from-green-600 to-blue-600 text-white">
+                  <CardContent className="p-8 text-center">
+                    <h3 className="text-2xl font-bold mb-4">
+                      พร้อมที่จะยกระดับการเรียนรู้ของคุณแล้วหรือยัง?
+                    </h3>
+                    <p className="text-green-100 mb-6">
+                      เข้าถึงคอร์สออนไลน์, เทมเพลต, และเครื่องมือ AI ทั้งหมดด้วย Begins.guide PRO
+                    </p>
+                    <Button asChild size="lg" className="bg-white text-green-600 hover:bg-gray-100">
+                      <Link to="/pro">
+                        สมัครสมาชิก PRO วันนี้
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8 space-y-6">
+                {/* Table of Contents - placeholder for future implementation */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h4 className="font-bold mb-4">สารบัญ</h4>
+                    <div className="text-sm text-gray-600">
+                      <p>สารบัญจะแสดงที่นี่เมื่อมีการอัปเดตระบบ</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Contextual CTA */}
+                <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+                  <CardContent className="p-6 text-center">
+                    <h4 className="font-bold text-gray-900 mb-3">
+                      เริ่มสร้างธุรกิจจริงๆ
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      เรียนรู้การสร้างเว็บไซต์และธุรกิจออนไลน์โดยไม่ต้องเขียนโค้ด
+                    </p>
+                    <Button asChild size="sm" className="w-full">
+                      <Link to="/no-code-webpreneur">
+                        ดูคอร์ส No-Code Webpreneur
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Newsletter Signup */}
+                <div className="sticky top-8">
+                  <NewsletterSignup />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };
