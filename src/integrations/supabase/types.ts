@@ -765,6 +765,45 @@ export type Database = {
           },
         ]
       }
+      service_leads: {
+        Row: {
+          budget_range: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          preferred_start_time: string | null
+          project_description: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget_range?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          preferred_start_time?: string | null
+          project_description: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget_range?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          preferred_start_time?: string | null
+          project_description?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_lesson_progress: {
         Row: {
           completed: boolean | null
