@@ -1165,6 +1165,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      create_affiliate_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       create_order_for_current_user: {
         Args: { product_ids: string[] }
         Returns: string

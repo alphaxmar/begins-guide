@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAffiliateTracking } from '@/hooks/useAffiliateTracking';
 import AuthPage from '@/pages/AuthPage';
 import Index from '@/pages/Index';
 import Articles from '@/pages/Articles';
@@ -54,6 +55,9 @@ import CertificatePage from '@/pages/CertificatePage';
 function App() {
   const { user } = useAuth();
   const location = useLocation();
+  
+  // Initialize affiliate tracking
+  useAffiliateTracking();
 
   // Redirect to profile if logged in and on /auth
   if (user && location.pathname === '/auth') {
