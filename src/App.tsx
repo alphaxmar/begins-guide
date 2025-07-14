@@ -10,12 +10,10 @@ import MicroSaasIdeasArticle from '@/pages/MicroSaasIdeasArticle';
 import OrganicMarketingArticle from '@/pages/OrganicMarketingArticle';
 import NoCodeBusinessArticle from '@/pages/NoCodeBusinessArticle';
 import PricingDigitalProductsArticle from '@/pages/PricingDigitalProductsArticle';
-import ProPage from '@/pages/ProPage';
 import ProgramPage from '@/pages/ProgramPage';
 import MicroSaasCoursePage from '@/pages/MicroSaasCoursePage';
 import MvpLaunchpadPage from '@/pages/MvpLaunchpadPage';
 import NoCodeWebpreneurPage from '@/pages/NoCodeWebpreneurPage';
-import PricingPage from '@/pages/PricingPage';
 import ProfilePage from '@/pages/ProfilePage';
 import CohortPage from '@/pages/CohortPage';
 import NotFound from '@/pages/NotFound';
@@ -31,8 +29,6 @@ import AdminArticlesPage from '@/pages/admin/AdminArticlesPage';
 import DiscountCodesPage from '@/pages/admin/DiscountCodesPage';
 import AdminPaymentSettingsPage from '@/pages/admin/AdminPaymentSettingsPage';
 import AdminEmailPage from '@/pages/admin/AdminEmailPage';
-import ProMembershipsPage from '@/pages/admin/ProMembershipsPage';
-import ProPackagesPage from '@/pages/admin/ProPackagesPage';
 import AiToolsForEntrepreneursArticle from '@/pages/AiToolsForEntrepreneursArticle';
 import HealjaiCaseStudyArticle from '@/pages/HealjaiCaseStudyArticle';
 import CaseStudyBuildSellplanStoreArticle from '@/pages/CaseStudyBuildSellplanStoreArticle';
@@ -95,7 +91,6 @@ function App() {
       <Route path="/learn/:slug" element={<UserProtectedRoute><CoursePage /></UserProtectedRoute>} />
       
       {/* Other pages */}
-      <Route path="/pro" element={<ProPage />} />
       <Route path="/program" element={<ProgramPage />} />
       <Route path="/micro-saas-course" element={<MicroSaasCoursePage />} />
       <Route path="/services/mvp-launchpad" element={<MvpLaunchpadPage />} />
@@ -104,7 +99,6 @@ function App() {
       {/* Existing pages */}
       <Route path="/courses" element={<CoursesPage />} />
       <Route path="/products" element={<Products />} />
-      <Route path="/pricing" element={<PricingPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
@@ -128,13 +122,6 @@ function App() {
         <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
         <Route path="email-templates" element={<AdminEmailPage />} />
         
-        {/* Updated PRO routes */}
-        <Route path="pro-memberships" element={<ProMembershipsPage />} />
-        <Route path="pro-packages" element={<ProPackagesPage />} />
-        
-        {/* Legacy routes for backward compatibility */}
-        <Route path="vip-management" element={<Navigate to="/admin/pro-memberships" replace />} />
-        <Route path="vip-packages" element={<Navigate to="/admin/pro-packages" replace />} />
       </Route>
       
       <Route path="*" element={<NotFound />} />

@@ -50,17 +50,14 @@ const Header = () => {
           <Link to="/" className="text-foreground/60 transition-colors hover:text-foreground/80">
             หน้าแรก
           </Link>
+          <Link to="/courses" className="text-foreground transition-colors hover:text-foreground/90 font-semibold">
+            คอร์สเรียน
+          </Link>
           <Link to="/articles" className="text-foreground/60 transition-colors hover:text-foreground/80">
             บทความ
           </Link>
-          <Link to="/courses" className="text-foreground/60 transition-colors hover:text-foreground/80">
-            คอร์สออนไลน์
-          </Link>
           <Link to="/products" className="text-foreground/60 transition-colors hover:text-foreground/80">
-            ผลิตภัณฑ์
-          </Link>
-          <Link to="/pricing" className="text-foreground/60 transition-colors hover:text-foreground/80">
-            ราคา
+            สินค้าดิจิทัล
           </Link>
           {user && isVip && (
             <Link 
@@ -153,7 +150,7 @@ const Header = () => {
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="outline" asChild>
-                <Link to="/pricing">PRO</Link>
+                <Link to="/courses">คอร์สเรียน</Link>
               </Button>
               <Button asChild>
                 <Link to="/auth">
@@ -178,6 +175,13 @@ const Header = () => {
               หน้าแรก
             </Link>
             <Link 
+              to="/courses" 
+              className="block text-foreground transition-colors hover:text-foreground/90 py-2 font-semibold"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              คอร์สเรียน
+            </Link>
+            <Link 
               to="/articles" 
               className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
               onClick={() => setMobileMenuOpen(false)}
@@ -185,25 +189,11 @@ const Header = () => {
               บทความ
             </Link>
             <Link 
-              to="/courses" 
-              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              คอร์สออนไลน์
-            </Link>
-            <Link 
               to="/products" 
               className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
-              ผลิตภัณฑ์
-            </Link>
-            <Link 
-              to="/pricing" 
-              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              ราคา
+              สินค้าดิจิทัล
             </Link>
             {user && isVip && (
               <Link 
