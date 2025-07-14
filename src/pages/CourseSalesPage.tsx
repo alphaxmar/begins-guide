@@ -6,6 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdvancedCourseAccess } from "@/hooks/useAdvancedCourseAccess";
 import { useCart } from "@/contexts/CartContext";
+import { useCourseReviews } from "@/hooks/useCourseReviews";
 import { toast } from "sonner";
 import {
   CheckCircle,
@@ -23,7 +24,8 @@ import {
   MessageSquare,
   User,
   Video,
-  FileText
+  FileText,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,33 +58,6 @@ const fetchLessons = async (productId: string) => {
   return data || [];
 };
 
-// Mock function to fetch reviews - will be replaced with real data
-const fetchCourseReviews = async (productId: string) => {
-  // This will be connected to real reviews system in Task 2.2
-  return [
-    {
-      id: "1",
-      user: { full_name: "นาย ธนกร ใจดี", avatar_url: null },
-      rating: 5,
-      comment: "คอร์สนี้ช่วยให้ผมเข้าใจการทำธุรกิจมากขึ้น และสามารถนำไปปรับใช้กับบริษัทได้จริง",
-      created_at: "2024-01-15"
-    },
-    {
-      id: "2", 
-      user: { full_name: "คุณ สมใจ ประสบผล", avatar_url: null },
-      rating: 5,
-      comment: "เนื้อหาครบครัน เข้าใจง่าย และที่สำคัญคือใช้ได้จริง ขอบคุณมากครับ",
-      created_at: "2024-01-20"
-    },
-    {
-      id: "3",
-      user: { full_name: "นางสาว ปิยดา สำเร็จ", avatar_url: null },
-      rating: 5,
-      comment: "คอร์สที่ดีที่สุดที่เคยเรียน คุ้มค่ากับเงินที่จ่ายไป และได้ความรู้เยอะมาก",
-      created_at: "2024-01-25"
-    }
-  ];
-};
 
 const CourseSalesPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -103,11 +78,12 @@ const CourseSalesPage = () => {
     enabled: !!course?.id,
   });
 
-  const { data: reviews = [] } = useQuery({
-    queryKey: ["course-reviews", course?.id],
-    queryFn: () => fetchCourseReviews(course!.id),
-    enabled: !!course?.id,
-  });
+  // Use real reviews hook
+  const { 
+    reviews: reviewsData, 
+    stats: reviewStats, 
+    loading: reviewsLoading 
+  } = useCourseReviews(course?.id || '');
 
   const { hasAccess, isLoading: isAccessLoading, accessType, isVip } = useAdvancedCourseAccess(
     course?.id
@@ -172,7 +148,7 @@ const CourseSalesPage = () => {
   const isFree = course.price === 0;
   const totalLessons = lessons.length;
   const estimatedHours = Math.ceil(totalLessons * 0.5); // ประมาณ 30 นาทีต่อบทเรียน
-  const averageRating = reviews.length > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
+  const averageRating = reviewStats.averageRating;
 
   // Learning outcomes based on course content
   const learningOutcomes = [
@@ -336,7 +312,7 @@ const CourseSalesPage = () => {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Users className="h-4 w-4" />
-                <span>{reviews.length > 0 ? `${reviews.length}+ คนเรียนแล้ว` : "เปิดใหม่"}</span>
+                <span>{reviewStats.totalReviews > 0 ? `${reviewStats.totalReviews}+ คนเรียนแล้ว` : "เปิดใหม่"}</span>
               </div>
               {averageRating > 0 && (
                 <RatingDisplay rating={averageRating} size="sm" />
@@ -462,7 +438,24 @@ const CourseSalesPage = () => {
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{lesson.title}</h3>
+                        <div className="flex items-center gap-2">
+                          {lesson.is_free_preview ? (
+                            <Link 
+                              to={`/course/${course.slug}/lesson/${lesson.id}`}
+                              className="font-medium text-blue-600 hover:underline"
+                            >
+                              {lesson.title}
+                            </Link>
+                          ) : (
+                            <h3 className="font-medium text-gray-900">{lesson.title}</h3>
+                          )}
+                          {lesson.is_free_preview && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                              <Eye className="w-3 h-3" />
+                              ดูตัวอย่างฟรี
+                            </span>
+                          )}
+                        </div>
                         {lesson.content && (
                           <p className="text-sm text-gray-600 mt-1">{lesson.content.substring(0, 100)}...</p>
                         )}
@@ -520,7 +513,7 @@ const CourseSalesPage = () => {
       </section>
 
       {/* Reviews & Testimonials Section */}
-      {reviews.length > 0 && (
+      {reviewStats.totalReviews > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
@@ -528,28 +521,52 @@ const CourseSalesPage = () => {
             </h2>
             <div className="text-center mb-12">
               <RatingDisplay rating={averageRating} size="lg" />
-              <p className="text-gray-600 mt-2">จาก {reviews.length} รีวิว</p>
+              <p className="text-gray-600 mt-2">จาก {reviewStats.totalReviews} รีวิว</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {reviews.map((review) => (
-                <Card key={review.id} className="p-6">
-                  <CardContent className="p-0">
-                    <div className="flex items-center gap-3 mb-4">
-                      <Avatar>
-                        <AvatarImage src={review.user.avatar_url || undefined} />
-                        <AvatarFallback>{review.user.full_name?.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-gray-900">{review.user.full_name}</p>
-                        <RatingDisplay rating={review.rating} size="sm" showText={false} />
+            {reviewsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="p-6 animate-pulse">
+                    <CardContent className="p-0">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-24"></div>
+                          <div className="h-3 bg-gray-200 rounded w-16"></div>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-gray-600 italic">"{review.comment}"</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-full"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                {reviewsData.map((review) => (
+                  <Card key={review.id} className="p-6">
+                    <CardContent className="p-0">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Avatar>
+                          <AvatarFallback>{review.user_name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-gray-900">{review.user_name}</p>
+                          <RatingDisplay rating={review.rating} size="sm" showText={false} />
+                        </div>
+                      </div>
+                      <p className="text-gray-600 italic">"{review.comment}"</p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {new Date(review.created_at).toLocaleDateString('th-TH')}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
