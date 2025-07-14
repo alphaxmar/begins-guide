@@ -8,38 +8,30 @@ import { useAdvancedCourseAccess } from "@/hooks/useAdvancedCourseAccess";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import {
-  Crown,
   CheckCircle,
   Clock,
   Users,
   PlayCircle,
-  Download,
   ArrowLeft,
   Star,
-  Trophy,
-  Zap,
   BookOpen,
-  Sparkles,
   ShoppingCart,
-  Heart,
-  TrendingUp,
   Shield,
   Target,
   Gift,
   Loader2,
-  Award,
   MessageSquare,
-  BarChart3
+  User,
+  Video,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import PaymentOptions from "@/components/payment/PaymentOptions";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import RatingDisplay from "@/components/reviews/RatingDisplay";
 
 const fetchProductBySlug = async (slug: string) => {
   const { data, error } = await supabase
@@ -64,6 +56,34 @@ const fetchLessons = async (productId: string) => {
   return data || [];
 };
 
+// Mock function to fetch reviews - will be replaced with real data
+const fetchCourseReviews = async (productId: string) => {
+  // This will be connected to real reviews system in Task 2.2
+  return [
+    {
+      id: "1",
+      user: { full_name: "นาย ธนกร ใจดี", avatar_url: null },
+      rating: 5,
+      comment: "คอร์สนี้ช่วยให้ผมเข้าใจการทำธุรกิจมากขึ้น และสามารถนำไปปรับใช้กับบริษัทได้จริง",
+      created_at: "2024-01-15"
+    },
+    {
+      id: "2", 
+      user: { full_name: "คุณ สมใจ ประสบผล", avatar_url: null },
+      rating: 5,
+      comment: "เนื้อหาครบครัน เข้าใจง่าย และที่สำคัญคือใช้ได้จริง ขอบคุณมากครับ",
+      created_at: "2024-01-20"
+    },
+    {
+      id: "3",
+      user: { full_name: "นางสาว ปิยดา สำเร็จ", avatar_url: null },
+      rating: 5,
+      comment: "คอร์สที่ดีที่สุดที่เคยเรียน คุ้มค่ากับเงินที่จ่ายไป และได้ความรู้เยอะมาก",
+      created_at: "2024-01-25"
+    }
+  ];
+};
+
 const CourseSalesPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
@@ -80,6 +100,12 @@ const CourseSalesPage = () => {
   const { data: lessons = [] } = useQuery({
     queryKey: ["lessons", course?.id],
     queryFn: () => fetchLessons(course!.id),
+    enabled: !!course?.id,
+  });
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["course-reviews", course?.id],
+    queryFn: () => fetchCourseReviews(course!.id),
     enabled: !!course?.id,
   });
 
@@ -115,20 +141,16 @@ const CourseSalesPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <div className="container mx-auto px-4 py-8">
-            <div className="animate-pulse space-y-8">
-              <div className="h-64 bg-gray-200 rounded-lg"></div>
-              <div className="space-y-4">
-                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-32 bg-gray-200 rounded"></div>
-              </div>
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-8">
+            <div className="h-64 bg-gray-200 rounded-lg"></div>
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
             </div>
           </div>
-        </main>
-        <Footer />
+        </div>
       </div>
     );
   }
@@ -136,17 +158,13 @@ const CourseSalesPage = () => {
   if (isError || !course) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <div className="container mx-auto px-4 py-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">ไม่พบคอร์สที่คุณค้นหา</h1>
-            <p className="text-gray-600 mb-8">คอร์สนี้อาจถูกลบหรือย้ายไปแล้ว</p>
-            <Button asChild>
-              <Link to="/articles">กลับไปหน้าหลัก</Link>
-            </Button>
-          </div>
-        </main>
-        <Footer />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">ไม่พบคอร์สที่คุณค้นหา</h1>
+          <p className="text-gray-600 mb-8">คอร์สนี้อาจถูกลบหรือย้ายไปแล้ว</p>
+          <Button asChild>
+            <Link to="/products">กลับไปหน้าคอร์สทั้งหมด</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -154,41 +172,19 @@ const CourseSalesPage = () => {
   const isFree = course.price === 0;
   const totalLessons = lessons.length;
   const estimatedHours = Math.ceil(totalLessons * 0.5); // ประมาณ 30 นาทีต่อบทเรียน
+  const averageRating = reviews.length > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
 
-  // Mock data สำหรับ demo
-  const benefits = [
+  // Learning outcomes based on course content
+  const learningOutcomes = [
     "เรียนรู้ได้ทุกที่ทุกเวลา ไม่มีข้อจำกัด",
-    "ได้ใบรับรองหลังจบคอร์ส",
+    "ได้ใบรับรองหลังจบคอร์ส", 
     "เข้าถึงเนื้อหาได้ตลอดชีวิต",
     "มีไฟล์เสริมและเทมเพลตให้ดาวน์โหลด",
-    "Q&A กับผู้สอนและเพื่อนร่วมคอร์ส",
+    "สามารถนำไปปฏิบัติได้จริง",
     "อัปเดตเนื้อหาใหม่ฟรี"
   ];
 
-  const testimonials = [
-    {
-      name: "นาย ธนกร ใจดี",
-      role: "Startup Founder",
-      content: "คอร์สนี้ช่วยให้ผมเข้าใจการทำธุรกิจมากขึ้น และสามารถนำไปปรับใช้กับบริษัทได้จริง",
-      rating: 5,
-      image: "/placeholder.svg"
-    },
-    {
-      name: "คุณ สมใจ ประสบผล",
-      role: "E-commerce Owner", 
-      content: "เนื้อหาครบครัน เข้าใจง่าย และที่สำคัญคือใช้ได้จริง ขอบคุณมากครับ",
-      rating: 5,
-      image: "/placeholder.svg"
-    },
-    {
-      name: "นางสาว ปิยดา สำเร็จ",
-      role: "Digital Marketer",
-      content: "คอร์สที่ดีที่สุดที่เคยเรียน คุ้มค่ากับเงินที่จ่ายไป และได้ความรู้เยอะมาก",
-      rating: 5,
-      image: "/placeholder.svg"
-    }
-  ];
-
+  // FAQ data
   const faqs = [
     {
       question: "คอร์สนี้เหมาะกับใคร?",
@@ -204,7 +200,7 @@ const CourseSalesPage = () => {
     },
     {
       question: "มีการสนับสนุนหลังการเรียนไหม?",
-      answer: "มีครับ สามารถถามคำถามได้ในกลุ่มเฟซบุ๊กของคอร์ส และทีมงานจะช่วยตอบข้อสงสัย"
+      answer: "มีครับ สามารถถามคำถามได้ในชุมชนของเรา และทีมงานจะช่วยตอบข้อสงสัย"
     },
     {
       question: "สามารถขอใบรับรองได้ไหม?",
@@ -228,7 +224,7 @@ const CourseSalesPage = () => {
   };
 
   const handleStartLearning = () => {
-    navigate(`/learn/${course.slug}`);
+    navigate(`/courses/${course.slug}/learn`);
   };
 
   const renderActionButton = () => {
@@ -247,25 +243,6 @@ const CourseSalesPage = () => {
           <PlayCircle className="mr-2 h-5 w-5" />
           เริ่มเรียนเลย
         </Button>
-      );
-    }
-
-    if (accessType === 'vip') {
-      return (
-        <div className="space-y-4">
-          <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <Crown className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-            <p className="text-sm text-yellow-800">
-              คอร์สนี้รวมอยู่ใน <strong>Begins.guide PRO</strong>
-            </p>
-          </div>
-          <Button asChild size="lg" className="w-full bg-yellow-600 hover:bg-yellow-700">
-            <Link to="/pricing">
-              <Crown className="mr-2 h-5 w-5" />
-              อัปเกรดเป็น PRO
-            </Link>
-          </Button>
-        </div>
       );
     }
 
@@ -316,316 +293,324 @@ const CourseSalesPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1">
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        {/* Back Button */}
-        <div className="container mx-auto px-4 pt-4">
-          <Button variant="ghost" asChild className="mb-4">
-            <Link to="/articles">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              กลับ
-            </Link>
-          </Button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Back Button */}
+      <div className="container mx-auto px-4 pt-4">
+        <Button variant="ghost" asChild className="mb-4">
+          <Link to="/products">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            กลับไปหน้าคอร์สทั้งหมด
+          </Link>
+        </Button>
+      </div>
 
-        {/* Hero Section */}
-        <section className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Course Info */}
-            <div className="space-y-6">
-              {/* Course Image */}
-              <div className="relative">
-                <img 
-                  src={course.image_url || `/placeholder.svg?height=400&width=600&text=${encodeURIComponent(course.title)}`}
-                  alt={course.title}
-                  className="w-full h-64 object-cover rounded-xl shadow-lg"
-                />
-                <div className="absolute top-4 left-4">
-                  {isFree ? (
-                    <Badge className="bg-green-500 text-white">ฟรี</Badge>
-                  ) : (
-                    <Badge className="bg-blue-500 text-white">คอร์สพรีเมียม</Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Course Stats */}
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <BookOpen className="h-4 w-4" />
-                  <span>{totalLessons} บทเรียน</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="h-4 w-4" />
-                  <span>ประมาณ {estimatedHours} ชั่วโมง</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Users className="h-4 w-4" />
-                  <span>500+ คนเรียนแล้ว</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <span>4.9/5 คะแนน</span>
-                </div>
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left: Course Image */}
+          <div className="space-y-6">
+            <div className="relative">
+              <img 
+                src={course.image_url || `/placeholder.svg?height=400&width=600&text=${encodeURIComponent(course.title)}`}
+                alt={course.title}
+                className="w-full h-64 object-cover rounded-xl shadow-lg"
+              />
+              <div className="absolute top-4 left-4">
+                {isFree ? (
+                  <Badge className="bg-green-500 text-white">ฟรี</Badge>
+                ) : (
+                  <Badge className="bg-blue-500 text-white">คอร์สพรีเมียม</Badge>
+                )}
               </div>
             </div>
 
-            {/* Right: Course Details */}
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  {course.title}
-                </h1>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  {course.description || "เรียนรู้ทักษะที่จำเป็นสำหรับการสร้างธุรกิจที่ประสบความสำเร็จ"}
-                </p>
+            {/* Course Stats */}
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <BookOpen className="h-4 w-4" />
+                <span>{totalLessons} บทเรียน</span>
               </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="h-4 w-4" />
+                <span>ประมาณ {estimatedHours} ชั่วโมง</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Users className="h-4 w-4" />
+                <span>{reviews.length > 0 ? `${reviews.length}+ คนเรียนแล้ว` : "เปิดใหม่"}</span>
+              </div>
+              {averageRating > 0 && (
+                <RatingDisplay rating={averageRating} size="sm" />
+              )}
+            </div>
+          </div>
 
-              {/* Price & CTA */}
-              <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200">
-                <div className="text-center space-y-4">
-                  {!isFree && (
-                    <div>
-                      <div className="text-3xl font-bold text-blue-600">
-                        ฿{course.price.toLocaleString()}
+          {/* Right: Course Details */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                {course.title}
+              </h1>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                {course.description || "เรียนรู้ทักษะที่จำเป็นสำหรับการสร้างธุรกิจที่ประสบความสำเร็จ"}
+              </p>
+            </div>
+
+            {/* Price & CTA */}
+            <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200">
+              <div className="text-center space-y-4">
+                {!isFree && (
+                  <div>
+                    <div className="text-3xl font-bold text-blue-600">
+                      ฿{course.price.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500">ครั้งเดียว เรียนได้ตลอดชีวิต</div>
+                  </div>
+                )}
+                
+                {renderActionButton()}
+                
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                  <Shield className="h-4 w-4" />
+                  <span>รับประกันความพึงพอใจ 30 วัน</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* What You'll Learn */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-blue-600" />
+                  สิ่งที่คุณจะได้เรียนรู้
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {learningOutcomes.slice(0, 4).map((outcome, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700">{outcome}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem & Solution Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            คอร์สนี้เหมาะกับใคร?
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">ผู้เริ่มต้นธุรกิจ</h3>
+              <p className="text-gray-600">
+                สำหรับคุณที่ต้องการเริ่มต้นธุรกิจแต่ไม่รู้จะเริ่มยังไง
+              </p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Target className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">คนทำงานประจำ</h3>
+              <p className="text-gray-600">
+                ต้องการรายได้เสริมหรือเตรียมตัวลาออกมาทำธุรกิจ
+              </p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">ผู้ประกอบการเดิม</h3>
+              <p className="text-gray-600">
+                ต้องการพัฒนาธุรกิจให้เติบโตและมีกำไรมากขึ้น
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Course Curriculum Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            เนื้อหาในคอร์ส
+          </h2>
+          
+          <div className="max-w-4xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">
+                  {totalLessons} บทเรียน • ประมาณ {estimatedHours} ชั่วโมง
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {lessons.map((lesson, index) => (
+                    <div key={lesson.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                        {index + 1}
                       </div>
-                      <div className="text-sm text-gray-500">ครั้งเดียว เรียนได้ตลอดชีวิต</div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">{lesson.title}</h3>
+                        {lesson.content && (
+                          <p className="text-sm text-gray-600 mt-1">{lesson.content.substring(0, 100)}...</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        {lesson.video_url && <Video className="h-4 w-4" />}
+                        <Clock className="h-4 w-4" />
+                        <span>30 นาที</span>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {lessons.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>กำลังเตรียมเนื้อหาคอร์ส</p>
                     </div>
                   )}
-                  
-                  {renderActionButton()}
-                  
-                  <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                    <Shield className="h-4 w-4" />
-                    <span>รับประกันความพึงพอใจ 30 วัน</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Instructor Bio Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            เกี่ยวกับผู้สอน
+          </h2>
+          
+          <div className="max-w-4xl mx-auto">
+            <Card>
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  <Avatar className="w-32 h-32">
+                    <AvatarImage src="/placeholder.svg" alt="Instructor" />
+                    <AvatarFallback className="text-2xl">BG</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Begins.guide Team</h3>
+                    <p className="text-blue-600 font-medium mb-4">ผู้เชี่ยวชาญด้านการสร้างธุรกิจ</p>
+                    <p className="text-gray-600 leading-relaxed">
+                      ทีมงาน Begins.guide มีประสบการณ์กว่า 10 ปีในการช่วยเหลือผู้ประกอบการหน้าใหม่
+                      ให้สามารถเริ่มต้นและพัฒนาธุรกิจได้อย่างยั่งยืน เราเชื่อว่าทุกคนสามารถสร้างธุรกิจที่ประสบความสำเร็จได้
+                      หากมีความรู้และเครื่องมือที่ถูกต้อง
+                    </p>
                   </div>
                 </div>
-              </Card>
-
-              {/* What You'll Learn */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-blue-600" />
-                    สิ่งที่คุณจะได้เรียนรู้
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {benefits.slice(0, 4).map((benefit, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
+              </CardContent>
+            </Card>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features Section */}
-        <section className="bg-white py-16">
+      {/* Reviews & Testimonials Section */}
+      {reviews.length > 0 && (
+        <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              ทำไมต้องเลือกคอร์สนี้?
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
+              รีวิวจากผู้เรียน
             </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-8 w-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">เนื้อหาล่าสุด</h3>
-                <p className="text-gray-600">
-                  เนื้อหาที่อัปเดตใหม่ล่าสุด ตามเทรนด์ธุรกิจ 2025
-                </p>
-              </Card>
-
-              <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="h-8 w-8 text-green-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">ผู้สอนผู้เชี่ยวชาญ</h3>
-                <p className="text-gray-600">
-                  เรียนจากผู้เชี่ยวชาญที่มีประสบการณ์จริงในการทำธุรกิจ
-                </p>
-              </Card>
-
-              <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Zap className="h-8 w-8 text-purple-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">ใช้ได้จริง</h3>
-                <p className="text-gray-600">
-                  เน้นความรู้ที่นำไปใช้ได้จริง พร้อมตัวอย่างและกรณีศึกษา
-                </p>
-              </Card>
+            <div className="text-center mb-12">
+              <RatingDisplay rating={averageRating} size="lg" />
+              <p className="text-gray-600 mt-2">จาก {reviews.length} รีวิว</p>
             </div>
-          </div>
-        </section>
-
-        {/* Course Curriculum */}
-        {lessons.length > 0 && (
-          <section className="py-16 bg-gray-50">
-            <div className="container mx-auto px-4">
-              <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-                เนื้อหาในคอร์ส
-              </h2>
-              
-              <div className="max-w-4xl mx-auto">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="h-5 w-5" />
-                      หลักสูตร ({totalLessons} บทเรียน)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Accordion type="single" collapsible className="w-full">
-                      {lessons.map((lesson, index) => (
-                        <AccordionItem key={lesson.id} value={`lesson-${index}`}>
-                          <AccordionTrigger className="text-left">
-                            <div className="flex items-center gap-3">
-                              <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-semibold">
-                                {index + 1}
-                              </div>
-                              <span>{lesson.title}</span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="pl-11 space-y-2">
-                              {lesson.content && (
-                                <p className="text-gray-600 text-sm">
-                                  {lesson.content.length > 150 
-                                    ? `${lesson.content.substring(0, 150)}...` 
-                                    : lesson.content}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-4 text-sm text-gray-500">
-                                {lesson.video_url && (
-                                  <div className="flex items-center gap-1">
-                                    <PlayCircle className="h-4 w-4" />
-                                    <span>วิดีโอ</span>
-                                  </div>
-                                )}
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>30 นาที</span>
-                                </div>
-                              </div>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Testimonials */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              ความคิดเห็นจากผู้เรียน
-            </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {testimonials.map((testimonial, index) => (
-                <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-1">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 text-yellow-500 fill-current" />
-                      ))}
-                    </div>
-                    
-                    <blockquote className="text-gray-700 italic">
-                      "{testimonial.content}"
-                    </blockquote>
-                    
-                    <div className="flex items-center gap-3">
+              {reviews.map((review) => (
+                <Card key={review.id} className="p-6">
+                  <CardContent className="p-0">
+                    <div className="flex items-center gap-3 mb-4">
                       <Avatar>
-                        <AvatarImage src={testimonial.image} />
-                        <AvatarFallback>{testimonial.name[0]}</AvatarFallback>
+                        <AvatarImage src={review.user.avatar_url || undefined} />
+                        <AvatarFallback>{review.user.full_name?.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                        <div className="text-sm text-gray-600">{testimonial.role}</div>
+                        <p className="font-medium text-gray-900">{review.user.full_name}</p>
+                        <RatingDisplay rating={review.rating} size="sm" showText={false} />
                       </div>
                     </div>
+                    <p className="text-gray-600 italic">"{review.comment}"</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </div>
         </section>
+      )}
 
-        {/* FAQ Section */}
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              คำถามที่พบบ่อย
-            </h2>
-            
-            <div className="max-w-3xl mx-auto">
-              <Accordion type="single" collapsible className="w-full space-y-4">
-                {faqs.map((faq, index) => (
-                  <Card key={index}>
-                    <AccordionItem value={`faq-${index}`} className="border-none">
-                      <AccordionTrigger className="px-6 py-4 text-left font-semibold">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="px-6 pb-4 text-gray-600">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Card>
-                ))}
-              </Accordion>
-            </div>
+      {/* FAQ Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            คำถามที่พบบ่อย
+          </h2>
+          
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="space-y-4">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left hover:no-underline">
+                    <span className="font-medium">{faq.question}</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-gray-600 pb-4">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Final CTA */}
-        <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              พร้อมเริ่มต้นเส้นทางการเรียนรู้แล้วหรือยัง?
-            </h2>
-            <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-              เข้าร่วมกับผู้เรียนมากกว่า 500 คนที่เชื่อมั่นในคุณภาพของเรา
-            </p>
-            
-            <div className="max-w-md mx-auto">
-              {renderActionButton()}
-            </div>
-            
-            <div className="flex items-center justify-center gap-8 mt-8 text-sm text-blue-100">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                <span>รับประกันความพึงพอใจ</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                <span>ได้ใบรับรอง</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
-                <span>เรียนได้ตลอดชีวิต</span>
-              </div>
-            </div>
+      {/* Final CTA Section */}
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            พร้อมที่จะเริ่มต้นแล้วหรือยัง?
+          </h2>
+          <p className="text-xl mb-8 text-blue-100">
+            เข้าร่วมกับผู้เรียนหลายร้อยคนที่เปลี่ยนชีวิตด้วยคอร์สนี้
+          </p>
+          
+          <div className="max-w-md mx-auto">
+            <Card className="p-6">
+              <CardContent className="p-0 text-gray-900">
+                {!isFree && (
+                  <div className="mb-4">
+                    <div className="text-3xl font-bold text-blue-600">
+                      ฿{course.price.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500">ครั้งเดียว เรียนได้ตลอดชีวิต</div>
+                  </div>
+                )}
+                
+                {renderActionButton()}
+                
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-4">
+                  <Shield className="h-4 w-4" />
+                  <span>รับประกันความพึงพอใจ 30 วัน</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </section>
-      </div>
-      </main>
-      <Footer />
+        </div>
+      </section>
     </div>
   );
 };
