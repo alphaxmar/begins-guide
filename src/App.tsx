@@ -50,6 +50,8 @@ import CheckoutPage from '@/pages/CheckoutPage';
 import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
 import CartPage from '@/pages/CartPage';
 import Products from '@/pages/Products';
+import CoursePage from '@/pages/CoursePage';
+import ModernCoursePage from '@/pages/ModernCoursePage';
 
 function App() {
   const { user } = useAuth();
@@ -87,6 +89,9 @@ function App() {
       
       {/* Course Sales Pages */}
       <Route path="/course/:slug" element={<CourseSalesPage />} />
+      
+      {/* Learning Routes */}
+      <Route path="/learn/:slug" element={<UserProtectedRoute><CoursePage /></UserProtectedRoute>} />
       
       {/* Other pages */}
       <Route path="/pro" element={<ProPage />} />
