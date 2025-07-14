@@ -1,7 +1,8 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain } from 'lucide-react';
+import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useVipStatus } from '@/hooks/useVipStatus';
@@ -24,6 +25,7 @@ const Header = () => {
   const { isVip } = useVipStatus();
   const { items } = useCart();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -72,6 +74,16 @@ const Header = () => {
           )}
         </nav>
         <div className="flex items-center gap-4">
+          {/* Mobile Menu Button */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+
           {/* Shopping Cart */}
           <Button variant="ghost" size="sm" asChild className="relative">
             <Link to="/cart">
@@ -153,6 +165,60 @@ const Header = () => {
           )}
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-b bg-background/95 backdrop-blur-sm">
+          <nav className="container mx-auto px-4 py-4 space-y-4">
+            <Link 
+              to="/" 
+              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              หน้าแรก
+            </Link>
+            <Link 
+              to="/articles" 
+              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              บทความ
+            </Link>
+            <Link 
+              to="/courses" 
+              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              คอร์สออนไลน์
+            </Link>
+            <Link 
+              to="/products" 
+              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              ผลิตภัณฑ์
+            </Link>
+            <Link 
+              to="/pricing" 
+              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              ราคา
+            </Link>
+            {user && isVip && (
+              <Link 
+                to="/ai-tools" 
+                className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Brain className="h-4 w-4" />
+                AI Tools
+                <Badge className="bg-yellow-500 text-white text-xs">PRO</Badge>
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
