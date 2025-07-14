@@ -52,6 +52,7 @@ import CartPage from '@/pages/CartPage';
 import Products from '@/pages/Products';
 import CoursePage from '@/pages/CoursePage';
 import ModernCoursePage from '@/pages/ModernCoursePage';
+import CoursesPage from '@/pages/CoursesPage';
 
 function App() {
   const { user } = useAuth();
@@ -101,6 +102,7 @@ function App() {
       <Route path="/no-code-webpreneur" element={<NoCodeWebpreneurPage />} />
       
       {/* Existing pages */}
+      <Route path="/courses" element={<CoursesPage />} />
       <Route path="/products" element={<Products />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/cart" element={<CartPage />} />
