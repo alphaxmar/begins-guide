@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Hook for tracking affiliate referrals via URL parameters and cookies
@@ -51,5 +52,32 @@ export const useAffiliateTracking = () => {
     }
   };
 
-  return { getAffiliateCode };
+  // Function to record affiliate sale after successful purchase
+  const recordAffiliateSale = async (purchaseId: string) => {
+    const affiliateCode = getAffiliateCode();
+    
+    if (!affiliateCode || !purchaseId) {
+      return { success: false, message: 'No affiliate code or purchase ID' };
+    }
+
+    try {
+      const { error } = await supabase.rpc('record_affiliate_sale', {
+        p_purchase_id: purchaseId,
+        p_affiliate_code: affiliateCode
+      });
+
+      if (error) {
+        console.error('❌ Failed to record affiliate sale:', error);
+        return { success: false, error };
+      }
+
+      console.log('✅ Affiliate sale recorded successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('❌ Error recording affiliate sale:', error);
+      return { success: false, error };
+    }
+  };
+
+  return { getAffiliateCode, recordAffiliateSale };
 };

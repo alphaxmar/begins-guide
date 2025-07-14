@@ -1257,6 +1257,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      record_affiliate_sale: {
+        Args: { p_purchase_id: string; p_affiliate_code: string }
+        Returns: undefined
+      }
       send_purchase_confirmation_email: {
         Args: { p_order_id: string }
         Returns: undefined
