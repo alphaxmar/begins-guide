@@ -1154,6 +1154,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      approve_commission: {
+        Args: { p_sale_id: string }
+        Returns: undefined
+      }
       check_admin_role_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1215,12 +1219,37 @@ export type Database = {
           items_count: number
         }[]
       }
+      get_all_affiliates: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          full_name: string
+          email: string
+          affiliate_code: string
+          status: string
+          created_at: string
+          total_sales: number
+          total_commission: number
+        }[]
+      }
       get_daily_sales_stats: {
         Args: { days_back?: number }
         Returns: {
           sale_date: string
           daily_revenue: number
           daily_orders: number
+        }[]
+      }
+      get_pending_commissions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          affiliate_name: string
+          affiliate_code: string
+          commission_amount: number
+          commission_rate: number
+          created_at: string
+          product_title: string
         }[]
       }
       get_top_selling_products: {
@@ -1263,6 +1292,10 @@ export type Database = {
       }
       send_purchase_confirmation_email: {
         Args: { p_order_id: string }
+        Returns: undefined
+      }
+      update_affiliate_status: {
+        Args: { p_user_id: string; p_status: string }
         Returns: undefined
       }
       update_lessons_order: {

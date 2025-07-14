@@ -11,6 +11,7 @@ import {
   FileBarChart,
   Crown,
   Gift,
+  UserCheck,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -32,6 +33,7 @@ const AdminSidebar: React.FC = () => {
     { icon: Crown, label: "สมาชิก PRO", path: "/admin/pro-memberships" },
     { icon: Gift, label: "แพ็กเกจ PRO", path: "/admin/pro-packages" },
     
+    { icon: UserCheck, label: "Affiliates", path: "/admin/affiliates" },
     { icon: Percent, label: "โค้ดส่วนลด", path: "/admin/discount-codes" },
     { icon: CreditCard, label: "การชำระเงิน", path: "/admin/payment-settings" },
     { icon: Mail, label: "อีเมล", path: "/admin/email-templates" },

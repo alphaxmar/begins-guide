@@ -43,6 +43,7 @@ import WhyPersonalBrandingIsPowerfulArticle from '@/pages/WhyPersonalBrandingIsP
 import LovableReviewArticle from '@/pages/LovableReviewArticle';
 import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityArticle';
 import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArticle';
+import AdminAffiliatesPage from '@/pages/admin/AdminAffiliatesPage';
 import CourseSalesPage from '@/pages/CourseSalesPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
@@ -129,6 +130,7 @@ function App() {
         <Route path="products" element={<AdminProductsPage />} />
         <Route path="articles" element={<AdminArticlesPage />} />
         <Route path="discount-codes" element={<DiscountCodesPage />} />
+        <Route path="affiliates" element={<AdminAffiliatesPage />} />
         <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
         <Route path="email-templates" element={<AdminEmailPage />} />
         
