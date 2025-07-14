@@ -1103,6 +1103,10 @@ export type Database = {
         Args: { role_name: string }
         Returns: boolean
       }
+      generate_certificate: {
+        Args: { p_user_id: string; p_course_id: string }
+        Returns: string
+      }
       get_admin_dashboard_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1162,6 +1166,10 @@ export type Database = {
           total_purchases: number
           total_spent: number
         }[]
+      }
+      has_user_completed_course: {
+        Args: { p_user_id: string; p_course_id: string }
+        Returns: boolean
       }
       is_admin_user: {
         Args: { user_id: string }

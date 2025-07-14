@@ -49,6 +49,7 @@ import Products from '@/pages/Products';
 import CoursePage from '@/pages/CoursePage';
 import ModernCoursePage from '@/pages/ModernCoursePage';
 import CoursesPage from '@/pages/CoursesPage';
+import CertificatePage from '@/pages/CertificatePage';
 
 function App() {
   const { user } = useAuth();
@@ -89,6 +90,9 @@ function App() {
       
       {/* Learning Routes */}
       <Route path="/learn/:slug" element={<UserProtectedRoute><CoursePage /></UserProtectedRoute>} />
+      
+      {/* Certificate Routes */}
+      <Route path="/certificate/:slug" element={<UserProtectedRoute><CertificatePage /></UserProtectedRoute>} />
       
       {/* Other pages */}
       <Route path="/program" element={<ProgramPage />} />
