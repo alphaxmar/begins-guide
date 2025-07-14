@@ -1,7 +1,7 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain, Menu, X } from 'lucide-react';
+import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain, Menu, X, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -134,6 +134,11 @@ const Header = () => {
                     <Badge className="ml-auto bg-yellow-500 text-white text-xs">PRO</Badge>
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem onClick={() => navigate('/affiliate')}>
+                  <Users className="mr-2 h-4 w-4 text-green-600" />
+                  <span>Affiliate</span>
+                  <Badge className="ml-auto bg-green-500 text-white text-xs">30%</Badge>
+                </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate('/admin')}>
                     <ShieldCheck className="mr-2 h-4 w-4 text-primary" />

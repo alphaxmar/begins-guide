@@ -16,6 +16,7 @@ import MicroSaasCoursePage from '@/pages/MicroSaasCoursePage';
 import MvpLaunchpadPage from '@/pages/MvpLaunchpadPage';
 import NoCodeWebpreneurPage from '@/pages/NoCodeWebpreneurPage';
 import ProfilePage from '@/pages/ProfilePage';
+import AffiliatePage from '@/pages/AffiliatePage';
 import CohortPage from '@/pages/CohortPage';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -113,6 +114,7 @@ function App() {
       
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
+      <Route path="/affiliate" element={<UserProtectedRoute><AffiliatePage /></UserProtectedRoute>} />
 
       {/* Cohort Routes */}
       <Route path="/cohort/:productSlug" element={<UserProtectedRoute><CohortPage /></UserProtectedRoute>} />
