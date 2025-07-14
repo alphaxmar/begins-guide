@@ -46,6 +46,7 @@ import LovableReviewArticle from '@/pages/LovableReviewArticle';
 import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityArticle';
 import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArticle';
 import CourseSalesPage from '@/pages/CourseSalesPage';
+import CartPage from '@/pages/CartPage';
 
 function App() {
   const { user } = useAuth();
@@ -93,6 +94,7 @@ function App() {
       
       {/* Existing pages */}
       <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/cart" element={<CartPage />} />
       
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
