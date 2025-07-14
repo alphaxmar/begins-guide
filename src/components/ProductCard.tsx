@@ -64,9 +64,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ title, description, price, im
   const IconComponent = typeConfig.icon;
   const isFree = price === 0;
 
+  // สำหรับคอร์ส ให้ไปหน้า sales page ใหม่
+  const linkPath = product_type === 'course' ? `/course/${slug}` : `/products/${slug}`;
+
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col">
-      <Link to={`/products/${slug}`} className="block">
+      <Link to={linkPath} className="block">
         <div className="relative">
           <img src={imageUrl} alt={title} className="w-full h-48 object-cover" />
           <div className="absolute top-2 right-2 flex gap-1">
@@ -95,8 +98,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ title, description, price, im
           {isFree ? 'ฟรี' : `${price.toLocaleString()} บาท`}
         </p>
         <Button asChild>
-          <Link to={`/products/${slug}`}>
-            {isFree ? 'รับฟรี' : 'ดูรายละเอียด'}
+          <Link to={linkPath}>
+            {product_type === 'course' ? (isFree ? 'รับคอร์สฟรี' : 'ดูรายละเอียดคอร์ส') : (isFree ? 'รับฟรี' : 'ดูรายละเอียด')}
           </Link>
         </Button>
       </CardFooter>

@@ -45,6 +45,7 @@ import WhyPersonalBrandingIsPowerfulArticle from '@/pages/WhyPersonalBrandingIsP
 import LovableReviewArticle from '@/pages/LovableReviewArticle';
 import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityArticle';
 import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArticle';
+import CourseSalesPage from '@/pages/CourseSalesPage';
 
 function App() {
   const { user } = useAuth();
@@ -79,6 +80,9 @@ function App() {
       <Route path="/articles/how-to-build-online-community-turn-customers-into-fans" element={<HowToBuildOnlineCommunityArticle />} />
       <Route path="/articles/how-to-build-course-platform-with-nocode" element={<HowToBuildCoursePlatformArticle />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
+      
+      {/* Course Sales Pages */}
+      <Route path="/course/:slug" element={<CourseSalesPage />} />
       
       {/* Other pages */}
       <Route path="/pro" element={<ProPage />} />
