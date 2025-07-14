@@ -12,11 +12,11 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            เปลี่ยนไอเดียให้เป็นธุรกิจจริง<br />
-            <span className="text-yellow-400">เริ่มต้นอย่างถูกวิธี</span>
+            ปลดล็อกศักยภาพธุรกิจของคุณ<br />
+            <span className="text-yellow-400">เปลี่ยนไอเดียให้เป็นธุรกิจที่ยั่งยืน</span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-purple-100 leading-relaxed">
-            แพลตฟอร์มความรู้, เครื่องมือ, และผู้ช่วย AI สำหรับผู้ประกอบการยุคใหม่
+            เรียนรู้ทักษะและกลยุทธ์ที่ใช้ได้จริงผ่านคอร์สออนไลน์คุณภาพจาก Begins.guide
           </p>
           
           <div className="mb-8">
@@ -24,15 +24,15 @@ const HeroSection = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link to="/pricing">
-              <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 py-3">
-                สำรวจ Begins.guide PRO
+            <Link to="/products">
+              <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 py-4 text-lg">
+                ดูคอร์สเรียนทั้งหมด
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Link to="/articles">
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-purple-600 px-8 py-3">
-                เริ่มเรียนรู้ฟรี
+              <Button size="lg" variant="ghost" className="text-white hover:bg-white/10 px-8 py-4">
+                อ่านบทความล่าสุด
                 <BookOpen className="ml-2 h-5 w-5" />
               </Button>
             </Link>
