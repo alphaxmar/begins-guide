@@ -46,6 +46,7 @@ import LovableReviewArticle from '@/pages/LovableReviewArticle';
 import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityArticle';
 import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArticle';
 import CourseSalesPage from '@/pages/CourseSalesPage';
+import CheckoutPage from '@/pages/CheckoutPage';
 import CartPage from '@/pages/CartPage';
 
 function App() {
@@ -95,6 +96,7 @@ function App() {
       {/* Existing pages */}
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/cart" element={<CartPage />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
       
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
