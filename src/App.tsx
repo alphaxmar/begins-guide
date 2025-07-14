@@ -47,7 +47,9 @@ import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityA
 import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArticle';
 import CourseSalesPage from '@/pages/CourseSalesPage';
 import CheckoutPage from '@/pages/CheckoutPage';
+import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
 import CartPage from '@/pages/CartPage';
+import Products from '@/pages/Products';
 
 function App() {
   const { user } = useAuth();
@@ -94,9 +96,11 @@ function App() {
       <Route path="/no-code-webpreneur" element={<NoCodeWebpreneurPage />} />
       
       {/* Existing pages */}
+      <Route path="/products" element={<Products />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
       
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
