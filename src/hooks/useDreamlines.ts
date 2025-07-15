@@ -205,11 +205,13 @@ export const useDreamlines = () => {
         .from('user_dreamline_summaries')
         .upsert({
           user_id: user.id,
-          monthly_basic_expenses: monthlyExpenses,
+          monthly_basic_expenses: monthlyExpenses || 0,
           total_having: summary?.total_having || 0,
           total_being: summary?.total_being || 0,
           total_doing: summary?.total_doing || 0,
           target_monthly_income: 0, // Will be recalculated
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
