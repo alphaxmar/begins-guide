@@ -1,9 +1,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Building2, Clock, CheckCircle } from 'lucide-react';
+import { Copy, Building2, Clock, CheckCircle, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePaymentSettings } from '@/hooks/usePaymentSettings';
+import { PaymentSlipUpload } from './PaymentSlipUpload';
+import { useState } from 'react';
 
 interface BankTransferInfoProps {
   amount: number;
@@ -15,6 +17,7 @@ const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
   orderId
 }) => {
   const { settings, isLoading } = usePaymentSettings();
+  const [showUpload, setShowUpload] = useState(false);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -28,6 +31,16 @@ const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
           <div className="text-center">กำลังโหลดข้อมูลการโอนเงิน...</div>
         </CardContent>
       </Card>
+    );
+  }
+
+  if (showUpload) {
+    return (
+      <PaymentSlipUpload
+        orderId={orderId}
+        amount={amount}
+        onSuccess={() => setShowUpload(false)}
+      />
     );
   }
 
@@ -164,6 +177,15 @@ const BankTransferInfo: React.FC<BankTransferInfoProps> = ({
               </div>
             </div>
           </div>
+
+          <Button
+            onClick={() => setShowUpload(true)}
+            className="w-full mt-4"
+            variant="outline"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            อัปโหลดสลิปการโอนเงิน
+          </Button>
         </CardContent>
       </Card>
     </div>

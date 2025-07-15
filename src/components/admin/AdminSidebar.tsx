@@ -14,6 +14,7 @@ import {
   UserCheck,
   Gem,
   Package2,
+  Receipt,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -42,6 +43,7 @@ const AdminSidebar: React.FC = () => {
     { icon: UserCheck, label: "Affiliates", path: "/admin/affiliates" },
     { icon: Percent, label: "โค้ดส่วนลด", path: "/admin/discount-codes" },
     { icon: CreditCard, label: "การชำระเงิน", path: "/admin/payment-settings" },
+    { icon: Receipt, label: "ตรวจสอบสลิป", path: "/admin/payment-slips" },
     { icon: Mail, label: "อีเมล", path: "/admin/email-templates" },
     { icon: FileBarChart, label: "รายงาน", path: "/admin/reports" },
   ];

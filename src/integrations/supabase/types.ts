@@ -761,6 +761,65 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_slips: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          bank_name: string | null
+          created_at: string
+          id: string
+          order_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slip_image_url: string
+          status: string
+          transaction_date: string | null
+          transfer_type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slip_image_url: string
+          status?: string
+          transaction_date?: string | null
+          transfer_type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slip_image_url?: string
+          status?: string
+          transaction_date?: string | null
+          transfer_type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_slips_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string | null
@@ -1370,6 +1429,10 @@ export type Database = {
       }
       update_lessons_order: {
         Args: { p_lesson_ids: string[] }
+        Returns: undefined
+      }
+      update_payment_slip_status: {
+        Args: { p_slip_id: string; p_status: string; p_admin_notes?: string }
         Returns: undefined
       }
       update_subscription_status: {
