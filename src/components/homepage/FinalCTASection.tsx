@@ -9,22 +9,17 @@ const FinalCTASection = () => {
     <section className="bg-gradient-to-r from-purple-600 to-blue-700 text-white py-16">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-6">
-          เริ่มต้นการเรียนรู้วันนี้
+          พร้อมที่จะเริ่มเขียนพิมพ์เขียวชีวิตของคุณแล้วหรือยัง?
         </h2>
         <p className="text-xl md:text-2xl mb-8 text-purple-100">
-          เข้าร่วมกับนักเรียนมากกว่า 500 คนที่กำลังพัฒนาตนเองด้วยคอร์สเรียนของเรา
+          เริ่มต้นด้วยการออกแบบชีวิตในฝันและค้นหา "Freedom Number" ของคุณ
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <Link to="/products">
+        <div className="flex justify-center mb-8">
+          <Link to="/dreamline">
             <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-12 py-4 text-xl">
-              ดูคอร์สเรียนทั้งหมด
+              สร้างบัญชีฟรีและเริ่มใช้งาน
               <ArrowRight className="ml-2 h-6 w-6" />
-            </Button>
-          </Link>
-          <Link to="/pricing">
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-purple-600 px-8 py-4">
-              ดู Begins.guide PRO
             </Button>
           </Link>
         </div>

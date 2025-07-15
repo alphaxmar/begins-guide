@@ -12,28 +12,18 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            ปลดล็อกศักยภาพธุรกิจของคุณ<br />
-            <span className="text-yellow-400">เปลี่ยนไอเดียให้เป็นธุรกิจที่ยั่งยืน</span>
+            หยุดฝันกลางวัน<br />
+            <span className="text-yellow-400">แล้วมาออกแบบชีวิตที่คุณควบคุมได้จริง</span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-purple-100 leading-relaxed">
-            เรียนรู้ทักษะและกลยุทธ์ที่ใช้ได้จริงผ่านคอร์สออนไลน์คุณภาพจาก Begins.guide
+            แพลตฟอร์มสำหรับผู้ประกอบการยุคใหม่ ที่จะมอบพิมพ์เขียวและเครื่องมือให้คุณสร้าง 'เครื่องจักรผลิตอิสรภาพ' ของตัวเอง
           </p>
           
-          <div className="mb-8">
-            <NewsletterSignup />
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link to="/products">
+            <Link to="/dreamline">
               <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 py-4 text-lg">
-                ดูคอร์สเรียนทั้งหมด
+                เริ่มออกแบบชีวิตของคุณ (ฟรี)
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/articles">
-              <Button size="lg" variant="ghost" className="text-white hover:bg-white/10 px-8 py-4">
-                อ่านบทความล่าสุด
-                <BookOpen className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
