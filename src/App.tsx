@@ -66,6 +66,8 @@ import DreamlineToolPage from '@/pages/DreamlineToolPage';
 import Dashboard from '@/pages/Dashboard';
 import BookSalesPage from '@/pages/BookSalesPage';
 import AcademyCoursePage from '@/pages/AcademyCoursePage';
+import CreateArticle from '@/pages/CreateArticle';
+import EditArticle from '@/pages/EditArticle';
 
 function App() {
   const { user } = useAuth();
@@ -153,6 +155,8 @@ function App() {
         <Route path="products/:id/edit" element={<EditProductPage />} />
         <Route path="products/:slug/lessons" element={<ManageLessonsPage />} />
         <Route path="articles" element={<AdminArticlesPage />} />
+        <Route path="articles/create" element={<CreateArticle />} />
+        <Route path="articles/:id/edit" element={<EditArticle />} />
         <Route path="discount-codes" element={<DiscountCodesPage />} />
         <Route path="affiliates" element={<AdminAffiliatesPage />} />
         <Route path="pro-memberships" element={<ProMembershipsPage />} />

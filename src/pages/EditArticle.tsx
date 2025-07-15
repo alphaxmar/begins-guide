@@ -9,12 +9,13 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/integrations/supabase/types";
 import ArticleForm, { ArticleFormValues } from "@/components/ArticleForm";
+import AdminLayout from "@/components/admin/AdminLayout";
 
-const fetchArticleForEdit = async (slug: string) => {
+const fetchArticleForEdit = async (id: string) => {
   const { data, error } = await supabase
     .from("articles")
     .select("*")
-    .eq("slug", slug)
+    .eq("id", id)
     .single();
 
   if (error) throw new Error(error.message);
@@ -22,16 +23,16 @@ const fetchArticleForEdit = async (slug: string) => {
 };
 
 const EditArticle = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: article, isLoading: isArticleLoading } = useQuery<Tables<'articles'>>({
-    queryKey: ['article-edit', slug],
-    queryFn: () => fetchArticleForEdit(slug!),
-    enabled: !!slug && !!isAdmin,
+    queryKey: ['article-edit', id],
+    queryFn: () => fetchArticleForEdit(id!),
+    enabled: !!id && !!isAdmin,
   });
   
   useEffect(() => {
@@ -45,7 +46,7 @@ const EditArticle = () => {
   const mutation = useMutation({
     mutationFn: async (updatedArticle: ArticleFormValues) => {
         if (!user || !isAdmin) throw new Error("User not authorized");
-        if (!slug) throw new Error("Article slug not found");
+        if (!id) throw new Error("Article ID not found");
 
         const { data, error } = await supabase
             .from("articles")
@@ -61,7 +62,7 @@ const EditArticle = () => {
                 seo_title: updatedArticle.seo_title || null,
                 seo_description: updatedArticle.seo_description || null,
             })
-            .eq("slug", slug)
+            .eq("id", id)
             .select('slug, status')
             .single();
 
@@ -72,8 +73,8 @@ const EditArticle = () => {
         toast.success("อัปเดตบทความสำเร็จ!");
         queryClient.invalidateQueries({ queryKey: ["articles"] });
         queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
-        queryClient.invalidateQueries({ queryKey: ["article", slug] });
-        queryClient.invalidateQueries({ queryKey: ["article-edit", slug] });
+        queryClient.invalidateQueries({ queryKey: ["article", data?.slug] });
+        queryClient.invalidateQueries({ queryKey: ["article-edit", id] });
       
         if (data && data.status === 'published') {
             navigate(`/articles/${data.slug}`);
@@ -93,17 +94,17 @@ const EditArticle = () => {
   const isLoading = authLoading || adminLoading || !isAdmin;
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
+      <AdminLayout>
         <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>
-      </div>
+      </AdminLayout>
     );
   }
 
   if (isArticleLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">กำลังแก้ไขบทความ...</h1>
+      <AdminLayout>
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold">กำลังแก้ไขบทความ...</h1>
           <div className="space-y-8">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
@@ -113,7 +114,7 @@ const EditArticle = () => {
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
@@ -133,9 +134,9 @@ const EditArticle = () => {
   } : undefined;
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">แก้ไขบทความ</h1>
+    <AdminLayout>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">แก้ไขบทความ</h1>
         <ArticleForm
           onSubmit={onSubmit}
           isPending={mutation.isPending}
@@ -144,7 +145,7 @@ const EditArticle = () => {
           isSlugDisabled={true}
         />
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

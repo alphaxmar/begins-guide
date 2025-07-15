@@ -82,23 +82,23 @@ const CreateArticle = () => {
 
   if (authLoading || adminLoading || !isAdmin) {
     return (
-      <div className="container mx-auto py-8">
+      <AdminLayout>
         <div className="text-center py-12">กำลังตรวจสอบสิทธิ์...</div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">เขียนบทความใหม่</h1>
+    <AdminLayout>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">เขียนบทความใหม่</h1>
         <ArticleForm
           onSubmit={onSubmit}
           isPending={mutation.isPending}
           submitButtonText="สร้างบทความ"
         />
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
