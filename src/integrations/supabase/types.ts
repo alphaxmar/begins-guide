@@ -422,6 +422,36 @@ export type Database = {
           },
         ]
       }
+      dreamlines: {
+        Row: {
+          category: string
+          cost: number
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          cost?: number
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          cost?: number
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string | null
@@ -990,6 +1020,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_dreamline_summaries: {
+        Row: {
+          created_at: string
+          id: string
+          monthly_basic_expenses: number
+          target_monthly_income: number
+          total_being: number
+          total_doing: number
+          total_having: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          monthly_basic_expenses?: number
+          target_monthly_income?: number
+          total_being?: number
+          total_doing?: number
+          total_having?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          monthly_basic_expenses?: number
+          target_monthly_income?: number
+          total_being?: number
+          total_doing?: number
+          total_having?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_lesson_progress: {
         Row: {
           completed: boolean | null
@@ -1156,6 +1222,10 @@ export type Database = {
       }
       approve_commission: {
         Args: { p_sale_id: string }
+        Returns: undefined
+      }
+      calculate_and_update_tmi: {
+        Args: { p_user_id: string }
         Returns: undefined
       }
       check_admin_role_safe: {

@@ -53,6 +53,9 @@ import CoursePage from '@/pages/CoursePage';
 import ModernCoursePage from '@/pages/ModernCoursePage';
 import CoursesPage from '@/pages/CoursesPage';
 import CertificatePage from '@/pages/CertificatePage';
+import DreamlineLandingPage from '@/pages/DreamlineLandingPage';
+import DreamlineToolPage from '@/pages/DreamlineToolPage';
+import DreamlineDashboard from '@/pages/DreamlineDashboard';
 
 function App() {
   const { user } = useAuth();
@@ -113,6 +116,11 @@ function App() {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
       
+      {/* Dreamline Tool Routes */}
+      <Route path="/dreamline" element={<DreamlineLandingPage />} />
+      <Route path="/dreamline-tool" element={<UserProtectedRoute><DreamlineToolPage /></UserProtectedRoute>} />
+      <Route path="/dashboard" element={<UserProtectedRoute><DreamlineDashboard /></UserProtectedRoute>} />
+
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
       <Route path="/affiliate" element={<UserProtectedRoute><AffiliatePage /></UserProtectedRoute>} />
