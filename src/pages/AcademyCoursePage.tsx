@@ -3,15 +3,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle, Star, Crown, Zap, Gift, Clock, Shield, ArrowDown, Settings } from "lucide-react";
+import { CheckCircle, Star, Crown, Zap, Gift, Clock, Shield, ArrowDown, Settings, Timer, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const AcademyCoursePage = () => {
   const scrollToPricing = () => {
     const pricingSection = document.getElementById('pricing-section');
     pricingSection?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Countdown timer state
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
+
+  // Calculate countdown timer (48 hours from now)
+  useEffect(() => {
+    const targetDate = new Date();
+    targetDate.setHours(targetDate.getHours() + 48);
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const difference = targetDate.getTime() - now;
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        setTimeLeft({ days, hours, minutes, seconds });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const modules = [
     {
@@ -190,15 +222,18 @@ const AcademyCoursePage = () => {
         </div>
       </section>
 
-      {/* Bonus Stack Section */}
+      {/* Main Bonus Stack Section */}
       <section className="py-16 px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-white">
-            โบนัสพิเศษ <span className="text-amber-400">มูลค่ากว่า 35,000 บาท</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-white">
+            สมัครวันนี้ รับโบนัสมาตรฐานทันที
           </h2>
+          <p className="text-xl text-center text-amber-400 mb-12">
+            (มูลค่ารวม 15,480 บาท)
+          </p>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            {bonuses.map((bonus, index) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {bonuses.slice(0, 3).map((bonus, index) => (
               <Card key={index} className="bg-slate-800/50 border-slate-700/50 hover:border-amber-400/50 transition-all duration-300">
                 <CardHeader className="text-center pb-4">
                   <div className="flex justify-center mb-4">
@@ -248,6 +283,117 @@ const AcademyCoursePage = () => {
         </div>
       </section>
 
+      {/* Fast-Action Bonus Section */}
+      <section className="py-16 px-6 bg-gradient-to-br from-red-900/20 via-orange-900/20 to-amber-900/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-amber-500/5"></div>
+        
+        <div className="max-w-4xl mx-auto relative">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <AlertTriangle className="h-8 w-8 text-red-400" />
+              <h2 className="text-3xl md:text-4xl font-bold text-red-400">
+                ข้อเสนอพิเศษแบบจำกัดเวลา!
+              </h2>
+              <AlertTriangle className="h-8 w-8 text-red-400" />
+            </div>
+            
+            <p className="text-xl text-white font-semibold mb-6">
+              สำหรับผู้ที่สมัครภายใน 48 ชั่วโมงนี้เท่านั้น
+            </p>
+            
+            {/* Countdown Timer */}
+            <div className="bg-black/50 backdrop-blur-sm rounded-2xl border border-red-500/30 p-6 mb-8">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Timer className="h-6 w-6 text-red-400" />
+                <span className="text-red-400 font-bold text-lg">เวลาที่เหลือ:</span>
+              </div>
+              
+              <div className="flex items-center justify-center gap-4 md:gap-8">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-red-400 mb-1">
+                    {String(timeLeft.days).padStart(2, '0')}
+                  </div>
+                  <div className="text-sm text-slate-300">วัน</div>
+                </div>
+                <div className="text-2xl text-red-400 font-bold">:</div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-red-400 mb-1">
+                    {String(timeLeft.hours).padStart(2, '0')}
+                  </div>
+                  <div className="text-sm text-slate-300">ชั่วโมง</div>
+                </div>
+                <div className="text-2xl text-red-400 font-bold">:</div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-red-400 mb-1">
+                    {String(timeLeft.minutes).padStart(2, '0')}
+                  </div>
+                  <div className="text-sm text-slate-300">นาที</div>
+                </div>
+                <div className="text-2xl text-red-400 font-bold">:</div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-red-400 mb-1">
+                    {String(timeLeft.seconds).padStart(2, '0')}
+                  </div>
+                  <div className="text-sm text-slate-300">วินาที</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bonus #4 Card */}
+          <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border-2 border-amber-500/50 shadow-2xl">
+            <CardHeader className="text-center pb-6">
+              <div className="flex justify-center mb-4">
+                <div className="bg-amber-500/20 p-4 rounded-full">
+                  <Settings className="h-12 w-12 text-amber-400" />
+                </div>
+              </div>
+              
+              <div className="text-2xl font-bold text-red-400 mb-2">รับฟรี!</div>
+              <CardTitle className="text-white text-2xl md:text-3xl mb-4">
+                {bonuses[3].title}
+              </CardTitle>
+              <Badge className="bg-amber-500/20 text-amber-400 border-amber-400/30 text-lg px-4 py-2">
+                {bonuses[3].value}
+              </Badge>
+            </CardHeader>
+            
+            <CardContent className="text-center">
+              <p className="text-slate-300 leading-relaxed mb-6 text-lg">
+                {bonuses[3].description}
+              </p>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="lg"
+                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    คลิกเพื่อดูรายละเอียด 'The Automation Arsenal'
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-amber-400 text-2xl flex items-center gap-3">
+                      <Settings className="h-8 w-8" />
+                      {bonuses[3].title}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-6">
+                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-400/30 text-lg px-4 py-2">
+                      {bonuses[3].value}
+                    </Badge>
+                    <p className="text-slate-300 leading-relaxed text-base">
+                      {bonuses[3].detailedDescription}
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* Offer & Pricing Section */}
       <section id="pricing-section" className="py-20 px-6 bg-gradient-to-r from-amber-500/10 via-blue-500/5 to-purple-500/10">
         <div className="max-w-4xl mx-auto">
@@ -265,7 +411,7 @@ const AcademyCoursePage = () => {
             <div className="bg-slate-900/50 rounded-xl p-6 mb-8">
               <h3 className="text-xl font-semibold text-white mb-4 text-center">รายการสิ่งที่คุณจะได้รับ</h3>
               <div className="space-y-3">
-                {valueStack.map((item, index) => (
+                {valueStack.slice(0, 4).map((item, index) => (
                   <div key={index} className="flex justify-between items-center py-2 border-b border-slate-700/30 last:border-b-0">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-green-400" />
@@ -274,6 +420,23 @@ const AcademyCoursePage = () => {
                     <span className="text-amber-400 font-semibold">฿{item.value}</span>
                   </div>
                 ))}
+              </div>
+              
+              {/* Fast Action Bonus */}
+              <div className="bg-gradient-to-r from-red-900/30 to-orange-900/30 rounded-lg p-4 mt-6 border border-red-500/30">
+                <div className="text-center mb-3">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <AlertTriangle className="h-5 w-5 text-red-400" />
+                    <span className="text-red-400 font-bold">รับเพิ่มทันที! เมื่อสมัครภายใน 48 ชั่วโมง:</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                    <span className="text-white">🔥 {valueStack[4].item}</span>
+                  </div>
+                  <span className="text-amber-400 font-semibold">฿{valueStack[4].value}</span>
+                </div>
               </div>
               
               <div className="border-t border-slate-600 mt-6 pt-6">
@@ -308,7 +471,7 @@ const AcademyCoursePage = () => {
                 className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold text-xl px-12 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 w-full md:w-auto"
               >
                 <Link to="/checkout">
-                  สมัครเรียนและสร้างเครื่องจักรของคุณทันที
+                  สมัครเรียนและรับโบนัสทั้งหมดทันที!
                   <Crown className="ml-3 h-6 w-6" />
                 </Link>
               </Button>
