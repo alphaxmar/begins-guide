@@ -48,6 +48,10 @@ import ProMembershipsPage from '@/pages/admin/ProMembershipsPage';
 import ProPackagesPage from '@/pages/admin/ProPackagesPage';
 import VipManagementPage from '@/pages/admin/VipManagementPage';
 import VipPackagesPage from '@/pages/admin/VipPackagesPage';
+import CreateProductPage from '@/pages/admin/CreateProductPage';
+import EditProductPage from '@/pages/admin/EditProductPage';
+import ImportProductsPage from '@/pages/admin/ImportProductsPage';
+import ManageLessonsPage from '@/pages/admin/ManageLessonsPage';
 import CourseSalesPage from '@/pages/CourseSalesPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
@@ -144,6 +148,10 @@ function App() {
         <Route path="reports" element={<AdminReportsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
         <Route path="products" element={<AdminProductsPage />} />
+        <Route path="products/create" element={<CreateProductPage />} />
+        <Route path="products/import" element={<ImportProductsPage />} />
+        <Route path="products/:id/edit" element={<EditProductPage />} />
+        <Route path="products/:slug/lessons" element={<ManageLessonsPage />} />
         <Route path="articles" element={<AdminArticlesPage />} />
         <Route path="discount-codes" element={<DiscountCodesPage />} />
         <Route path="affiliates" element={<AdminAffiliatesPage />} />
