@@ -57,6 +57,7 @@ import DreamlineLandingPage from '@/pages/DreamlineLandingPage';
 import DreamlineToolPage from '@/pages/DreamlineToolPage';
 import Dashboard from '@/pages/Dashboard';
 import BookSalesPage from '@/pages/BookSalesPage';
+import AcademyCoursePage from '@/pages/AcademyCoursePage';
 
 function App() {
   const { user } = useAuth();
@@ -122,6 +123,7 @@ function App() {
         <Route path="/dreamline-tool" element={<UserProtectedRoute><DreamlineToolPage /></UserProtectedRoute>} />
         <Route path="/dashboard" element={<UserProtectedRoute><Dashboard /></UserProtectedRoute>} />
         <Route path="/book" element={<BookSalesPage />} />
+        <Route path="/academy" element={<UserProtectedRoute><AcademyCoursePage /></UserProtectedRoute>} />
 
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
