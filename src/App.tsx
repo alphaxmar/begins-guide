@@ -57,6 +57,7 @@ import CheckoutPage from '@/pages/CheckoutPage';
 import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
 import CartPage from '@/pages/CartPage';
 import Products from '@/pages/Products';
+import ProductDetail from '@/pages/ProductDetail';
 import CoursePage from '@/pages/CoursePage';
 import ModernCoursePage from '@/pages/ModernCoursePage';
 import CoursesPage from '@/pages/CoursesPage';
@@ -124,6 +125,7 @@ function App() {
       {/* Existing pages */}
       <Route path="/courses" element={<CoursesPage />} />
       <Route path="/products" element={<Products />} />
+      <Route path="/products/:slug" element={<ProductDetail />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
