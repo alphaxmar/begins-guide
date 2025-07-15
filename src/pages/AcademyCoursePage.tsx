@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle, Star, Crown, Zap, Gift, Clock, Shield, ArrowDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CheckCircle, Star, Crown, Zap, Gift, Clock, Shield, ArrowDown, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const AcademyCoursePage = () => {
   const scrollToPricing = () => {
@@ -38,31 +40,39 @@ const AcademyCoursePage = () => {
     {
       icon: <Zap className="h-8 w-8 text-amber-400" />,
       title: "โบนัส #1: The Ultimate AI Prompt Library",
-      description: "คลังคำสั่ง AI กว่า 200 แบบ สำหรับทุกงานในธุรกิจ จากการเขียนโฆษณา ไปจนถึงการวิเคราะห์ข้อมูล",
-      value: "มูลค่า 2,990 บาท"
+      description: "คลังคำสั่ง AI สำเร็จรูปกว่า 200 แบบสำหรับงานธุรกิจ",
+      value: "มูลค่า 2,990 บาท",
+      detailedDescription: "คลังคำสั่ง AI ที่ครอบคลุมทุกงานในธุรกิจ รวมถึงการเขียนโฆษณา การสร้างเนื้อหา การวิเคราะห์ข้อมูล การบริการลูกค้า และอีกมากมาย พร้อมตัวอย่างการใช้งานจริงที่ทดลองแล้วและให้ผลลัพธ์ดี"
     },
     {
       icon: <Crown className="h-8 w-8 text-amber-400" />,
       title: "โบนัส #2: Business Template Vault",
-      description: "เทมเพลตสำเร็จรูปกว่า 50 แบบ รวมถึง Contract, Proposal, Workflow และเอกสารทางธุรกิจที่จำเป็น",
-      value: "มูลค่า 4,990 บาท"
+      description: "คลังเอกสารธุรกิจที่จำเป็นกว่า 50 แบบ (สัญญา, ใบเสนอราคา)",
+      value: "มูลค่า 4,990 บาท",
+      detailedDescription: "เทมเพลตสำเร็จรูปครบครันสำหรับการทำธุรกิจ รวมถึง Contract Templates, Proposal Templates, Workflow Documents, SOP, และเอกสารทางกฎหมายพื้นฐาน ทั้งหมดถูกออกแบบโดยผู้เชี่ยวชาญและใช้งานได้จริง"
     },
     {
       icon: <Gift className="h-8 w-8 text-amber-400" />,
       title: "โบนัส #3: Weekly Q&A Access",
-      description: "เข้าร่วมเซสชัน Q&A ออนไลน์ทุกสัปดาห์เป็นเวลา 3 เดือน สำหรับผู้ที่ซื้อใน 48 ชั่วโมงแรก",
-      value: "มูลค่า 7,500 บาท"
+      description: "สิทธิ์เข้าร่วม Group Coaching สดทุกสัปดาห์ 3 เดือน (สำหรับผู้ซื้อใน 48 ชม. แรก)",
+      value: "มูลค่า 7,500 บาท",
+      detailedDescription: "สิทธิพิเศษในการเข้าร่วมเซสชัน Q&A สดกับผู้สอนทุกสัปดาห์เป็นเวลา 3 เดือน ได้ถามคำถามเฉพาะเจาะจง รับคำแนะนำส่วนตัว และแลกเปลี่ยนประสบการณ์กับเพื่อนนักเรียนที่มีเป้าหมายเดียวกัน"
+    },
+    {
+      icon: <Settings className="h-8 w-8 text-amber-400" />,
+      title: "โบนัส #4: The Automation Arsenal",
+      description: "คลังแสง n8n Templates และ AI Agent ส่วนตัวสำหรับสร้างระบบอัตโนมัติ",
+      value: "มูลค่า 19,900 บาท",
+      detailedDescription: "ชุดเครื่องมืออัตโนมัติที่ทรงพลังที่สุด ประกอบด้วย n8n Workflow Templates ที่พร้อมใช้งาน, Idea Engine GPT ส่วนตัวสำหรับการระดมสมอง, และ Custom AI Agents ที่จะช่วยทำงานต่างๆ แทนคุณ รวมมูลค่ากว่า 19,900 บาท"
     }
   ];
 
   const valueStack = [
-    { item: "Freedom Engine Academy (คอร์สหลัก)", value: "19,900" },
+    { item: "Freedom Engine Academy (คอร์สหลัก)", value: "29,000" },
     { item: "โบนัส #1: Ultimate AI Prompt Library", value: "2,990" },
     { item: "โบนัส #2: Business Template Vault", value: "4,990" },
     { item: "โบนัส #3: Weekly Q&A Access (3 เดือน)", value: "7,500" },
-    { item: "ใบรับรองความสำเร็จ", value: "1,500" },
-    { item: "เข้าถึงชุมชนส่วนตัว", value: "2,500" },
-    { item: "อัปเดตเนื้อหาตลอดชีวิต", value: "2,100" }
+    { item: "โบนัส #4: The Automation Arsenal", value: "19,900" }
   ];
 
   const totalValue = valueStack.reduce((sum, item) => sum + parseInt(item.value.replace(",", "")), 0);
@@ -184,10 +194,10 @@ const AcademyCoursePage = () => {
       <section className="py-16 px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-white">
-            โบนัสพิเศษ <span className="text-amber-400">มูลค่ากว่า 15,000 บาท</span>
+            โบนัสพิเศษ <span className="text-amber-400">มูลค่ากว่า 35,000 บาท</span>
           </h2>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             {bonuses.map((bonus, index) => (
               <Card key={index} className="bg-slate-800/50 border-slate-700/50 hover:border-amber-400/50 transition-all duration-300">
                 <CardHeader className="text-center pb-4">
@@ -199,10 +209,38 @@ const AcademyCoursePage = () => {
                     {bonus.value}
                   </Badge>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-slate-300 text-center leading-relaxed">
+                <CardContent className="text-center">
+                  <p className="text-slate-300 leading-relaxed mb-4">
                     {bonus.description}
                   </p>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400"
+                      >
+                        ดูรายละเอียดเพิ่มเติม
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-amber-400 text-xl flex items-center gap-3">
+                          {bonus.icon}
+                          {bonus.title}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Badge className="bg-amber-500/20 text-amber-400 border-amber-400/30">
+                          {bonus.value}
+                        </Badge>
+                        <p className="text-slate-300 leading-relaxed text-base">
+                          {bonus.detailedDescription}
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             ))}
