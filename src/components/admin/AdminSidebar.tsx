@@ -12,6 +12,8 @@ import {
   Crown,
   Gift,
   UserCheck,
+  Gem,
+  Package2,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -29,9 +31,13 @@ const AdminSidebar: React.FC = () => {
     { icon: Package, label: "สินค้า", path: "/admin/products" },
     { icon: FileText, label: "บทความ", path: "/admin/articles" },
     
-    // Updated PRO menu items
+    // PRO Subscription menu items
     { icon: Crown, label: "สมาชิก PRO", path: "/admin/pro-memberships" },
     { icon: Gift, label: "แพ็กเกจ PRO", path: "/admin/pro-packages" },
+    
+    // VIP Management menu items
+    { icon: Gem, label: "สมาชิก VIP", path: "/admin/vip-management" },
+    { icon: Package2, label: "แพ็กเกจ VIP", path: "/admin/vip-packages" },
     
     { icon: UserCheck, label: "Affiliates", path: "/admin/affiliates" },
     { icon: Percent, label: "โค้ดส่วนลด", path: "/admin/discount-codes" },

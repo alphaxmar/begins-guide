@@ -10,7 +10,7 @@ const DashboardPage = () => {
     <div className="py-8">
       <PageHeader 
         title="แดชบอร์ด"
-        description="ภาพรวมของระบบ, ยอดขาย และ Subscription"
+        description="ภาพรวมของระบบ, ยอดขาย, PRO Subscription และ VIP Management"
       />
       
       <div className="space-y-8">
@@ -20,9 +20,9 @@ const DashboardPage = () => {
         {/* Payment Method Stats */}
         <div>
           <h3 className="text-lg font-medium mb-4">สถิติการชำระเงิน</h3>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
             <PaymentStatsCard
-              title="Stripe Subscription"
+              title="PRO Subscription"
               amount={125000}
               transactions={45}
               percentage={12}
@@ -30,7 +30,7 @@ const DashboardPage = () => {
               trend="up"
             />
             <PaymentStatsCard
-              title="PromptPay"
+              title="VIP Membership"
               amount={89000}
               transactions={32}
               percentage={8}
@@ -44,6 +44,14 @@ const DashboardPage = () => {
               percentage={-3}
               icon="omise"
               trend="down"
+            />
+            <PaymentStatsCard
+              title="Academy Course"
+              amount={95000}
+              transactions={15}
+              percentage={25}
+              icon="stripe"
+              trend="up"
             />
           </div>
         </div>

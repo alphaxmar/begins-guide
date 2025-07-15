@@ -44,6 +44,10 @@ import LovableReviewArticle from '@/pages/LovableReviewArticle';
 import HowToBuildOnlineCommunityArticle from '@/pages/HowToBuildOnlineCommunityArticle';
 import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArticle';
 import AdminAffiliatesPage from '@/pages/admin/AdminAffiliatesPage';
+import ProMembershipsPage from '@/pages/admin/ProMembershipsPage';
+import ProPackagesPage from '@/pages/admin/ProPackagesPage';
+import VipManagementPage from '@/pages/admin/VipManagementPage';
+import VipPackagesPage from '@/pages/admin/VipPackagesPage';
 import CourseSalesPage from '@/pages/CourseSalesPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
@@ -143,6 +147,10 @@ function App() {
         <Route path="articles" element={<AdminArticlesPage />} />
         <Route path="discount-codes" element={<DiscountCodesPage />} />
         <Route path="affiliates" element={<AdminAffiliatesPage />} />
+        <Route path="pro-memberships" element={<ProMembershipsPage />} />
+        <Route path="pro-packages" element={<ProPackagesPage />} />
+        <Route path="vip-management" element={<VipManagementPage />} />
+        <Route path="vip-packages" element={<VipPackagesPage />} />
         <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
         <Route path="email-templates" element={<AdminEmailPage />} />
         
