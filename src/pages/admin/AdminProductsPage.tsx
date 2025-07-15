@@ -29,7 +29,7 @@ type SortOrder = 'asc' | 'desc';
 const fetchProducts = async (
   page: number,
   searchQuery?: string, 
-  typeFilter?: "course" | "template", 
+  typeFilter?: "course" | "template" | "ebook" | "video" | "software" | "service" | "membership", 
   statusFilter?: string,
   ownerFilter?: string,
   sortBy?: SortField,
@@ -105,7 +105,7 @@ const AdminProductsPage = () => {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"all" | "course" | "template">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "course" | "template" | "ebook" | "video" | "software" | "service" | "membership">("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
   const [sortBy, setSortBy] = useState<SortField>('created_at');
@@ -246,9 +246,14 @@ const AdminProductsPage = () => {
   const getProductTypeBadge = (type: string) => {
     const variants = {
       course: { variant: "default" as const, label: "คอร์ส" },
-      template: { variant: "secondary" as const, label: "เทมเพลต" }
+      template: { variant: "secondary" as const, label: "เทมเพลต" },
+      ebook: { variant: "outline" as const, label: "E-book" },
+      video: { variant: "secondary" as const, label: "วิดีโอ" },
+      software: { variant: "outline" as const, label: "ซอฟต์แวร์" },
+      service: { variant: "destructive" as const, label: "บริการ" },
+      membership: { variant: "default" as const, label: "สมาชิก" }
     };
-    const config = variants[type as keyof typeof variants] || variants.course;
+    const config = variants[type as keyof typeof variants] || { variant: "outline" as const, label: "ไม่ระบุ" };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -259,9 +264,23 @@ const AdminProductsPage = () => {
     }
 
     const csvHeaders = ["ชื่อสินค้า", "ประเภท", "เจ้าของ", "ราคา", "ยอดขาย", "ผู้ซื้อ", "รายได้รวม", "วันที่สร้าง"];
+    const getProductTypeLabel = (type: string) => {
+      const labels = {
+        course: 'คอร์ส',
+        template: 'เทมเพลต',
+        ebook: 'E-book',
+        video: 'วิดีโอ',
+        software: 'ซอฟต์แวร์',
+        service: 'บริการ',
+        membership: 'สมาชิก',
+        cohort_program: 'Signature Course'
+      };
+      return labels[type as keyof typeof labels] || 'ไม่ระบุ';
+    };
+
     const csvData = products.map(product => [
       product.title,
-      product.product_type === 'course' ? 'คอร์ส' : 'เทมเพลต',
+      getProductTypeLabel(product.product_type),
       product.instructor_id ? 'Partner' : 'Admin',
       product.price.toLocaleString(),
       product.total_buyers || 0,
@@ -363,7 +382,7 @@ const AdminProductsPage = () => {
           </div>
           
           <div className="flex gap-2">
-            <Select value={typeFilter} onValueChange={(value: "all" | "course" | "template") => {
+            <Select value={typeFilter} onValueChange={(value: "all" | "course" | "template" | "ebook" | "video" | "software" | "service" | "membership") => {
               setTypeFilter(value);
               setCurrentPage(1);
             }}>
@@ -375,6 +394,11 @@ const AdminProductsPage = () => {
                 <SelectItem value="all">ทุกประเภท</SelectItem>
                 <SelectItem value="course">คอร์ส</SelectItem>
                 <SelectItem value="template">เทมเพลต</SelectItem>
+                <SelectItem value="ebook">E-book</SelectItem>
+                <SelectItem value="video">วิดีโอ</SelectItem>
+                <SelectItem value="software">ซอฟต์แวร์</SelectItem>
+                <SelectItem value="service">บริการ</SelectItem>
+                <SelectItem value="membership">สมาชิก</SelectItem>
               </SelectContent>
             </Select>
 
