@@ -16,7 +16,18 @@ import {
   Package2,
   Receipt,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 
 interface MenuItem {
   icon: React.ComponentType<any>;
@@ -25,21 +36,26 @@ interface MenuItem {
 }
 
 const AdminSidebar: React.FC = () => {
-  const menuItems = [
+  const { state } = useSidebar();
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const menuItems: MenuItem[] = [
     { icon: BarChart3, label: "แดชบอร์ด", path: "/admin/dashboard" },
     { icon: Users, label: "ผู้ใช้งาน", path: "/admin/users" },
     { icon: ShoppingCart, label: "คำสั่งซื้อ", path: "/admin/orders" },
     { icon: Package, label: "สินค้า", path: "/admin/products" },
     { icon: FileText, label: "บทความ", path: "/admin/articles" },
-    
-    // PRO Subscription menu items
+  ];
+
+  const membershipItems: MenuItem[] = [
     { icon: Crown, label: "สมาชิก PRO", path: "/admin/pro-memberships" },
     { icon: Gift, label: "แพ็กเกจ PRO", path: "/admin/pro-packages" },
-    
-    // VIP Management menu items
     { icon: Gem, label: "สมาชิก VIP", path: "/admin/vip-management" },
     { icon: Package2, label: "แพ็กเกจ VIP", path: "/admin/vip-packages" },
-    
+  ];
+
+  const systemItems: MenuItem[] = [
     { icon: UserCheck, label: "Affiliates", path: "/admin/affiliates" },
     { icon: Percent, label: "โค้ดส่วนลด", path: "/admin/discount-codes" },
     { icon: CreditCard, label: "การชำระเงิน", path: "/admin/payment-settings" },
@@ -48,26 +64,46 @@ const AdminSidebar: React.FC = () => {
     { icon: FileBarChart, label: "รายงาน", path: "/admin/reports" },
   ];
 
+  const isActive = (path: string) => currentPath === path;
+  const isCollapsed = state === "collapsed";
+
+  const getNavClassName = ({ isActive }: { isActive: boolean }) =>
+    isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "";
+
+  const renderMenuSection = (items: MenuItem[], label?: string) => (
+    <SidebarGroup key={label}>
+      {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.path}>
+              <SidebarMenuButton asChild>
+                <NavLink to={item.path} className={getNavClassName}>
+                  <item.icon className="h-4 w-4" />
+                  {!isCollapsed && <span>{item.label}</span>}
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 h-full py-4 px-2">
-      <div className="font-bold text-xl mb-4 px-2">Admin Panel</div>
-      <nav className="space-y-2">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.label}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100 ${
-                isActive ? "bg-gray-100 font-medium" : ""
-              }`
-            }
-          >
-            <item.icon className="h-4 w-4" />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
-    </div>
+    <Sidebar collapsible="icon">
+      <SidebarContent className="gap-0">
+        <div className="p-4 border-b">
+          <h2 className={`font-bold text-lg ${isCollapsed ? "sr-only" : ""}`}>
+            Admin Panel
+          </h2>
+        </div>
+        
+        {renderMenuSection(menuItems, "หลัก")}
+        {renderMenuSection(membershipItems, "สมาชิกภาพ")}
+        {renderMenuSection(systemItems, "ระบบ")}
+      </SidebarContent>
+    </Sidebar>
   );
 };
 
