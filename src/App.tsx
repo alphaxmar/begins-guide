@@ -31,6 +31,7 @@ import AdminArticlesPage from '@/pages/admin/AdminArticlesPage';
 import DiscountCodesPage from '@/pages/admin/DiscountCodesPage';
 import AdminPaymentSettingsPage from '@/pages/admin/AdminPaymentSettingsPage';
 import AdminEmailPage from '@/pages/admin/AdminEmailPage';
+import AdminPaymentSlipsPage from '@/pages/admin/AdminPaymentSlipsPage';
 import AiToolsForEntrepreneursArticle from '@/pages/AiToolsForEntrepreneursArticle';
 import HealjaiCaseStudyArticle from '@/pages/HealjaiCaseStudyArticle';
 import CaseStudyBuildSellplanStoreArticle from '@/pages/CaseStudyBuildSellplanStoreArticle';
@@ -166,6 +167,7 @@ function App() {
         <Route path="vip-management" element={<VipManagementPage />} />
         <Route path="vip-packages" element={<VipPackagesPage />} />
         <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
+        <Route path="payment-slips" element={<AdminPaymentSlipsPage />} />
         <Route path="email-templates" element={<AdminEmailPage />} />
         
       </Route>
