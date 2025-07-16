@@ -4,6 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DreamlineSummary, Dreamline } from '@/hooks/useDreamlines';
 import { toast } from '@/hooks/use-toast';
 
+// Thai font for PDF - using base64 encoded font data for Sarabun
+const sarabunFontBase64 = "data:font/truetype;charset=utf-8;base64,"; // This would be the actual font data
+
 export const usePDFGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useAuth();
@@ -25,6 +28,29 @@ export const usePDFGenerator = () => {
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       
+      // Add Thai font support - Use a fallback approach for Thai text
+      // For now, we'll use English only for PDF until proper Thai font can be embedded
+      const generateThaiCompatibleText = (thaiText: string, englishFallback?: string) => {
+        // For production, we would load and embed a Thai font
+        // For now, we'll provide English translations
+        const translations: Record<string, string> = {
+          'พิมพ์เขียวชีวิตของคุณ': 'Your Life Blueprint',
+          'สิ่งที่อยากมี (Having)': 'Things to Have',
+          'สิ่งที่อยากเป็น (Being)': 'Who to Be', 
+          'สิ่งที่อยากทำ (Doing)': 'What to Do',
+          'ตัวเลขแห่งอิสรภาพของคุณ (Your Freedom Number)': 'Your Freedom Number',
+          'ต่อเดือน': 'per month',
+          'การคำนวณ:': 'Calculation:',
+          'รวม:': 'Total:',
+          'สำหรับ:': 'For:',
+          'วันที่ดาวน์โหลด:': 'Downloaded:',
+          'นี่คือ "เป้าหมาย" ของคุณ ขั้นตอนต่อไปคือการสร้าง "แผนที่" ที่จะพาคุณไปให้ถึง': 'This is your "target". The next step is to create a "roadmap" to get you there.',
+          'ค้นพบพิมพ์เขียวฉบับสมบูรณ์ในหนังสือ "The Freedom Engine" ได้ที่: www.begins.guide/book': 'Discover the complete blueprint in "The Freedom Engine" book at: www.begins.guide/book'
+        };
+        
+        return translations[thaiText] || englishFallback || thaiText.replace(/[ก-๙]/g, '?');
+      };
+      
       // Set up fonts and styling
       pdf.setFont('helvetica', 'normal');
       
@@ -35,22 +61,22 @@ export const usePDFGenerator = () => {
       
       pdf.setFontSize(10);
       pdf.setTextColor(128, 128, 128);
-      const currentDate = new Date().toLocaleDateString('th-TH');
-      pdf.text(`วันที่ดาวน์โหลด: ${currentDate}`, pageWidth - 60, 25);
+      const currentDate = new Date().toLocaleDateString('en-GB');
+      pdf.text(`Downloaded: ${currentDate}`, pageWidth - 60, 25);
       
       // Title
       pdf.setFontSize(24);
       pdf.setTextColor(10, 34, 64);
-      pdf.text('พิมพ์เขียวชีวิตของคุณ', 20, 45);
+      pdf.text(generateThaiCompatibleText('พิมพ์เขียวชีวิตของคุณ'), 20, 45);
       
       pdf.setFontSize(16);
       pdf.text('(Your Life Blueprint)', 20, 55);
       
       // User name
-      const userName = user.email?.split('@')[0] || 'ผู้ใช้';
+      const userName = user.email?.split('@')[0] || 'User';
       pdf.setFontSize(14);
       pdf.setTextColor(68, 68, 68);
-      pdf.text(`สำหรับ: ${userName}`, 20, 70);
+      pdf.text(`${generateThaiCompatibleText('สำหรับ:')} ${userName}`, 20, 70);
       
       // Line separator
       pdf.setDrawColor(10, 34, 64);
@@ -64,9 +90,9 @@ export const usePDFGenerator = () => {
       // Column headers
       pdf.setFontSize(14);
       pdf.setTextColor(10, 34, 64);
-      pdf.text('สิ่งที่อยากมี (Having)', 20, yPos);
-      pdf.text('สิ่งที่อยากเป็น (Being)', 20 + colWidth, yPos);
-      pdf.text('สิ่งที่อยากทำ (Doing)', 20 + colWidth * 2, yPos);
+      pdf.text(generateThaiCompatibleText('สิ่งที่อยากมี (Having)'), 20, yPos);
+      pdf.text(generateThaiCompatibleText('สิ่งที่อยากเป็น (Being)'), 20 + colWidth, yPos);
+      pdf.text(generateThaiCompatibleText('สิ่งที่อยากทำ (Doing)'), 20 + colWidth * 2, yPos);
       
       yPos += 10;
       
@@ -117,9 +143,9 @@ export const usePDFGenerator = () => {
       yPos += 10;
       pdf.setFontSize(12);
       pdf.setTextColor(10, 34, 64);
-      pdf.text(`รวม: ฿${summary.total_having.toLocaleString()}`, 20, yPos);
-      pdf.text(`รวม: ฿${summary.total_being.toLocaleString()}`, 20 + colWidth, yPos);
-      pdf.text(`รวม: ฿${summary.total_doing.toLocaleString()}`, 20 + colWidth * 2, yPos);
+      pdf.text(`${generateThaiCompatibleText('รวม:')} ฿${summary.total_having.toLocaleString()}`, 20, yPos);
+      pdf.text(`${generateThaiCompatibleText('รวม:')} ฿${summary.total_being.toLocaleString()}`, 20 + colWidth, yPos);
+      pdf.text(`${generateThaiCompatibleText('รวม:')} ฿${summary.total_doing.toLocaleString()}`, 20 + colWidth * 2, yPos);
       
       // Summary section
       yPos += 30;
@@ -127,7 +153,7 @@ export const usePDFGenerator = () => {
       // TMI Display
       pdf.setFontSize(18);
       pdf.setTextColor(255, 215, 7); // Gold color
-      pdf.text('ตัวเลขแห่งอิสรภาพของคุณ (Your Freedom Number)', 20, yPos);
+      pdf.text(generateThaiCompatibleText('ตัวเลขแห่งอิสรภาพของคุณ (Your Freedom Number)'), 20, yPos);
       
       yPos += 15;
       pdf.setFontSize(32);
@@ -137,13 +163,13 @@ export const usePDFGenerator = () => {
       yPos += 10;
       pdf.setFontSize(12);
       pdf.setTextColor(68, 68, 68);
-      pdf.text('ต่อเดือน', 20, yPos);
+      pdf.text(generateThaiCompatibleText('ต่อเดือน'), 20, yPos);
       
       // Calculation breakdown
       yPos += 20;
       pdf.setFontSize(10);
       const totalDreamCost = summary.total_having + summary.total_being + summary.total_doing;
-      pdf.text(`การคำนวณ: (฿${totalDreamCost.toLocaleString()} ÷ 12) + ฿${summary.monthly_basic_expenses.toLocaleString()} = ฿${summary.target_monthly_income.toLocaleString()}`, 20, yPos);
+      pdf.text(`${generateThaiCompatibleText('การคำนวณ:')} (฿${totalDreamCost.toLocaleString()} ÷ 12) + ฿${summary.monthly_basic_expenses.toLocaleString()} = ฿${summary.target_monthly_income.toLocaleString()}`, 20, yPos);
       
       // Footer
       yPos = pageHeight - 40;
@@ -153,15 +179,15 @@ export const usePDFGenerator = () => {
       yPos += 10;
       pdf.setFontSize(12);
       pdf.setTextColor(68, 68, 68);
-      pdf.text('นี่คือ "เป้าหมาย" ของคุณ ขั้นตอนต่อไปคือการสร้าง "แผนที่" ที่จะพาคุณไปให้ถึง', 20, yPos);
+      pdf.text(generateThaiCompatibleText('นี่คือ "เป้าหมาย" ของคุณ ขั้นตอนต่อไปคือการสร้าง "แผนที่" ที่จะพาคุณไปให้ถึง'), 20, yPos);
       
       yPos += 8;
       pdf.setFontSize(10);
       pdf.setTextColor(10, 34, 64);
-      pdf.text('ค้นพบพิมพ์เขียวฉบับสมบูรณ์ในหนังสือ "The Freedom Engine" ได้ที่: www.begins.guide/book', 20, yPos);
+      pdf.text(generateThaiCompatibleText('ค้นพบพิมพ์เขียวฉบับสมบูรณ์ในหนังสือ "The Freedom Engine" ได้ที่: www.begins.guide/book'), 20, yPos);
       
       // Save the PDF
-      const fileName = `พิมพ์เขียวชีวิต-${userName}-${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `Life-Blueprint-${userName}-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
       
       toast({
