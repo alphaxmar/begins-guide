@@ -27,179 +27,204 @@ export const usePDFGenerator = () => {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      // Add Thai font support - Use a fallback approach for Thai text
-      // For now, we'll use English only for PDF until proper Thai font can be embedded
-      const generateThaiCompatibleText = (thaiText: string, englishFallback?: string) => {
-        // For production, we would load and embed a Thai font
-        // For now, we'll provide English translations
-        const translations: Record<string, string> = {
-          'พิมพ์เขียวชีวิตของคุณ': 'Your Life Blueprint',
-          'สิ่งที่อยากมี (Having)': 'Things to Have',
-          'สิ่งที่อยากเป็น (Being)': 'Who to Be', 
-          'สิ่งที่อยากทำ (Doing)': 'What to Do',
-          'ตัวเลขแห่งอิสรภาพของคุณ (Your Freedom Number)': 'Your Freedom Number',
-          'ต่อเดือน': 'per month',
-          'การคำนวณ:': 'Calculation:',
-          'รวม:': 'Total:',
-          'สำหรับ:': 'For:',
-          'วันที่ดาวน์โหลด:': 'Downloaded:',
-          'นี่คือ "เป้าหมาย" ของคุณ ขั้นตอนต่อไปคือการสร้าง "แผนที่" ที่จะพาคุณไปให้ถึง': 'This is your "target". The next step is to create a "roadmap" to get you there.',
-          'ค้นพบพิมพ์เขียวฉบับสมบูรณ์ในหนังสือ "The Freedom Engine" ได้ที่: www.begins.guide/book': 'Discover the complete blueprint in "The Freedom Engine" book at: www.begins.guide/book'
-        };
-        
-        return translations[thaiText] || englishFallback || thaiText.replace(/[ก-๙]/g, '?');
-      };
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
       
       // Set up fonts and styling
       pdf.setFont('helvetica', 'normal');
       
+      let yPos = margin;
+      
       // Header
       pdf.setFontSize(16);
       pdf.setTextColor(10, 34, 64); // Blueprint Blue
-      pdf.text('begins.guide', 20, 25);
+      pdf.text('begins.guide', margin, yPos);
       
       pdf.setFontSize(10);
       pdf.setTextColor(128, 128, 128);
       const currentDate = new Date().toLocaleDateString('en-GB');
-      pdf.text(`Downloaded: ${currentDate}`, pageWidth - 60, 25);
+      pdf.text(`Downloaded: ${currentDate}`, pageWidth - 60, yPos);
+      
+      yPos += 20;
       
       // Title
-      pdf.setFontSize(24);
+      pdf.setFontSize(20);
       pdf.setTextColor(10, 34, 64);
-      pdf.text(generateThaiCompatibleText('พิมพ์เขียวชีวิตของคุณ'), 20, 45);
+      pdf.text('Your Life Blueprint', margin, yPos);
       
-      pdf.setFontSize(16);
-      pdf.text('(Your Life Blueprint)', 20, 55);
+      yPos += 10;
       
       // User name
       const userName = user.email?.split('@')[0] || 'User';
-      pdf.setFontSize(14);
+      pdf.setFontSize(12);
       pdf.setTextColor(68, 68, 68);
-      pdf.text(`${generateThaiCompatibleText('สำหรับ:')} ${userName}`, 20, 70);
+      pdf.text(`For: ${userName}`, margin, yPos);
+      
+      yPos += 15;
       
       // Line separator
       pdf.setDrawColor(10, 34, 64);
       pdf.setLineWidth(0.5);
-      pdf.line(20, 80, pageWidth - 20, 80);
+      pdf.line(margin, yPos, pageWidth - margin, yPos);
       
-      // Three columns layout
-      const colWidth = (pageWidth - 60) / 3;
-      let yPos = 95;
-      
-      // Column headers
-      pdf.setFontSize(14);
-      pdf.setTextColor(10, 34, 64);
-      pdf.text(generateThaiCompatibleText('สิ่งที่อยากมี (Having)'), 20, yPos);
-      pdf.text(generateThaiCompatibleText('สิ่งที่อยากเป็น (Being)'), 20 + colWidth, yPos);
-      pdf.text(generateThaiCompatibleText('สิ่งที่อยากทำ (Doing)'), 20 + colWidth * 2, yPos);
-      
-      yPos += 10;
+      yPos += 20;
       
       // Categories data
       const havingItems = dreamlines.filter(d => d.category === 'having');
       const beingItems = dreamlines.filter(d => d.category === 'being');
       const doingItems = dreamlines.filter(d => d.category === 'doing');
       
-      const maxItems = Math.max(havingItems.length, beingItems.length, doingItems.length);
+      // Three columns layout
+      const colWidth = contentWidth / 3;
+      const col1X = margin;
+      const col2X = margin + colWidth;
+      const col3X = margin + (colWidth * 2);
       
-      pdf.setFontSize(10);
+      // Column headers
+      pdf.setFontSize(14);
+      pdf.setTextColor(10, 34, 64);
+      pdf.text('Things to Have', col1X, yPos);
+      pdf.text('Who to Be', col2X, yPos);
+      pdf.text('What to Do', col3X, yPos);
+      
+      yPos += 10;
+      
+      // Draw separator lines under headers
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.3);
+      pdf.line(col1X, yPos, col1X + colWidth - 10, yPos);
+      pdf.line(col2X, yPos, col2X + colWidth - 10, yPos);
+      pdf.line(col3X, yPos, col3X + colWidth - 10, yPos);
+      
+      yPos += 10;
+      
+      // Content items
+      pdf.setFontSize(9);
       pdf.setTextColor(68, 68, 68);
       
+      const maxItems = Math.max(havingItems.length, beingItems.length, doingItems.length);
+      
       for (let i = 0; i < maxItems; i++) {
-        const currentY = yPos + (i * 8);
+        const itemYPos = yPos + (i * 12);
         
         // Check if we need a new page
-        if (currentY > pageHeight - 50) {
+        if (itemYPos > pageHeight - 80) {
           pdf.addPage();
-          yPos = 30;
+          yPos = margin + 20;
           break;
         }
         
         if (havingItems[i]) {
           const item = havingItems[i];
-          pdf.text(`• ${item.title}`, 20, currentY);
-          pdf.text(`฿${item.cost.toLocaleString()}`, 20, currentY + 4);
+          const text = `• ${item.title}`;
+          const wrappedText = pdf.splitTextToSize(text, colWidth - 10);
+          pdf.text(wrappedText, col1X, itemYPos);
+          pdf.text(`฿${item.cost.toLocaleString()}`, col1X, itemYPos + 6);
         }
         
         if (beingItems[i]) {
           const item = beingItems[i];
-          pdf.text(`• ${item.title}`, 20 + colWidth, currentY);
-          pdf.text(`฿${item.cost.toLocaleString()}`, 20 + colWidth, currentY + 4);
+          const text = `• ${item.title}`;
+          const wrappedText = pdf.splitTextToSize(text, colWidth - 10);
+          pdf.text(wrappedText, col2X, itemYPos);
+          pdf.text(`฿${item.cost.toLocaleString()}`, col2X, itemYPos + 6);
         }
         
         if (doingItems[i]) {
           const item = doingItems[i];
-          pdf.text(`• ${item.title}`, 20 + colWidth * 2, currentY);
-          pdf.text(`฿${item.cost.toLocaleString()}`, 20 + colWidth * 2, currentY + 4);
+          const text = `• ${item.title}`;
+          const wrappedText = pdf.splitTextToSize(text, colWidth - 10);
+          pdf.text(wrappedText, col3X, itemYPos);
+          pdf.text(`฿${item.cost.toLocaleString()}`, col3X, itemYPos + 6);
         }
       }
       
       // Column totals
-      yPos += (maxItems * 8) + 15;
-      pdf.setDrawColor(200, 200, 200);
-      pdf.line(20, yPos, pageWidth - 20, yPos);
+      yPos += (maxItems * 12) + 20;
       
-      yPos += 10;
-      pdf.setFontSize(12);
-      pdf.setTextColor(10, 34, 64);
-      pdf.text(`${generateThaiCompatibleText('รวม:')} ฿${summary.total_having.toLocaleString()}`, 20, yPos);
-      pdf.text(`${generateThaiCompatibleText('รวม:')} ฿${summary.total_being.toLocaleString()}`, 20 + colWidth, yPos);
-      pdf.text(`${generateThaiCompatibleText('รวม:')} ฿${summary.total_doing.toLocaleString()}`, 20 + colWidth * 2, yPos);
-      
-      // Summary section
-      yPos += 30;
-      
-      // TMI Display
-      pdf.setFontSize(18);
-      pdf.setTextColor(255, 215, 7); // Gold color
-      pdf.text(generateThaiCompatibleText('ตัวเลขแห่งอิสรภาพของคุณ (Your Freedom Number)'), 20, yPos);
+      pdf.setDrawColor(10, 34, 64);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, yPos, pageWidth - margin, yPos);
       
       yPos += 15;
-      pdf.setFontSize(32);
+      
+      pdf.setFontSize(12);
       pdf.setTextColor(10, 34, 64);
-      pdf.text(`฿${summary.target_monthly_income.toLocaleString()}`, 20, yPos);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`Total: ฿${summary.total_having.toLocaleString()}`, col1X, yPos);
+      pdf.text(`Total: ฿${summary.total_being.toLocaleString()}`, col2X, yPos);
+      pdf.text(`Total: ฿${summary.total_doing.toLocaleString()}`, col3X, yPos);
+      
+      yPos += 30;
+      
+      // Summary section
+      pdf.setFont('helvetica', 'normal');
+      
+      // TMI Display
+      pdf.setFontSize(16);
+      pdf.setTextColor(255, 215, 7); // Gold color
+      pdf.text('Your Freedom Number', margin, yPos);
+      
+      yPos += 20;
+      
+      pdf.setFontSize(28);
+      pdf.setTextColor(10, 34, 64);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`฿${summary.target_monthly_income.toLocaleString()}`, margin, yPos);
       
       yPos += 10;
+      
       pdf.setFontSize(12);
       pdf.setTextColor(68, 68, 68);
-      pdf.text(generateThaiCompatibleText('ต่อเดือน'), 20, yPos);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('per month', margin, yPos);
+      
+      yPos += 20;
       
       // Calculation breakdown
-      yPos += 20;
       pdf.setFontSize(10);
       const totalDreamCost = summary.total_having + summary.total_being + summary.total_doing;
-      pdf.text(`${generateThaiCompatibleText('การคำนวณ:')} (฿${totalDreamCost.toLocaleString()} ÷ 12) + ฿${summary.monthly_basic_expenses.toLocaleString()} = ฿${summary.target_monthly_income.toLocaleString()}`, 20, yPos);
+      const calculationText = `Calculation: (฿${totalDreamCost.toLocaleString()} ÷ 12) + ฿${summary.monthly_basic_expenses.toLocaleString()} = ฿${summary.target_monthly_income.toLocaleString()}`;
+      const wrappedCalculation = pdf.splitTextToSize(calculationText, contentWidth);
+      pdf.text(wrappedCalculation, margin, yPos);
       
       // Footer
-      yPos = pageHeight - 40;
+      yPos = pageHeight - 60;
+      
       pdf.setDrawColor(10, 34, 64);
-      pdf.line(20, yPos, pageWidth - 20, yPos);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, yPos, pageWidth - margin, yPos);
+      
+      yPos += 15;
+      
+      pdf.setFontSize(11);
+      pdf.setTextColor(68, 68, 68);
+      const footerText1 = 'This is your "target". The next step is to create a "roadmap" to get you there.';
+      const wrappedFooter1 = pdf.splitTextToSize(footerText1, contentWidth);
+      pdf.text(wrappedFooter1, margin, yPos);
       
       yPos += 10;
-      pdf.setFontSize(12);
-      pdf.setTextColor(68, 68, 68);
-      pdf.text(generateThaiCompatibleText('นี่คือ "เป้าหมาย" ของคุณ ขั้นตอนต่อไปคือการสร้าง "แผนที่" ที่จะพาคุณไปให้ถึง'), 20, yPos);
       
-      yPos += 8;
       pdf.setFontSize(10);
       pdf.setTextColor(10, 34, 64);
-      pdf.text(generateThaiCompatibleText('ค้นพบพิมพ์เขียวฉบับสมบูรณ์ในหนังสือ "The Freedom Engine" ได้ที่: www.begins.guide/book'), 20, yPos);
+      const footerText2 = 'Discover the complete blueprint in "The Freedom Engine" book at: www.begins.guide/book';
+      const wrappedFooter2 = pdf.splitTextToSize(footerText2, contentWidth);
+      pdf.text(wrappedFooter2, margin, yPos);
       
       // Save the PDF
       const fileName = `Life-Blueprint-${userName}-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
       
       toast({
-        title: "ดาวน์โหลดสำเร็จ",
-        description: "ไฟล์ PDF พิมพ์เขียวของคุณถูกดาวน์โหลดแล้ว",
+        title: "Download Successful",
+        description: "Your Life Blueprint PDF has been downloaded",
       });
       
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถสร้างไฟล์ PDF ได้",
+        title: "Error",
+        description: "Could not generate PDF file",
         variant: "destructive",
       });
     } finally {
