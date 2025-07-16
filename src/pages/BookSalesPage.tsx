@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,8 +21,26 @@ import {
 } from 'lucide-react';
 
 const BookSalesPage = () => {
+  const navigate = useNavigate();
+
   const handlePurchase = (type: 'ebook' | 'physical') => {
-    window.location.href = '/products';
+    try {
+      // ใช้ React Router navigation แทน window.location.href
+      navigate('/products', { 
+        state: { 
+          productType: type,
+          fromBookSales: true 
+        } 
+      });
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback ในกรณีที่ navigate ไม่ทำงาน
+      window.location.href = '/products';
+    }
+  };
+
+  const handleEbookPurchase = () => {
+    handlePurchase('ebook');
   };
 
   return (
@@ -51,7 +70,7 @@ const BookSalesPage = () => {
                 <Button 
                   size="lg" 
                   className="text-lg px-8 py-6 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold"
-                  onClick={() => window.location.href = '/products'}
+                  onClick={handleEbookPurchase}
                 >
                   <BookOpen className="mr-2" />
                   สั่งซื้อ E-book ฿990
@@ -271,7 +290,7 @@ const BookSalesPage = () => {
                 <Button 
                   size="lg" 
                   className="text-xl px-10 py-8 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                  onClick={() => window.location.href = '/products'}
+                  onClick={handleEbookPurchase}
                 >
                   <BookOpen className="mr-3 w-6 h-6" />
                   สั่งซื้อ E-book ทันที ฿990
