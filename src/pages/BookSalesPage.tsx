@@ -21,8 +21,7 @@ import {
 
 const BookSalesPage = () => {
   const handlePurchase = (type: 'ebook' | 'physical') => {
-    // TODO: Implement purchase logic
-    console.log(`Purchase ${type} book`);
+    window.location.href = '/products';
   };
 
   return (
@@ -48,24 +47,19 @@ const BookSalesPage = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-center">
                 <Button 
                   size="lg" 
                   className="text-lg px-8 py-6 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold"
-                  onClick={() => handlePurchase('ebook')}
+                  onClick={() => window.location.href = '/products'}
                 >
                   <BookOpen className="mr-2" />
-                  สั่งซื้อ E-book (฿350)
+                  สั่งซื้อ E-book ฿990
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="text-lg px-8 py-6 border-2"
-                  onClick={() => handlePurchase('physical')}
-                >
-                  <FileText className="mr-2" />
-                  สั่งซื้อหนังสือเล่ม (฿450)
-                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground line-through text-lg">฿2,590</span>
+                  <Badge className="bg-red-500 text-white">ลด 62%</Badge>
+                </div>
               </div>
             </div>
 
@@ -273,24 +267,19 @@ const BookSalesPage = () => {
                 ในราคาที่น้อยกว่าค่ากาแฟของคุณในหนึ่งเดือน
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button 
                   size="lg" 
                   className="text-xl px-10 py-8 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                  onClick={() => handlePurchase('ebook')}
+                  onClick={() => window.location.href = '/products'}
                 >
                   <BookOpen className="mr-3 w-6 h-6" />
-                  สั่งซื้อ E-book ทันที (฿350)
+                  สั่งซื้อ E-book ทันที ฿990
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="text-xl px-10 py-8 border-2 font-semibold hover:bg-primary/5 transform hover:scale-105 transition-all duration-200"
-                  onClick={() => handlePurchase('physical')}
-                >
-                  <FileText className="mr-3 w-6 h-6" />
-                  สั่งซื้อหนังสือเล่ม (฿450)
-                </Button>
+                <div className="flex items-center gap-3">
+                  <span className="text-muted-foreground line-through text-xl">฿2,590</span>
+                  <Badge className="bg-red-500 text-white text-lg px-3 py-1">ประหยัด 62%</Badge>
+                </div>
               </div>
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 mt-8">
