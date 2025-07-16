@@ -30,42 +30,34 @@ export const usePDFGenerator = () => {
       const margin = 20;
       const contentWidth = pageWidth - (margin * 2);
       
-      // Set up fonts and styling
+      // Set up fonts and styling - Using standard font for compatibility
       pdf.setFont('helvetica', 'normal');
       
       let yPos = margin;
+      const userName = user.email?.split('@')[0] || 'User';
+      const currentDate = new Date().toLocaleDateString('en-GB');
       
-      // Header
-      pdf.setFontSize(16);
+      // Header Section
+      pdf.setFontSize(18);
       pdf.setTextColor(10, 34, 64); // Blueprint Blue
+      pdf.setFont('helvetica', 'bold');
       pdf.text('begins.guide', margin, yPos);
       
+      // Right side header info
       pdf.setFontSize(10);
-      pdf.setTextColor(128, 128, 128);
-      const currentDate = new Date().toLocaleDateString('en-GB');
-      pdf.text(`Downloaded: ${currentDate}`, pageWidth - 60, yPos);
-      
-      yPos += 20;
-      
-      // Title
-      pdf.setFontSize(20);
-      pdf.setTextColor(10, 34, 64);
-      pdf.text('Your Life Blueprint', margin, yPos);
-      
-      yPos += 10;
-      
-      // User name
-      const userName = user.email?.split('@')[0] || 'User';
-      pdf.setFontSize(12);
       pdf.setTextColor(68, 68, 68);
-      pdf.text(`For: ${userName}`, margin, yPos);
+      pdf.setFont('helvetica', 'normal');
+      const headerRight = `Life Blueprint for: ${userName}`;
+      pdf.text(headerRight, pageWidth - margin - pdf.getStringUnitWidth(headerRight) * 10 * 0.352778, yPos - 5);
+      pdf.text(`Created: ${currentDate}`, pageWidth - margin - pdf.getStringUnitWidth(`Created: ${currentDate}`) * 10 * 0.352778, yPos + 5);
       
-      yPos += 15;
+      yPos += 25;
       
-      // Line separator
-      pdf.setDrawColor(10, 34, 64);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPos, pageWidth - margin, yPos);
+      // Main Title
+      pdf.setFontSize(24);
+      pdf.setTextColor(10, 34, 64);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Your Life Blueprint', margin, yPos);
       
       yPos += 20;
       
@@ -74,142 +66,125 @@ export const usePDFGenerator = () => {
       const beingItems = dreamlines.filter(d => d.category === 'being');
       const doingItems = dreamlines.filter(d => d.category === 'doing');
       
-      // Three columns layout
-      const colWidth = contentWidth / 3;
-      const col1X = margin;
-      const col2X = margin + colWidth;
-      const col3X = margin + (colWidth * 2);
-      
-      // Column headers
-      pdf.setFontSize(14);
-      pdf.setTextColor(10, 34, 64);
-      pdf.text('Things to Have', col1X, yPos);
-      pdf.text('Who to Be', col2X, yPos);
-      pdf.text('What to Do', col3X, yPos);
-      
-      yPos += 10;
-      
-      // Draw separator lines under headers
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.3);
-      pdf.line(col1X, yPos, col1X + colWidth - 10, yPos);
-      pdf.line(col2X, yPos, col2X + colWidth - 10, yPos);
-      pdf.line(col3X, yPos, col3X + colWidth - 10, yPos);
-      
-      yPos += 10;
-      
-      // Content items
-      pdf.setFontSize(9);
-      pdf.setTextColor(68, 68, 68);
-      
-      const maxItems = Math.max(havingItems.length, beingItems.length, doingItems.length);
-      
-      for (let i = 0; i < maxItems; i++) {
-        const itemYPos = yPos + (i * 12);
+      // Helper function to draw table section
+      const drawTableSection = (title: string, items: Dreamline[], startY: number, total: number): number => {
+        let currentY = startY;
         
-        // Check if we need a new page
-        if (itemYPos > pageHeight - 80) {
-          pdf.addPage();
-          yPos = margin + 20;
-          break;
-        }
+        // Section title
+        pdf.setFontSize(16);
+        pdf.setTextColor(10, 34, 64);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(title, margin, currentY);
+        currentY += 15;
         
-        if (havingItems[i]) {
-          const item = havingItems[i];
-          const text = `• ${item.title}`;
-          const wrappedText = pdf.splitTextToSize(text, colWidth - 10);
-          pdf.text(wrappedText, col1X, itemYPos);
-          pdf.text(`฿${item.cost.toLocaleString()}`, col1X, itemYPos + 6);
-        }
+        // Table headers
+        pdf.setFontSize(11);
+        pdf.setTextColor(68, 68, 68);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Item', margin, currentY);
+        pdf.text('Cost (Baht)', pageWidth - margin - 40, currentY);
         
-        if (beingItems[i]) {
-          const item = beingItems[i];
-          const text = `• ${item.title}`;
-          const wrappedText = pdf.splitTextToSize(text, colWidth - 10);
-          pdf.text(wrappedText, col2X, itemYPos);
-          pdf.text(`฿${item.cost.toLocaleString()}`, col2X, itemYPos + 6);
-        }
+        // Table header underline
+        pdf.setDrawColor(10, 34, 64);
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, currentY + 2, pageWidth - margin, currentY + 2);
+        currentY += 10;
         
-        if (doingItems[i]) {
-          const item = doingItems[i];
-          const text = `• ${item.title}`;
-          const wrappedText = pdf.splitTextToSize(text, colWidth - 10);
-          pdf.text(wrappedText, col3X, itemYPos);
-          pdf.text(`฿${item.cost.toLocaleString()}`, col3X, itemYPos + 6);
-        }
+        // Table content
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        
+        items.forEach((item, index) => {
+          // Item name
+          const itemText = pdf.splitTextToSize(item.title, contentWidth - 60);
+          pdf.text(itemText, margin, currentY);
+          
+          // Cost (right aligned)
+          const costText = `${item.cost.toLocaleString()}`;
+          pdf.text(costText, pageWidth - margin - pdf.getStringUnitWidth(costText) * 10 * 0.352778, currentY);
+          
+          currentY += Math.max(itemText.length * 5, 8);
+        });
+        
+        // Total row
+        currentY += 5;
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineWidth(0.3);
+        pdf.line(margin, currentY, pageWidth - margin, currentY);
+        currentY += 8;
+        
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.setTextColor(10, 34, 64);
+        pdf.text('Total:', margin, currentY);
+        const totalText = `${total.toLocaleString()}`;
+        pdf.text(totalText, pageWidth - margin - pdf.getStringUnitWidth(totalText) * 11 * 0.352778, currentY);
+        
+        return currentY + 20;
+      };
+      
+      // Draw each section
+      yPos = drawTableSection('Things to Have (การมี)', havingItems, yPos, summary.total_having);
+      yPos = drawTableSection('Who to Be (การเป็น)', beingItems, yPos, summary.total_being);
+      yPos = drawTableSection('What to Do (การทำ)', doingItems, yPos, summary.total_doing);
+      
+      // Check if we need a new page for the highlight section
+      if (yPos > pageHeight - 120) {
+        pdf.addPage();
+        yPos = margin + 20;
       }
       
-      // Column totals
-      yPos += (maxItems * 12) + 20;
-      
-      pdf.setDrawColor(10, 34, 64);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPos, pageWidth - margin, yPos);
-      
-      yPos += 15;
-      
-      pdf.setFontSize(12);
-      pdf.setTextColor(10, 34, 64);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`Total: ฿${summary.total_having.toLocaleString()}`, col1X, yPos);
-      pdf.text(`Total: ฿${summary.total_being.toLocaleString()}`, col2X, yPos);
-      pdf.text(`Total: ฿${summary.total_doing.toLocaleString()}`, col3X, yPos);
-      
-      yPos += 30;
-      
-      // Summary section
-      pdf.setFont('helvetica', 'normal');
-      
-      // TMI Display
-      pdf.setFontSize(16);
-      pdf.setTextColor(255, 215, 7); // Gold color
-      pdf.text('Your Freedom Number', margin, yPos);
-      
-      yPos += 20;
-      
-      pdf.setFontSize(28);
-      pdf.setTextColor(10, 34, 64);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`฿${summary.target_monthly_income.toLocaleString()}`, margin, yPos);
-      
+      // Highlight Section - Freedom Number
       yPos += 10;
       
+      // Blue background rectangle
+      pdf.setFillColor(10, 34, 64); // Blueprint Blue
+      pdf.rect(margin, yPos - 10, contentWidth, 60, 'F');
+      
+      // Freedom Number title
+      pdf.setFontSize(16);
+      pdf.setTextColor(255, 255, 255); // White text
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Your Freedom Number', margin + 10, yPos + 5);
+      
+      // TMI Amount
+      pdf.setFontSize(32);
+      pdf.setTextColor(255, 215, 7); // Gold color
+      pdf.setFont('helvetica', 'bold');
+      const tmiText = `${summary.target_monthly_income.toLocaleString()}`;
+      pdf.text(tmiText, margin + 10, yPos + 25);
+      
+      // Per month text
       pdf.setFontSize(12);
-      pdf.setTextColor(68, 68, 68);
+      pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('per month', margin, yPos);
+      pdf.text('per month', margin + 10, yPos + 35);
       
-      yPos += 20;
+      // Note
+      pdf.setFontSize(9);
+      pdf.setTextColor(200, 200, 200);
+      pdf.text('*This number may change based on future data', margin + 10, yPos + 45);
       
-      // Calculation breakdown
-      pdf.setFontSize(10);
-      const totalDreamCost = summary.total_having + summary.total_being + summary.total_doing;
-      const calculationText = `Calculation: (฿${totalDreamCost.toLocaleString()} ÷ 12) + ฿${summary.monthly_basic_expenses.toLocaleString()} = ฿${summary.target_monthly_income.toLocaleString()}`;
-      const wrappedCalculation = pdf.splitTextToSize(calculationText, contentWidth);
-      pdf.text(wrappedCalculation, margin, yPos);
+      yPos += 80;
       
-      // Footer
-      yPos = pageHeight - 60;
+      // Footer Section
+      yPos = Math.max(yPos, pageHeight - 40);
       
       pdf.setDrawColor(10, 34, 64);
       pdf.setLineWidth(0.5);
-      pdf.line(margin, yPos, pageWidth - margin, yPos);
-      
-      yPos += 15;
+      pdf.line(margin, yPos - 10, pageWidth - margin, yPos - 10);
       
       pdf.setFontSize(11);
       pdf.setTextColor(68, 68, 68);
+      pdf.setFont('helvetica', 'normal');
       const footerText1 = 'This is your "target". The next step is to create a "roadmap" to get you there.';
-      const wrappedFooter1 = pdf.splitTextToSize(footerText1, contentWidth);
-      pdf.text(wrappedFooter1, margin, yPos);
+      pdf.text(footerText1, margin, yPos);
       
-      yPos += 10;
-      
-      pdf.setFontSize(10);
+      pdf.setFontSize(11);
       pdf.setTextColor(10, 34, 64);
+      pdf.setFont('helvetica', 'bold');
       const footerText2 = 'Discover the complete blueprint in "The Freedom Engine" book at: www.begins.guide/book';
-      const wrappedFooter2 = pdf.splitTextToSize(footerText2, contentWidth);
-      pdf.text(wrappedFooter2, margin, yPos);
+      pdf.text(footerText2, margin, yPos + 10);
       
       // Save the PDF
       const fileName = `Life-Blueprint-${userName}-${new Date().toISOString().split('T')[0]}.pdf`;
