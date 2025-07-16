@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Trash2, Save, Calculator, Target } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { PDFDownloadButton } from '@/components/PDFDownloadButton';
 
 interface DreamlineRowProps {
   dreamline: Dreamline;
@@ -327,7 +328,7 @@ const DreamlineToolPage = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 flex-wrap">
           <Button
             onClick={saveAllData}
             disabled={loading}
@@ -337,6 +338,13 @@ const DreamlineToolPage = () => {
             <Save className="w-4 h-4 mr-2" />
             {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
           </Button>
+          
+          <PDFDownloadButton
+            dreamlines={dreamlines}
+            summary={summary}
+            variant="outline"
+            size="lg"
+          />
           
           <Button
             variant="outline"

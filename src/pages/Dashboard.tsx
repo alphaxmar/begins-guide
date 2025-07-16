@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Target, BookOpen, GraduationCap, Users, Calculator, Edit3, ExternalLink } from 'lucide-react';
+import { PDFDownloadButton } from '@/components/PDFDownloadButton';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { summary, loading } = useDreamlines();
+  const { dreamlines, summary, loading } = useDreamlines();
 
   useEffect(() => {
     if (!user) {
@@ -49,14 +50,20 @@ const Dashboard = () => {
                   <p className="text-4xl md:text-5xl font-bold text-primary mb-4">
                     ฿{targetMonthlyIncome.toLocaleString()} / เดือน
                   </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/dreamline-tool')}
-                    className="mt-2"
-                  >
-                    <Edit3 className="w-4 h-4 mr-2" />
-                    แก้ไข/ดู Dreamline ของฉัน
-                  </Button>
+                  <div className="flex gap-3 justify-center mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/dreamline-tool')}
+                    >
+                      <Edit3 className="w-4 h-4 mr-2" />
+                      แก้ไข/ดู Dreamline ของฉัน
+                    </Button>
+                    <PDFDownloadButton
+                      dreamlines={dreamlines}
+                      summary={summary}
+                      variant="ghost"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>

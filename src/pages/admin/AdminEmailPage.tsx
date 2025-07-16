@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import EmailTester from '@/components/admin/EmailTester';
 import WebhookConfig from '@/components/admin/WebhookConfig';
+import { ReengagementEmailManager } from '@/components/admin/ReengagementEmailManager';
 
 const AdminEmailPage = () => {
   const [recipientEmail, setRecipientEmail] = useState('');
@@ -127,6 +128,8 @@ const AdminEmailPage = () => {
           </Card>
           
           <WebhookConfig />
+          
+          <ReengagementEmailManager />
         </div>
         
         <div className="space-y-6">
