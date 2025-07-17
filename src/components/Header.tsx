@@ -40,7 +40,7 @@ const Header = () => {
   const totalItems = (items || []).reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <header className="bg-background/80 backdrop-blur-sm sticky top-0 z-40 border-b">
+    <header className="bg-background/95 backdrop-blur-md sticky top-0 z-50 border-b">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="text-2xl font-bold text-primary">
           Begins Guide
@@ -106,7 +106,7 @@ const Header = () => {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56 z-50" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">เข้าสู่ระบบด้วย</p>
@@ -166,7 +166,7 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b bg-background/95 backdrop-blur-sm">
+        <div className="md:hidden fixed inset-x-0 top-16 z-40 border-b bg-background/95 backdrop-blur-md shadow-lg">
           <nav className="container mx-auto px-4 py-4 space-y-4">
             <Link 
               to="/" 
