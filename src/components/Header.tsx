@@ -49,9 +49,6 @@ const Header = () => {
           <Link to="/" className="text-foreground/60 transition-colors hover:text-foreground/80">
             หน้าแรก
           </Link>
-          <Link to="/toolbox" className="text-foreground/60 transition-colors hover:text-foreground/80">
-            Toolbox
-          </Link>
           <Link to="/courses" className="text-foreground transition-colors hover:text-foreground/90 font-semibold">
             คอร์สเรียน
           </Link>
@@ -61,16 +58,14 @@ const Header = () => {
           <Link to="/products" className="text-foreground/60 transition-colors hover:text-foreground/80">
             สินค้าดิจิทัล
           </Link>
-          {user && isVip && (
-            <Link 
-              to="/toolbox" 
-              className="text-foreground/60 transition-colors hover:text-foreground/80 flex items-center gap-1"
-            >
-              <Brain className="h-4 w-4" />
-              Toolbox
-              <Badge className="bg-yellow-500 text-white text-xs ml-1">PRO</Badge>
-            </Link>
-          )}
+          <Link 
+            to="/toolbox" 
+            className="text-foreground/60 transition-colors hover:text-foreground/80 flex items-center gap-1"
+          >
+            <Brain className="h-4 w-4" />
+            AI Tools
+            {user && isVip && <Badge className="bg-yellow-500 text-white text-xs ml-1">PRO</Badge>}
+          </Link>
         </nav>
         <div className="flex items-center gap-4">
           {/* Mobile Menu Button */}
@@ -129,13 +124,11 @@ const Header = () => {
                   <User className="mr-2 h-4 w-4" />
                   <span>โปรไฟล์</span>
                 </DropdownMenuItem>
-                {isVip && (
-                  <DropdownMenuItem onClick={() => navigate('/ai-tools')}>
+                <DropdownMenuItem onClick={() => navigate('/toolbox')}>
                     <Brain className="mr-2 h-4 w-4 text-yellow-600" />
                     <span>AI Tools</span>
-                    <Badge className="ml-auto bg-yellow-500 text-white text-xs">PRO</Badge>
+                    {isVip && <Badge className="ml-auto bg-yellow-500 text-white text-xs">PRO</Badge>}
                   </DropdownMenuItem>
-                )}
                 <DropdownMenuItem onClick={() => navigate('/affiliate')}>
                   <Users className="mr-2 h-4 w-4 text-green-600" />
                   <span>Affiliate</span>
@@ -182,13 +175,6 @@ const Header = () => {
               หน้าแรก
             </Link>
             <Link 
-              to="/toolbox" 
-              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Toolbox
-            </Link>
-            <Link 
               to="/courses" 
               className="block text-foreground transition-colors hover:text-foreground/90 py-2 font-semibold"
               onClick={() => setMobileMenuOpen(false)}
@@ -209,17 +195,15 @@ const Header = () => {
             >
               สินค้าดิจิทัล
             </Link>
-            {user && isVip && (
-              <Link 
-                to="/toolbox" 
-                className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Brain className="h-4 w-4" />
-                Toolbox
-                <Badge className="bg-yellow-500 text-white text-xs">PRO</Badge>
-              </Link>
-            )}
+            <Link 
+              to="/toolbox" 
+              className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Brain className="h-4 w-4" />
+              AI Tools
+              {user && isVip && <Badge className="bg-yellow-500 text-white text-xs">PRO</Badge>}
+            </Link>
           </nav>
         </div>
       )}
