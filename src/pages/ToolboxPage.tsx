@@ -19,9 +19,9 @@ export default function ToolboxPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { hasBookAccess, hasCourseAccess } = useCourseAccess();
-  const { isProMember } = useVipStatus();
+  const { isVip } = useVipStatus();
 
-  if (!hasBookAccess && !hasCourseAccess && !isProMember) {
+  if (!hasBookAccess && !hasCourseAccess && !isVip) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-center">ไม่มีสิทธิ์เข้าถึง</h1>
@@ -74,7 +74,7 @@ export default function ToolboxPage() {
             </NavigationMenuItem>
           )}
 
-          {isProMember && (
+          {isVip && (
             <NavigationMenuItem>
               <NavigationMenuTrigger>Pro Member</NavigationMenuTrigger>
               <NavigationMenuContent>

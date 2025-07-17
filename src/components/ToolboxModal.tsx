@@ -58,10 +58,10 @@ interface ToolboxModalProps {
 export function ToolboxModal({ isOpen, onClose }: ToolboxModalProps) {
   const { user } = useAuth();
   const { hasBookAccess, hasCourseAccess } = useCourseAccess();
-  const { isProMember } = useVipStatus();
+  const { isVip } = useVipStatus();
 
   const canAccessTool = (toolId: number) => {
-    if (isProMember) return true;
+    if (isVip) return true;
     if (hasCourseAccess && toolId !== 3) return true;
     if (hasBookAccess && toolId === 1) return true;
     return false;
