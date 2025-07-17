@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAffiliateTracking } from '@/hooks/useAffiliateTracking';
+import DefaultLayout from '@/components/layouts/DefaultLayout';
 import AuthPage from '@/pages/AuthPage';
 import Index from '@/pages/Index';
 import Articles from '@/pages/Articles';
@@ -85,62 +86,65 @@ function App() {
 
   return (
     <Routes>
+      {/* Full screen pages */}
       <Route path="/auth" element={<AuthPage />} />
-      <Route path="/" element={<Index />} />
+      
+      {/* Pages with default layout */}
+      <Route path="/" element={<DefaultLayout><Index /></DefaultLayout>} />
       
       {/* Articles routes */}
-      <Route path="/articles" element={<Articles />} />
-      <Route path="/articles/10-thai-micro-saas-ideas-2025" element={<MicroSaasIdeasArticle />} />
-      <Route path="/articles/how-to-get-first-100-customers-organic-marketing" element={<OrganicMarketingArticle />} />
-      <Route path="/articles/what-is-no-code-business-the-whole-truth" element={<NoCodeBusinessArticle />} />
-      <Route path="/articles/how-to-price-digital-products-4-strategies" element={<PricingDigitalProductsArticle />} />
-      <Route path="/articles/5-ai-tools-for-entrepreneurs-2025" element={<AiToolsForEntrepreneursArticle />} />
-      <Route path="/articles/case-study-healjai-me-matching-platform-15-days" element={<HealjaiCaseStudyArticle />} />
-      <Route path="/articles/case-study-build-sellplan-store-in-7-days-with-nocode" element={<CaseStudyBuildSellplanStoreArticle />} />
-      <Route path="/articles/case-study-ai-franchise-finder-no-code" element={<CaseStudyAiFranchiseFinderArticle />} />
-      <Route path="/articles/case-study-nocode-cafe-booking-app-7-days" element={<CaseStudyNocodeBookingAppArticle />} />
-      <Route path="/articles/seo-101-for-busy-business-owners" element={<Seo101ForBusyOwnersArticle />} />
-      <Route path="/articles/basic-tax-for-thai-business-owners" element={<BasicTaxForThaiBusinessOwnersArticle />} />
-      <Route path="/articles/interview-office-worker-to-6-figure-fashion-brand" element={<OfficeWorkerTo6FigureFashionBrandArticle />} />
-      <Route path="/articles/why-personal-branding-is-powerful-for-small-business" element={<WhyPersonalBrandingIsPowerfulArticle />} />
-      <Route path="/articles/what-is-lovable-nocode-tool-review" element={<LovableReviewArticle />} />
-      <Route path="/articles/how-to-build-online-community-turn-customers-into-fans" element={<HowToBuildOnlineCommunityArticle />} />
-      <Route path="/articles/how-to-build-course-platform-with-nocode" element={<HowToBuildCoursePlatformArticle />} />
-      <Route path="/articles/:slug" element={<ArticleDetail />} />
+      <Route path="/articles" element={<DefaultLayout><Articles /></DefaultLayout>} />
+      <Route path="/articles/10-thai-micro-saas-ideas-2025" element={<DefaultLayout><MicroSaasIdeasArticle /></DefaultLayout>} />
+      <Route path="/articles/how-to-get-first-100-customers-organic-marketing" element={<DefaultLayout><OrganicMarketingArticle /></DefaultLayout>} />
+      <Route path="/articles/what-is-no-code-business-the-whole-truth" element={<DefaultLayout><NoCodeBusinessArticle /></DefaultLayout>} />
+      <Route path="/articles/how-to-price-digital-products-4-strategies" element={<DefaultLayout><PricingDigitalProductsArticle /></DefaultLayout>} />
+      <Route path="/articles/5-ai-tools-for-entrepreneurs-2025" element={<DefaultLayout><AiToolsForEntrepreneursArticle /></DefaultLayout>} />
+      <Route path="/articles/case-study-healjai-me-matching-platform-15-days" element={<DefaultLayout><HealjaiCaseStudyArticle /></DefaultLayout>} />
+      <Route path="/articles/case-study-build-sellplan-store-in-7-days-with-nocode" element={<DefaultLayout><CaseStudyBuildSellplanStoreArticle /></DefaultLayout>} />
+      <Route path="/articles/case-study-ai-franchise-finder-no-code" element={<DefaultLayout><CaseStudyAiFranchiseFinderArticle /></DefaultLayout>} />
+      <Route path="/articles/case-study-nocode-cafe-booking-app-7-days" element={<DefaultLayout><CaseStudyNocodeBookingAppArticle /></DefaultLayout>} />
+      <Route path="/articles/seo-101-for-busy-business-owners" element={<DefaultLayout><Seo101ForBusyOwnersArticle /></DefaultLayout>} />
+      <Route path="/articles/basic-tax-for-thai-business-owners" element={<DefaultLayout><BasicTaxForThaiBusinessOwnersArticle /></DefaultLayout>} />
+      <Route path="/articles/interview-office-worker-to-6-figure-fashion-brand" element={<DefaultLayout><OfficeWorkerTo6FigureFashionBrandArticle /></DefaultLayout>} />
+      <Route path="/articles/why-personal-branding-is-powerful-for-small-business" element={<DefaultLayout><WhyPersonalBrandingIsPowerfulArticle /></DefaultLayout>} />
+      <Route path="/articles/what-is-lovable-nocode-tool-review" element={<DefaultLayout><LovableReviewArticle /></DefaultLayout>} />
+      <Route path="/articles/how-to-build-online-community-turn-customers-into-fans" element={<DefaultLayout><HowToBuildOnlineCommunityArticle /></DefaultLayout>} />
+      <Route path="/articles/how-to-build-course-platform-with-nocode" element={<DefaultLayout><HowToBuildCoursePlatformArticle /></DefaultLayout>} />
+      <Route path="/articles/:slug" element={<DefaultLayout><ArticleDetail /></DefaultLayout>} />
       
       {/* Course Sales Pages */}
-      <Route path="/course/:slug" element={<CourseSalesPage />} />
+      <Route path="/course/:slug" element={<DefaultLayout><CourseSalesPage /></DefaultLayout>} />
       
       {/* Learning Routes */}
-      <Route path="/learn/:slug" element={<UserProtectedRoute><CoursePage /></UserProtectedRoute>} />
+      <Route path="/learn/:slug" element={<UserProtectedRoute><DefaultLayout><CoursePage /></DefaultLayout></UserProtectedRoute>} />
       
       {/* Certificate Routes */}
-      <Route path="/certificate/:slug" element={<UserProtectedRoute><CertificatePage /></UserProtectedRoute>} />
+      <Route path="/certificate/:slug" element={<UserProtectedRoute><DefaultLayout><CertificatePage /></DefaultLayout></UserProtectedRoute>} />
       
       {/* Other pages */}
-      <Route path="/program" element={<ProgramPage />} />
-      <Route path="/micro-saas-course" element={<MicroSaasCoursePage />} />
-      <Route path="/services/mvp-launchpad" element={<MvpLaunchpadPage />} />
-      <Route path="/no-code-webpreneur" element={<NoCodeWebpreneurPage />} />
+      <Route path="/program" element={<DefaultLayout><ProgramPage /></DefaultLayout>} />
+      <Route path="/micro-saas-course" element={<DefaultLayout><MicroSaasCoursePage /></DefaultLayout>} />
+      <Route path="/services/mvp-launchpad" element={<DefaultLayout><MvpLaunchpadPage /></DefaultLayout>} />
+      <Route path="/no-code-webpreneur" element={<DefaultLayout><NoCodeWebpreneurPage /></DefaultLayout>} />
       
       {/* Existing pages */}
-      <Route path="/courses" element={<CoursesPage />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/products/:slug" element={<ProductDetail />} />
-      <Route path="/cart" element={<CartPage />} />
-      <Route path="/checkout" element={<CheckoutPage />} />
-      <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+      <Route path="/courses" element={<DefaultLayout><CoursesPage /></DefaultLayout>} />
+      <Route path="/products" element={<DefaultLayout><Products /></DefaultLayout>} />
+      <Route path="/products/:slug" element={<DefaultLayout><ProductDetail /></DefaultLayout>} />
+      <Route path="/cart" element={<DefaultLayout><CartPage /></DefaultLayout>} />
+      <Route path="/checkout" element={<DefaultLayout><CheckoutPage /></DefaultLayout>} />
+      <Route path="/checkout/success" element={<DefaultLayout><CheckoutSuccessPage /></DefaultLayout>} />
       
       {/* Dreamline Tool Routes */}
-      <Route path="/dreamline" element={<DreamlineLandingPage />} />
-        <Route path="/dreamline-tool" element={<UserProtectedRoute><DreamlineToolPage /></UserProtectedRoute>} />
-        <Route path="/dashboard" element={<UserProtectedRoute><Dashboard /></UserProtectedRoute>} />
-        <Route path="/book" element={<BookSalesPage />} />
-        <Route path="/academy" element={<UserProtectedRoute><AcademyCoursePage /></UserProtectedRoute>} />
+      <Route path="/dreamline" element={<DefaultLayout><DreamlineLandingPage /></DefaultLayout>} />
+      <Route path="/dreamline-tool" element={<UserProtectedRoute><DefaultLayout><DreamlineToolPage /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/dashboard" element={<UserProtectedRoute><DefaultLayout><Dashboard /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/book" element={<DefaultLayout><BookSalesPage /></DefaultLayout>} />
+      <Route path="/academy" element={<UserProtectedRoute><DefaultLayout><AcademyCoursePage /></DefaultLayout></UserProtectedRoute>} />
 
       {/* User Routes */}
-      <Route path="/profile" element={<UserProtectedRoute><ProfilePage /></UserProtectedRoute>} />
-      <Route path="/affiliate" element={<UserProtectedRoute><AffiliatePage /></UserProtectedRoute>} />
+      <Route path="/profile" element={<UserProtectedRoute><DefaultLayout><ProfilePage /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/affiliate" element={<UserProtectedRoute><DefaultLayout><AffiliatePage /></DefaultLayout></UserProtectedRoute>} />
 
       {/* Cohort Routes */}
       <Route path="/cohort/:productSlug" element={<UserProtectedRoute><CohortPage /></UserProtectedRoute>} />
@@ -176,7 +180,7 @@ function App() {
       <Route path="/toolbox" element={<UserProtectedRoute><ToolboxPage /></UserProtectedRoute>} />
       <Route path="/ai-tools" element={<Navigate to="/toolbox" replace />} />
 
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<DefaultLayout><NotFound /></DefaultLayout>} />
     </Routes>
   );
 }

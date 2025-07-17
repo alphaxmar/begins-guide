@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain, Menu, X, Users } from 'lucide-react';
+import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain, Menu, X, Users, Home } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -46,7 +46,8 @@ const Header = () => {
           Begins Guide
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <Link to="/" className="text-foreground/60 transition-colors hover:text-foreground/80">
+          <Link to="/" className="text-foreground/60 transition-colors hover:text-foreground/80 flex items-center gap-1">
+            <Home className="h-4 w-4" />
             หน้าแรก
           </Link>
           <Link to="/courses" className="text-foreground transition-colors hover:text-foreground/90 font-semibold">

@@ -2,12 +2,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Crown, BookOpen, FileText, ShoppingBag, Package } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Crown, BookOpen, FileText, ShoppingBag, Package, User2 } from "lucide-react";
 import ProfileForm from "@/components/profile/ProfileForm";
 import PurchasedItemsList from "@/components/profile/PurchasedItemsList";
 import VipStatusCard from "@/components/profile/VipStatusCard";
@@ -18,6 +19,7 @@ const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
   const { isVip } = useVipStatus();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("profile");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -44,7 +46,6 @@ const ProfilePage = () => {
     enabled: !!user,
   });
 
-  // เพิ่ม query สำหรับนับจำนวนสินค้าที่ซื้อแล้ว
   const { data: purchaseCount } = useQuery({
     queryKey: ['purchase_count', user?.id],
     queryFn: async () => {
@@ -78,101 +79,124 @@ const ProfilePage = () => {
   return (
     <div className="py-12 max-w-6xl mx-auto px-4">
       <ProMemberNav />
+      
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>โปรไฟล์ของคุณ</CardTitle>
-              <CardDescription>จัดการข้อมูลส่วนตัวและดูสินค้าของคุณ</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ProfileForm user={user} profile={profile} />
-            </CardContent>
-          </Card>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User2 className="h-4 w-4" />
+                โปรไฟล์
+              </TabsTrigger>
+              <TabsTrigger value="purchases" className="flex items-center gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                สินค้าของฉัน
+              </TabsTrigger>
+              <TabsTrigger value="vip" className="flex items-center gap-2">
+                <Crown className="h-4 w-4" />
+                VIP Content
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Quick Access Cards - ปุ่มนำทางที่ชัดเจน */}
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5" />
-                สินค้าและคอร์สของฉัน
-              </CardTitle>
-              <CardDescription>
-                เข้าถึงคอร์สเรียนและเทมเพลตที่คุณซื้อแล้ว
-                {purchaseCount !== undefined && ` (${purchaseCount} รายการ)`}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Button 
-                  asChild 
-                  variant="outline" 
-                  className="h-20 flex-col bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-blue-200"
-                >
-                  <div className="cursor-pointer" onClick={() => {
-                    const element = document.getElementById('purchased-items-section');
-                    element?.scrollIntoView({ behavior: 'smooth' });
-                  }}>
-                    <Package className="h-6 w-6 mb-2 text-blue-600" />
-                    <span className="font-medium">สินค้าทั้งหมด</span>
-                    <span className="text-xs text-muted-foreground">
-                      {purchaseCount || 0} รายการ
-                    </span>
+            <TabsContent value="profile" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>โปรไฟล์ของคุณ</CardTitle>
+                  <CardDescription>จัดการข้อมูลส่วนตัวของคุณ</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ProfileForm user={user} profile={profile} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="purchases" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingBag className="h-5 w-5" />
+                    สินค้าและคอร์สของฉัน
+                  </CardTitle>
+                  <CardDescription>
+                    เข้าถึงคอร์สเรียนและเทมเพลตที่คุณซื้อแล้ว
+                    {purchaseCount !== undefined && ` (${purchaseCount} รายการ)`}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 mb-6">
+                    <Button 
+                      asChild 
+                      variant="outline" 
+                      className="h-20 flex-col bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-blue-200"
+                    >
+                      <div className="cursor-pointer" onClick={() => {
+                        const element = document.getElementById('purchased-items-section');
+                        element?.scrollIntoView({ behavior: 'smooth' });
+                      }}>
+                        <Package className="h-6 w-6 mb-2 text-blue-600" />
+                        <span className="font-medium">สินค้าทั้งหมด</span>
+                        <span className="text-xs text-muted-foreground">
+                          {purchaseCount || 0} รายการ
+                        </span>
+                      </div>
+                    </Button>
+                    
+                    <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200">
+                      <Link to="/products">
+                        <ShoppingBag className="h-6 w-6 mb-2 text-green-600" />
+                        <span className="font-medium">เลือกซื้อเพิ่ม</span>
+                        <span className="text-xs text-muted-foreground">สินค้าใหม่</span>
+                      </Link>
+                    </Button>
                   </div>
-                </Button>
-                
-                <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200">
-                  <Link to="/products">
-                    <ShoppingBag className="h-6 w-6 mb-2 text-green-600" />
-                    <span className="font-medium">เลือกซื้อเพิ่ม</span>
-                    <span className="text-xs text-muted-foreground">สินค้าใหม่</span>
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  
+                  <div id="purchased-items-section">
+                    <PurchasedItemsList user={user} />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* VIP Quick Access - show only for VIP users */}
-          {isVip && (
-            <Card className="mt-8 border-yellow-200 bg-gradient-to-br from-yellow-50 to-amber-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-yellow-500" />
-                  เข้าถึงเนื้อหา VIP
-                </CardTitle>
-                <CardDescription>
-                  เข้าถึงคอร์สและเทมเพลตทั้งหมดได้ไม่จำกัด
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-yellow-300">
-                    <Link to="/vip/courses">
-                      <BookOpen className="h-6 w-6 mb-2 text-amber-600" />
-                      <span className="font-medium">คอร์สทั้งหมด</span>
-                      <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-yellow-300">
-                    <Link to="/vip/templates">
-                      <FileText className="h-6 w-6 mb-2 text-amber-600" />
-                      <span className="font-medium">เทมเพลตทั้งหมด</span>
-                      <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {/* รายการสินค้าที่ซื้อแล้ว */}
-          <div id="purchased-items-section" className="mt-8">
-            <PurchasedItemsList user={user} />
-          </div>
+            <TabsContent value="vip" className="space-y-4">
+              {isVip ? (
+                <Card className="border-yellow-200 bg-gradient-to-br from-yellow-50 to-amber-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Crown className="h-5 w-5 text-yellow-500" />
+                      เข้าถึงเนื้อหา VIP
+                    </CardTitle>
+                    <CardDescription>
+                      เข้าถึงคอร์สและเทมเพลตทั้งหมดได้ไม่จำกัด
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-yellow-300">
+                        <Link to="/vip/courses">
+                          <BookOpen className="h-6 w-6 mb-2 text-amber-600" />
+                          <span className="font-medium">คอร์สทั้งหมด</span>
+                          <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-yellow-300">
+                        <Link to="/vip/templates">
+                          <FileText className="h-6 w-6 mb-2 text-amber-600" />
+                          <span className="font-medium">เทมเพลตทั้งหมด</span>
+                          <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <VipStatusCard />
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
         
         <div className="space-y-6">
-          <VipStatusCard />
+          {activeTab !== "vip" && <VipStatusCard />}
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +14,7 @@ import { User } from "@supabase/supabase-js";
 
 const profileSchema = z.object({
   full_name: z.string().min(2, { message: "ชื่อ-นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร" }).optional(),
-  avatar_url: z.string().url({ message: "กรุณาใส่ URL ของรูปภาพที่ถูกต้อง" }).optional().or(z.literal('')),
+  avatar_url: z.string().optional().or(z.literal('')),
 });
 
 interface ProfileFormProps {
@@ -49,83 +48,116 @@ const ProfileForm = ({ user, profile }: ProfileFormProps) => {
 
       const { data, error } = await supabase
         .from('profiles')
-        .update({
-          full_name: updatedProfile.full_name,
-          avatar_url: updatedProfile.avatar_url,
+        .upsert({
+          id: user.id,
+          ...updatedProfile,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id)
         .select()
         .single();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      toast.success("อัปเดตโปรไฟล์สำเร็จ!");
-      queryClient.setQueryData(['profile', user?.id], data);
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success('อัพเดทโปรไฟล์สำเร็จ');
     },
     onError: (error) => {
-      toast.error(`เกิดข้อผิดพลาด: ${error.message}`);
+      console.error('Update profile error:', error);
+      toast.error('เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์');
     },
   });
 
-  const onSubmit = (values: z.infer<typeof profileSchema>) => {
+  function onSubmit(values: z.infer<typeof profileSchema>) {
     updateProfileMutation.mutate(values);
-  };
+  }
 
   return (
-    <div>
-      <div className="flex items-center space-x-4">
-        <Avatar className="h-20 w-20">
-          <AvatarImage src={form.watch('avatar_url') || user.user_metadata?.avatar_url} alt={user.email ?? ''} />
-          <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <div>
-          <p className="font-medium">{form.watch('full_name') || 'ผู้ใช้ใหม่'}</p>
-          <p className="text-sm text-muted-foreground">{user.email}</p>
-        </div>
-      </div>
-      
-      <div className="mt-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="full_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ชื่อ-นามสกุล</FormLabel>
-                  <FormControl>
-                    <Input placeholder="ชื่อ-นามสกุลของคุณ" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="avatar_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL รูปโปรไฟล์</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://example.com/avatar.jpg" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={updateProfileMutation.isPending}>
-              {updateProfileMutation.isPending ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
-            </Button>
-          </form>
-        </Form>
-      </div>
-    </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="full_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ชื่อ-นามสกุล</FormLabel>
+              <FormControl>
+                <Input placeholder="ใส่ชื่อ-นามสกุลของคุณ" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="avatar_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>รูปโปรไฟล์</FormLabel>
+              <FormControl>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={field.value || user.user_metadata?.avatar_url} />
+                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-2">
+                    <Input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 2 * 1024 * 1024) {
+                            toast.error('ขนาดไฟล์ต้องไม่เกิน 2MB');
+                            return;
+                          }
+
+                          const fileExt = file.name.split('.').pop();
+                          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+                          
+                          toast.loading('กำลังอัพโหลดรูปภาพ...');
+                          
+                          const { error: uploadError, data } = await supabase.storage
+                            .from('avatars')
+                            .upload(fileName, file);
+                          
+                          if (uploadError) {
+                            toast.error('อัพโหลดรูปภาพไม่สำเร็จ');
+                            return;
+                          }
+
+                          if (data) {
+                            const { data: { publicUrl } } = supabase.storage
+                              .from('avatars')
+                              .getPublicUrl(data.path);
+                            field.onChange(publicUrl);
+                            toast.success('อัพโหลดรูปภาพสำเร็จ');
+                          }
+                        }
+                      }}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      อัพโหลดรูปโปรไฟล์ขนาดไม่เกิน 2MB
+                    </p>
+                  </div>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button 
+          type="submit" 
+          disabled={updateProfileMutation.isPending}
+          className="w-full md:w-auto"
+        >
+          {updateProfileMutation.isPending ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
+        </Button>
+      </form>
+    </Form>
   );
 };
 
