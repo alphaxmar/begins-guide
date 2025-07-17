@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import NewsletterSignup from "@/components/NewsletterSignup";
-import Layout from "@/components/Layout";
+import DefaultLayout from "@/components/layouts/DefaultLayout";
 
 type Article = Tables<'articles'> & {
   categories?: Tables<'categories'>;
@@ -169,7 +169,7 @@ const Articles = () => {
   });
 
   return (
-    <Layout>
+    <DefaultLayout>
       <div className="min-h-screen bg-gray-50">
         {/* Section 1: Hero Section */}
         <section className="bg-gradient-to-r from-green-600 to-emerald-700 text-white py-20">
@@ -450,7 +450,7 @@ const Articles = () => {
             </section>
           </div>
         </div>
-    </Layout>
+    </DefaultLayout>
   );
 };
 
