@@ -63,11 +63,11 @@ const Header = () => {
           </Link>
           {user && isVip && (
             <Link 
-              to="/ai-tools" 
+              to="/toolbox" 
               className="text-foreground/60 transition-colors hover:text-foreground/80 flex items-center gap-1"
             >
               <Brain className="h-4 w-4" />
-              AI Tools
+              Toolbox
               <Badge className="bg-yellow-500 text-white text-xs ml-1">PRO</Badge>
             </Link>
           )}
@@ -211,12 +211,12 @@ const Header = () => {
             </Link>
             {user && isVip && (
               <Link 
-                to="/ai-tools" 
+                to="/toolbox" 
                 className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Brain className="h-4 w-4" />
-                AI Tools
+                Toolbox
                 <Badge className="bg-yellow-500 text-white text-xs">PRO</Badge>
               </Link>
             )}
