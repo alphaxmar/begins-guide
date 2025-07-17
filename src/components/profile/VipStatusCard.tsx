@@ -107,17 +107,61 @@ const VipStatusCard = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            <Badge variant="secondary">สมาชิกทั่วไป</Badge>
-            <CardDescription>
-              อัปเกรดเป็นสมาชิก PRO เพื่อเข้าถึงคอร์สและเทมเพลตทั้งหมดได้ไม่จำกัด พร้อมเครื่องมือ AI Power Tools
-            </CardDescription>
-            <Button asChild className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600">
-              <Link to="/pricing" className="flex items-center gap-2">
-                <Crown className="h-4 w-4" />
-                อัปเกรดเป็น PRO
-              </Link>
-            </Button>
+          <div className="space-y-6">
+            <div className="text-center">
+              <Badge variant="secondary" className="text-lg px-4 py-2">สมาชิกทั่วไป</Badge>
+            </div>
+            
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200">
+              <div className="flex items-start gap-3">
+                <Sparkles className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-amber-800 mb-1">
+                    สมาชิก PRO ได้อะไรบ้าง?
+                  </h4>
+                  <ul className="text-sm text-amber-700 space-y-1">
+                    <li>✨ เข้าถึงคอร์สทั้งหมดไม่จำกัด</li>
+                    <li>📄 ดาวน์โหลดเทมเพลตทั้งหมดฟรี</li>
+                    <li>🤖 ใช้เครื่องมือ AI Power Tools</li>
+                    <li>🎯 เข้าถึงเนื้อหาใหม่ก่อนใคร</li>
+                    <li>🔄 อัพเดตตลอดชีวิต</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600 text-center">
+                เริ่มต้นด้วยคอร์สเดี่ยว หรืออัพเกรด PRO เลย?
+              </p>
+              
+              <div className="grid gap-3">
+                <Button asChild className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600">
+                  <Link to="/pricing" className="flex items-center justify-center gap-2">
+                    <Crown className="h-4 w-4" />
+                    อัพเกรดเป็น PRO
+                  </Link>
+                </Button>
+                
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/products" className="flex items-center justify-center gap-2">
+                    <ArrowRight className="h-4 w-4" />
+                    ดูคอร์สเดี่ยว
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="text-center pt-2 border-t">
+              <p className="text-xs text-gray-500">
+                💡 เริ่มต้นฟรี: ลองดูคอร์สและเทมเพลตฟรีก่อน
+              </p>
+              <Button variant="ghost" size="sm" asChild className="mt-1">
+                <Link to="/products?price=free" className="text-blue-600 hover:text-blue-800">
+                  ดูสินค้าฟรี →
+                </Link>
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

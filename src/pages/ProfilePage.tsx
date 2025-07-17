@@ -115,40 +115,44 @@ const ProfilePage = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingBag className="h-5 w-5" />
-                    สินค้าและคอร์สของฉัน
+                    {(purchaseCount && purchaseCount > 0) ? "สินค้าและคอร์สของฉัน" : "เริ่มต้นการเรียนรู้"}
                   </CardTitle>
                   <CardDescription>
-                    เข้าถึงคอร์สเรียนและเทมเพลตที่คุณซื้อแล้ว
-                    {purchaseCount !== undefined && ` (${purchaseCount} รายการ)`}
+                    {(purchaseCount && purchaseCount > 0) 
+                      ? `เข้าถึงคอร์สเรียนและเทมเพลตที่คุณซื้อแล้ว (${purchaseCount} รายการ)`
+                      : "ค้นพบคอร์สเรียนและเครื่องมือที่จะช่วยให้คุณสร้างธุรกิจได้จริง"
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 mb-6">
-                    <Button 
-                      asChild 
-                      variant="outline" 
-                      className="h-20 flex-col bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-blue-200"
-                    >
-                      <div className="cursor-pointer" onClick={() => {
-                        const element = document.getElementById('purchased-items-section');
-                        element?.scrollIntoView({ behavior: 'smooth' });
-                      }}>
-                        <Package className="h-6 w-6 mb-2 text-blue-600" />
-                        <span className="font-medium">สินค้าทั้งหมด</span>
-                        <span className="text-xs text-muted-foreground">
-                          {purchaseCount || 0} รายการ
-                        </span>
-                      </div>
-                    </Button>
-                    
-                    <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200">
-                      <Link to="/products">
-                        <ShoppingBag className="h-6 w-6 mb-2 text-green-600" />
-                        <span className="font-medium">เลือกซื้อเพิ่ม</span>
-                        <span className="text-xs text-muted-foreground">สินค้าใหม่</span>
-                      </Link>
-                    </Button>
-                  </div>
+                  {(purchaseCount && purchaseCount > 0) && (
+                    <div className="grid gap-4 md:grid-cols-2 mb-6">
+                      <Button 
+                        asChild 
+                        variant="outline" 
+                        className="h-20 flex-col bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-blue-200"
+                      >
+                        <div className="cursor-pointer" onClick={() => {
+                          const element = document.getElementById('purchased-items-section');
+                          element?.scrollIntoView({ behavior: 'smooth' });
+                        }}>
+                          <Package className="h-6 w-6 mb-2 text-blue-600" />
+                          <span className="font-medium">สินค้าทั้งหมด</span>
+                          <span className="text-xs text-muted-foreground">
+                            {purchaseCount || 0} รายการ
+                          </span>
+                        </div>
+                      </Button>
+                      
+                      <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200">
+                        <Link to="/products">
+                          <ShoppingBag className="h-6 w-6 mb-2 text-green-600" />
+                          <span className="font-medium">เลือกซื้อเพิ่ม</span>
+                          <span className="text-xs text-muted-foreground">สินค้าใหม่</span>
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
                   
                   <div id="purchased-items-section">
                     <PurchasedItemsList user={user} />

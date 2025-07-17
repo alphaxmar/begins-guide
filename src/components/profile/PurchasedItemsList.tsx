@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import PurchasedItemCard from "./PurchasedItemCard";
 import { Tables } from "@/integrations/supabase/types";
 import { User } from "@supabase/supabase-js";
-import { Package, RefreshCw, ShoppingCart } from "lucide-react";
+import { Package, RefreshCw, ShoppingCart, BookOpen, FileText, Crown } from "lucide-react";
 
 type ProductWithTemplatePath = Tables<'products'> & { template_file_path?: string | null };
 type PurchasedItem = Tables<'user_purchases'> & {
@@ -144,24 +144,141 @@ const PurchasedItemsList = ({ user }: PurchasedItemsListProps) => {
       </div>
       
       {!purchasedItems || purchasedItems.length === 0 ? (
-        <div className="text-center py-12 border-2 border-dashed rounded-lg bg-muted/5">
-          <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h4 className="text-lg font-semibold mb-2">ยังไม่มีสินค้า</h4>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            เลือกซื้อคอร์สเรียนหรือเทมเพลตเพื่อเริ่มต้นเส้นทางการเรียนรู้ของคุณ
-          </p>
-          <div className="space-x-4">
-            <Button asChild>
-              <Link to="/products">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                เลือกชมสินค้าทั้งหมด
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/courses">
-                คอร์สเรียน
-              </Link>
-            </Button>
+        <div className="min-h-[400px] flex flex-col items-center justify-center">
+          {/* Welcome Section */}
+          <div className="text-center mb-8 max-w-2xl">
+            <div className="mb-6">
+              <div className="relative inline-block">
+                <Package className="mx-auto h-16 w-16 text-blue-500 mb-4" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">!</span>
+                </div>
+              </div>
+            </div>
+            
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              ยินดีต้อนรับสู่ Begins Guide! 🎉
+            </h3>
+            
+            <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+              คุณกำลังอยู่ในจุดเริ่มต้นของการเดินทางที่ยิ่งใหญ่! 
+              เรามีคอร์สเรียนและเครื่องมือมากมายที่จะช่วยให้คุณสร้างธุรกิจได้จริง
+            </p>
+          </div>
+
+          {/* Quick Start Cards */}
+          <div className="grid gap-6 md:grid-cols-3 w-full max-w-4xl mb-8">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">1. เลือกคอร์สเรียน</h4>
+                <p className="text-sm text-gray-600 mb-4">
+                  เริ่มต้นด้วยคอร์สที่เหมาะสมกับคุณ
+                </p>
+                <Button size="sm" asChild className="w-full">
+                  <Link to="/courses">ดูคอร์สทั้งหมด</Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200 hover:shadow-lg transition-all duration-300">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">2. ดาวน์โหลดเทมเพลต</h4>
+                <p className="text-sm text-gray-600 mb-4">
+                  เครื่องมือพร้อมใช้สำหรับธุรกิจ
+                </p>
+                <Button size="sm" variant="outline" asChild className="w-full">
+                  <Link to="/products?type=template">ดูเทมเพลต</Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Crown className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">3. อัพเกรด PRO</h4>
+                <p className="text-sm text-gray-600 mb-4">
+                  เข้าถึงทุกอย่างไม่จำกัด
+                </p>
+                <Button size="sm" variant="outline" asChild className="w-full border-purple-300 text-purple-600 hover:bg-purple-50">
+                  <Link to="/pricing">ดูราคา PRO</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Popular Recommendations */}
+          <div className="w-full max-w-4xl">
+            <h4 className="text-xl font-semibold text-center mb-6 text-gray-800">
+              📚 แนะนำสำหรับมือใหม่
+            </h4>
+            
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-300">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h5 className="font-semibold text-gray-900 mb-2">คอร์สเริ่มต้นธุรกิจ</h5>
+                    <p className="text-sm text-gray-600 mb-3">
+                      เหมาะสำหรับผู้ที่ยังไม่รู้จะเริ่มจากไหน
+                    </p>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/courses">เริ่มเรียน</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-300">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h5 className="font-semibold text-gray-900 mb-2">เทมเพลตฟรี</h5>
+                    <p className="text-sm text-gray-600 mb-3">
+                      เครื่องมือพร้อมใช้ที่ไม่เสียค่าใช้จ่าย
+                    </p>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/products?price=free">ดาวน์โหลดฟรี</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="w-full max-w-2xl mt-8 text-center">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white">
+              <h4 className="text-xl font-bold mb-2">พร้อมเริ่มต้นแล้วหรือยัง? 🚀</h4>
+              <p className="text-blue-100 mb-4">
+                เริ่มต้นด้วยคอร์สหรือเทมเพลตที่คุณสนใจ
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button size="lg" variant="secondary" asChild className="bg-white text-blue-600 hover:bg-gray-100">
+                  <Link to="/products">
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    เลือกชมสินค้า
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="border-white text-white hover:bg-white hover:text-blue-600">
+                  <Link to="/courses">
+                    <BookOpen className="mr-2 h-5 w-5" />
+                    ดูคอร์สเรียน
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       ) : (

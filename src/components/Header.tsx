@@ -59,14 +59,30 @@ const Header = () => {
           <Link to="/products" className="text-foreground/60 transition-colors hover:text-foreground/80">
             สินค้าดิจิทัล
           </Link>
-          <Link 
-            to="/toolbox" 
-            className="text-foreground/60 transition-colors hover:text-foreground/80 flex items-center gap-1"
-          >
-            <Brain className="h-4 w-4" />
-            AI Tools
-            {user && isVip && <Badge className="bg-yellow-500 text-white text-xs ml-1">PRO</Badge>}
-          </Link>
+          {user && isVip && (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-foreground/60 transition-colors hover:text-foreground/80 flex items-center gap-1 focus:outline-none">
+                <Brain className="h-4 w-4" />
+                Pro Member
+                <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs ml-1">PRO</Badge>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/pro')}>
+                  <User className="mr-2 h-4 w-4 text-blue-600" />
+                  <span>Pro Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/toolbox')}>
+                  <Brain className="mr-2 h-4 w-4 text-purple-600" />
+                  <span>AI Tools</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/affiliate')}>
+                  <Users className="mr-2 h-4 w-4 text-green-600" />
+                  <span>Affiliate</span>
+                  <Badge className="ml-auto bg-green-500 text-white text-xs">30%</Badge>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </nav>
         <div className="flex items-center gap-4">
           {/* Mobile Menu Button */}
@@ -124,16 +140,6 @@ const Header = () => {
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="mr-2 h-4 w-4" />
                   <span>โปรไฟล์</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/toolbox')}>
-                    <Brain className="mr-2 h-4 w-4 text-yellow-600" />
-                    <span>AI Tools</span>
-                    {isVip && <Badge className="ml-auto bg-yellow-500 text-white text-xs">PRO</Badge>}
-                  </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/affiliate')}>
-                  <Users className="mr-2 h-4 w-4 text-green-600" />
-                  <span>Affiliate</span>
-                  <Badge className="ml-auto bg-green-500 text-white text-xs">30%</Badge>
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate('/admin')}>
@@ -196,15 +202,42 @@ const Header = () => {
             >
               สินค้าดิจิทัล
             </Link>
-            <Link 
-              to="/toolbox" 
-              className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Brain className="h-4 w-4" />
-              AI Tools
-              {user && isVip && <Badge className="bg-yellow-500 text-white text-xs">PRO</Badge>}
-            </Link>
+            {user && isVip && (
+              <div className="border-t pt-4 mt-4">
+                <div className="flex items-center gap-2 text-foreground/80 mb-3">
+                  <Brain className="h-4 w-4" />
+                  <span className="font-medium">Pro Member</span>
+                  <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs">PRO</Badge>
+                </div>
+                <div className="ml-6 space-y-2">
+                  <Link 
+                    to="/pro" 
+                    className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-1"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4 text-blue-600" />
+                    Pro Dashboard
+                  </Link>
+                  <Link 
+                    to="/toolbox" 
+                    className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-1"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Brain className="h-4 w-4 text-purple-600" />
+                    AI Tools
+                  </Link>
+                  <Link 
+                    to="/affiliate" 
+                    className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground/80 py-1"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Users className="h-4 w-4 text-green-600" />
+                    Affiliate
+                    <Badge className="bg-green-500 text-white text-xs">30%</Badge>
+                  </Link>
+                </div>
+              </div>
+            )}
           </nav>
         </div>
       )}

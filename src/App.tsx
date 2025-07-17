@@ -71,6 +71,11 @@ import AcademyCoursePage from '@/pages/AcademyCoursePage';
 import CreateArticle from '@/pages/CreateArticle';
 import EditArticle from '@/pages/EditArticle';
 import ToolboxPage from '@/pages/ToolboxPage';
+import ProPage from '@/pages/ProPage';
+import PricingPage from '@/pages/PricingPage';
+import AIToolsPage from '@/pages/AIToolsPage';
+import VipCoursesPage from '@/pages/VipCoursesPage';
+import VipTemplatesPage from '@/pages/VipTemplatesPage';
 
 function App() {
   const { user } = useAuth();
@@ -145,6 +150,12 @@ function App() {
       {/* User Routes */}
       <Route path="/profile" element={<UserProtectedRoute><DefaultLayout><ProfilePage /></DefaultLayout></UserProtectedRoute>} />
       <Route path="/affiliate" element={<UserProtectedRoute><AffiliatePage /></UserProtectedRoute>} />
+      <Route path="/pro" element={<UserProtectedRoute><DefaultLayout><ProPage /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/pricing" element={<DefaultLayout><PricingPage /></DefaultLayout>} />
+      
+      {/* VIP Routes */}
+      <Route path="/vip-courses" element={<UserProtectedRoute><DefaultLayout><VipCoursesPage /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/vip-templates" element={<UserProtectedRoute><DefaultLayout><VipTemplatesPage /></DefaultLayout></UserProtectedRoute>} />
 
       {/* Cohort Routes */}
       <Route path="/cohort/:productSlug" element={<UserProtectedRoute><CohortPage /></UserProtectedRoute>} />
@@ -177,8 +188,8 @@ function App() {
       </Route>
       
       {/* Toolbox Routes */}
-      <Route path="/toolbox" element={<UserProtectedRoute><ToolboxPage /></UserProtectedRoute>} />
-      <Route path="/ai-tools" element={<Navigate to="/toolbox" replace />} />
+      <Route path="/toolbox" element={<UserProtectedRoute><DefaultLayout><ToolboxPage /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/ai-tools" element={<UserProtectedRoute><DefaultLayout><AIToolsPage /></DefaultLayout></UserProtectedRoute>} />
 
       <Route path="*" element={<DefaultLayout><NotFound /></DefaultLayout>} />
     </Routes>
