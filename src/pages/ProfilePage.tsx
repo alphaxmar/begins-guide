@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +12,7 @@ import ProfileForm from "@/components/profile/ProfileForm";
 import PurchasedItemsList from "@/components/profile/PurchasedItemsList";
 import VipStatusCard from "@/components/profile/VipStatusCard";
 import { useVipStatus } from "@/hooks/useVipStatus";
+import { ProMemberNav } from '@/components/ProMemberNav';
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -77,6 +77,7 @@ const ProfilePage = () => {
 
   return (
     <div className="py-12 max-w-6xl mx-auto px-4">
+      <ProMemberNav />
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>

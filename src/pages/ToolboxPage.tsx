@@ -4,15 +4,7 @@ import { useCourseAccess } from '@/hooks/useCourseAccess';
 import { useVipStatus } from '@/hooks/useVipStatus';
 import { Button } from '@/components/ui/button';
 import { ToolboxModal } from '@/components/ToolboxModal';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
-import { useNavigate } from 'react-router-dom';
+import { ProMemberNav } from '@/components/ProMemberNav';
 
 export default function ToolboxPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,75 +26,7 @@ export default function ToolboxPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <NavigationMenu className="mb-8">
-        <NavigationMenuList>
-          {hasBookAccess && (
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>หนังสือของฉัน</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="grid gap-3 p-4 w-[400px]">
-                  <NavigationMenuLink
-                    className="cursor-pointer block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    onClick={() => navigate('/book')}
-                  >
-                    <div className="text-sm font-medium leading-none">หน้าหนังสือ</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      กลับไปยังหน้าหนังสือของคุณ
-                    </p>
-                  </NavigationMenuLink>
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          )}
-
-          {hasCourseAccess && (
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>คอร์สของฉัน</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="grid gap-3 p-4 w-[400px]">
-                  <NavigationMenuLink
-                    className="cursor-pointer block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    onClick={() => navigate('/courses')}
-                  >
-                    <div className="text-sm font-medium leading-none">หน้าคอร์ส</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      กลับไปยังหน้าคอร์สเรียนของคุณ
-                    </p>
-                  </NavigationMenuLink>
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          )}
-
-          {isVip && (
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Pro Member</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="grid gap-3 p-4 w-[400px]">
-                  <NavigationMenuLink
-                    className="cursor-pointer block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    onClick={() => navigate('/pro')}
-                  >
-                    <div className="text-sm font-medium leading-none">Pro Dashboard</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      กลับไปยังหน้า Pro Dashboard ของคุณ
-                    </p>
-                  </NavigationMenuLink>
-                  <NavigationMenuLink
-                    className="cursor-pointer block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    onClick={() => navigate('/toolbox')}
-                  >
-                    <div className="text-sm font-medium leading-none">AI Power Tools</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      เครื่องมือ AI สำหรับสมาชิก Pro
-                    </p>
-                  </NavigationMenuLink>
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          )}
-        </NavigationMenuList>
-      </NavigationMenu>
+      <ProMemberNav />
 
       <div className="max-w-2xl mx-auto text-center">
         <h1 className="text-4xl font-bold mb-4">Toolbox</h1>

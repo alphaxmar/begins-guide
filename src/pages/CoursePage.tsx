@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useCourseData } from "@/hooks/useCourseData";
@@ -9,6 +8,7 @@ import EnhancedLessonContent from "@/components/learn/EnhancedLessonContent";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, ShoppingCart } from "lucide-react";
+import { ProMemberNav } from '@/components/ProMemberNav';
 
 const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -106,7 +106,7 @@ const CoursePage = () => {
 
   return (
     <div className="flex flex-col h-full py-4">
-       <div className="mb-4">
+      <div className="mb-4">
         <Button variant="ghost" asChild className="-ml-4">
          <Link to={`/products/${product.slug}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
