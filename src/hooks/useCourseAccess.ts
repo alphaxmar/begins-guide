@@ -3,35 +3,39 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-const checkPurchase = async (userId: string, productId: string): Promise<boolean> => {
-  console.log("Checking purchase for user:", userId, "product:", productId);
+const checkPurchase = async (userId: string, type?: string): Promise<{ hasBookAccess: boolean; hasCourseAccess: boolean }> => {
+  console.log("Checking purchases for user:", userId);
   
-  const { data, error } = await supabase
+  const { data: purchases, error } = await supabase
     .from("user_purchases")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("product_id", productId)
-    .maybeSingle();
+    .select("product_id, product:products(type)")
+    .eq("user_id", userId);
 
   if (error) {
-    console.error("Error checking purchase:", error);
-    return false;
+    console.error("Error checking purchases:", error);
+    return { hasBookAccess: false, hasCourseAccess: false };
   }
   
-  console.log("Purchase check result:", !!data);
-  return !!data;
+  const hasBookAccess = purchases?.some(p => p.product?.type === 'book') ?? false;
+  const hasCourseAccess = purchases?.some(p => p.product?.type === 'course') ?? false;
+  
+  console.log("Purchase check result - Book:", hasBookAccess, "Course:", hasCourseAccess);
+  return { hasBookAccess, hasCourseAccess };
 };
 
-export const useCourseAccess = (productId?: string) => {
+export const useCourseAccess = () => {
   const { user } = useAuth();
 
-  const { data: hasAccess, isLoading, isError } = useQuery({
-    queryKey: ["purchaseStatus", user?.id, productId],
-    queryFn: () => checkPurchase(user!.id, productId!),
-    enabled: !!user && !!productId,
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["userPurchases", user?.id],
+    queryFn: () => checkPurchase(user!.id),
+    enabled: !!user,
   });
 
-  console.log("Course access check - User:", user?.id, "Product:", productId, "Has access:", hasAccess);
-
-  return { hasAccess: hasAccess ?? false, isLoading, isError };
+  return {
+    hasBookAccess: data?.hasBookAccess ?? false,
+    hasCourseAccess: data?.hasCourseAccess ?? false,
+    isLoading,
+    isError
+  };
 };

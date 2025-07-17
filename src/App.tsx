@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,6 +69,7 @@ import BookSalesPage from '@/pages/BookSalesPage';
 import AcademyCoursePage from '@/pages/AcademyCoursePage';
 import CreateArticle from '@/pages/CreateArticle';
 import EditArticle from '@/pages/EditArticle';
+import ToolboxPage from '@/pages/ToolboxPage';
 
 function App() {
   const { user } = useAuth();
@@ -171,6 +171,9 @@ function App() {
         <Route path="email-templates" element={<AdminEmailPage />} />
         
       </Route>
+      
+      {/* Toolbox Route */}
+      <Route path="/toolbox" element={<UserProtectedRoute><ToolboxPage /></UserProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogIn, User, LogOut, ShieldCheck, ShoppingCart, Brain, Menu, X, Users } from 'lucide-react';
@@ -49,6 +48,9 @@ const Header = () => {
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           <Link to="/" className="text-foreground/60 transition-colors hover:text-foreground/80">
             หน้าแรก
+          </Link>
+          <Link to="/toolbox" className="text-foreground/60 transition-colors hover:text-foreground/80">
+            Toolbox
           </Link>
           <Link to="/courses" className="text-foreground transition-colors hover:text-foreground/90 font-semibold">
             คอร์สเรียน
@@ -178,6 +180,13 @@ const Header = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               หน้าแรก
+            </Link>
+            <Link 
+              to="/toolbox" 
+              className="block text-foreground/60 transition-colors hover:text-foreground/80 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Toolbox
             </Link>
             <Link 
               to="/courses" 
