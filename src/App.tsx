@@ -172,9 +172,10 @@ function App() {
         
       </Route>
       
-      {/* Toolbox Route */}
+      {/* Toolbox Routes */}
       <Route path="/toolbox" element={<UserProtectedRoute><ToolboxPage /></UserProtectedRoute>} />
-      
+      <Route path="/ai-tools" element={<Navigate to="/toolbox" replace />} />
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
