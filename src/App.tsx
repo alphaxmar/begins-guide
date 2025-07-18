@@ -77,6 +77,10 @@ import AIToolsPage from '@/pages/AIToolsPage';
 import VipCoursesPage from '@/pages/VipCoursesPage';
 import VipTemplatesPage from '@/pages/VipTemplatesPage';
 import DreamlineCalculatorPage from '@/pages/DreamlineCalculatorPage';
+import ValueLadderDashboard from '@/pages/ValueLadderDashboard';
+import ReaderDashboard from '@/pages/ReaderDashboard';
+import ProMemberDashboard from '@/pages/ProMemberDashboard';
+import CircleMemberDashboard from '@/pages/CircleMemberDashboard';
 
 function App() {
   const { user } = useAuth();
@@ -145,6 +149,10 @@ function App() {
       <Route path="/dreamline" element={<DefaultLayout><DreamlineLandingPage /></DefaultLayout>} />
       <Route path="/dreamline-tool" element={<UserProtectedRoute><DefaultLayout><DreamlineToolPage /></DefaultLayout></UserProtectedRoute>} />
       <Route path="/dashboard" element={<UserProtectedRoute><DefaultLayout><Dashboard /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/value-ladder-dashboard" element={<UserProtectedRoute><DefaultLayout><ValueLadderDashboard /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/reader-dashboard" element={<UserProtectedRoute><DefaultLayout><ReaderDashboard /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/pro-member-dashboard" element={<UserProtectedRoute><DefaultLayout><ProMemberDashboard /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/circle-member-dashboard" element={<UserProtectedRoute><DefaultLayout><CircleMemberDashboard /></DefaultLayout></UserProtectedRoute>} />
       <Route path="/book" element={<DefaultLayout><BookSalesPage /></DefaultLayout>} />
       <Route path="/academy" element={<UserProtectedRoute><DefaultLayout><AcademyCoursePage /></DefaultLayout></UserProtectedRoute>} />
 

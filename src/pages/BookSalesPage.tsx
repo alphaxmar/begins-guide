@@ -35,7 +35,7 @@ const BookSalesPage = () => {
     } catch (error) {
       console.error('Navigation error:', error);
       // Fallback ในกรณีที่ navigate ไม่ทำงาน
-      window.location.href = '/products';
+      window.location.href = '/pricing';
     }
   };
 

@@ -42,7 +42,7 @@ const ProPage = () => {
             <p className="text-gray-600 mb-6">
               หน้านี้สำหรับ Pro Member เท่านั้น กรุณาอัพเกรดสมาชิกเพื่อเข้าถึง
             </p>
-            <Button onClick={() => navigate('/products')} className="w-full bg-gradient-to-r from-amber-500 to-orange-500">
+            <Button onClick={() => navigate('/pricing')} className="w-full bg-gradient-to-r from-amber-500 to-orange-500">
               อัพเกรดเป็น Pro Member
             </Button>
           </div>
