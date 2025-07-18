@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Star, Zap, Calculator, BookOpen } from 'lucide-react';
 
-const PricingPage = () => {
+const PricingPageOld = () => {
   const { user } = useAuth();
   const { isVip } = useVipStatus();
   const { hasBookAccess, hasCourseAccess } = useCourseAccess();
@@ -318,36 +318,4 @@ const PricingPage = () => {
   );
 };
 
-export default PricingPage;
-            </Card>
-          ))}
-        </div>
-
-        {/* FAQ Section */}
-        <div className="mt-20 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">คำถามที่พบบ่อย</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">สามารถเปลี่ยนแพลนได้ไหม?</h3>
-              <p className="text-gray-600">ได้ครับ คุณสามารถอัปเกรดหรือดาวน์เกรดแพลนได้ตลอดเวลา</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">มีการคืนเงินไหม?</h3>
-              <p className="text-gray-600">มีการรับประกันคืนเงิน 30 วัน หากไม่พอใจ</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">การชำระเงินปลอดภัยไหม?</h3>
-              <p className="text-gray-600">ใช่ครับ เราใช้ระบบการชำระเงินที่ปลอดภัยและเชื่อถือได้</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">ได้รับการสนับสนุนอย่างไร?</h3>
-              <p className="text-gray-600">มีทีมงานคอยให้ความช่วยเหลือผ่านหลายช่องทาง</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default PricingPage;
+export default PricingPageOld;
