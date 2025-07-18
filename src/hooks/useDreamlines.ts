@@ -37,7 +37,7 @@ export const useDreamlines = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && !loading) {
       fetchDreamlines();
       fetchSummary();
     }
