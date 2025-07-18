@@ -20,19 +20,34 @@ interface DreamlineRowProps {
 const DreamlineRow: React.FC<DreamlineRowProps> = ({ dreamline, onUpdate, onDelete }) => {
   const [title, setTitle] = useState(dreamline.title);
   const [cost, setCost] = useState(dreamline.cost.toString());
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Use local state และ debounce การอัปเดต
+  useEffect(() => {
+    setTitle(dreamline.title);
+    setCost(dreamline.cost.toString());
+    setHasChanges(false);
+  }, [dreamline.title, dreamline.cost]);
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    if (dreamline.id) {
-      onUpdate(dreamline.id, { title: value });
-    }
+    setHasChanges(true);
   };
 
   const handleCostChange = (value: string) => {
     setCost(value);
-    const numValue = parseFloat(value) || 0;
-    if (dreamline.id) {
-      onUpdate(dreamline.id, { cost: numValue });
+    setHasChanges(true);
+  };
+
+  const handleBlur = () => {
+    // อัปเดต database เฉพาะเมื่อมีการเปลี่ยนแปลงจริงๆ
+    if (dreamline.id && hasChanges) {
+      const numValue = parseFloat(cost) || 0;
+      onUpdate(dreamline.id, { 
+        title: title.trim(),
+        cost: numValue 
+      });
+      setHasChanges(false);
     }
   };
 
@@ -42,14 +57,16 @@ const DreamlineRow: React.FC<DreamlineRowProps> = ({ dreamline, onUpdate, onDele
         placeholder="เช่น บ้านหลังใหม่, เรียนต่อปริญญาโท, เที่ยวญี่ปุ่น"
         value={title}
         onChange={(e) => handleTitleChange(e.target.value)}
-        className="flex-1"
+        onBlur={handleBlur}
+        className={`flex-1 ${hasChanges ? 'border-orange-300 bg-orange-50' : ''}`}
       />
       <Input
         type="number"
         placeholder="0"
         value={cost}
         onChange={(e) => handleCostChange(e.target.value)}
-        className="w-32"
+        onBlur={handleBlur}
+        className={`w-32 ${hasChanges ? 'border-orange-300 bg-orange-50' : ''}`}
         min="0"
         step="0.01"
       />
@@ -144,6 +161,7 @@ const DreamlineToolPage = () => {
   } = useDreamlines();
 
   const [monthlyExpenses, setMonthlyExpenses] = useState('0');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -163,11 +181,28 @@ const DreamlineToolPage = () => {
       category,
       cost: 0,
     });
+    setHasUnsavedChanges(true);
+  };
+
+  const handleUpdateDreamline = (id: string, updates: Partial<Dreamline>) => {
+    updateDreamline(id, updates);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDeleteDreamline = (id: string) => {
+    deleteDreamline(id);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveAllData = async () => {
+    await saveAllData();
+    setHasUnsavedChanges(false);
   };
 
   const handleUpdateExpenses = () => {
     const value = parseFloat(monthlyExpenses) || 0;
     updateMonthlyExpenses(value);
+    setHasUnsavedChanges(true);
   };
 
   const totalHaving = dreamlines
@@ -234,8 +269,8 @@ const DreamlineToolPage = () => {
             dreamlines={dreamlines}
             total={totalHaving}
             onAdd={() => handleAddDreamline('having')}
-            onUpdate={updateDreamline}
-            onDelete={deleteDreamline}
+            onUpdate={handleUpdateDreamline}
+            onDelete={handleDeleteDreamline}
           />
 
           <DreamlineColumn
@@ -245,8 +280,8 @@ const DreamlineToolPage = () => {
             dreamlines={dreamlines}
             total={totalBeing}
             onAdd={() => handleAddDreamline('being')}
-            onUpdate={updateDreamline}
-            onDelete={deleteDreamline}
+            onUpdate={handleUpdateDreamline}
+            onDelete={handleDeleteDreamline}
           />
 
           <DreamlineColumn
@@ -256,8 +291,8 @@ const DreamlineToolPage = () => {
             dreamlines={dreamlines}
             total={totalDoing}
             onAdd={() => handleAddDreamline('doing')}
-            onUpdate={updateDreamline}
-            onDelete={deleteDreamline}
+            onUpdate={handleUpdateDreamline}
+            onDelete={handleDeleteDreamline}
           />
         </div>
 
@@ -328,15 +363,30 @@ const DreamlineToolPage = () => {
         </div>
 
         {/* Action Buttons */}
+        {hasUnsavedChanges && (
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 border border-orange-300 rounded-lg text-orange-800">
+              <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</span>
+            </div>
+          </div>
+        )}
+        
+        <div className="text-center mb-4">
+          <p className="text-sm text-muted-foreground">
+            💡 หลังจากกรอกข้อมูลเสร็จแล้ว กดปุ่ม "บันทึกข้อมูลและคำนวณ TMI" เพื่ออัปเดตรายได้เป้าหมายของคุณ
+          </p>
+        </div>
+        
         <div className="flex justify-center gap-4 flex-wrap">
           <Button
-            onClick={saveAllData}
+            onClick={handleSaveAllData}
             disabled={loading}
             size="lg"
-            className="bg-primary hover:bg-primary/90"
+            className={`${hasUnsavedChanges ? 'bg-orange-600 hover:bg-orange-700' : 'bg-primary hover:bg-primary/90'} text-white`}
           >
             <Save className="w-4 h-4 mr-2" />
-            {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+            {loading ? 'กำลังบันทึกและคำนวณ...' : 'บันทึกข้อมูลและคำนวณ TMI'}
           </Button>
           
           <PDFDownloadButton

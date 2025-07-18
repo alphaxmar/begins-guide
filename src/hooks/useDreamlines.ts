@@ -117,11 +117,12 @@ export const useDreamlines = () => {
         cost: (data as DreamlineDB).cost,
       };
       setDreamlines(prev => [...prev, newDreamline]);
-      await calculateTMI();
+      
+      // ไม่เรียก calculateTMI ทันที ให้ user กดปุ่มบันทึกแทน
       
       toast({
         title: "เพิ่มความฝันสำเร็จ",
-        description: "ข้อมูลความฝันของคุณถูกเพิ่มแล้ว",
+        description: "ข้อมูลความฝันของคุณถูกเพิ่มแล้ว กดปุ่มบันทึกเพื่อคำนวณ TMI",
       });
     } catch (error: any) {
       console.error('Error adding dreamline:', error);
@@ -157,7 +158,8 @@ export const useDreamlines = () => {
       setDreamlines(prev => prev.map(item => 
         item.id === id ? updatedDreamline : item
       ));
-      await calculateTMI();
+      
+      // ไม่เรียก calculateTMI ทันที ให้ user กดปุ่มบันทึกแทน
     } catch (error: any) {
       console.error('Error updating dreamline:', error);
       toast({
@@ -181,11 +183,12 @@ export const useDreamlines = () => {
       if (error) throw error;
 
       setDreamlines(prev => prev.filter(item => item.id !== id));
-      await calculateTMI();
+      
+      // ไม่เรียก calculateTMI ทันที ให้ user กดปุ่มบันทึกแทน
       
       toast({
         title: "ลบสำเร็จ",
-        description: "รายการความฝันถูกลบแล้ว",
+        description: "รายการความฝันถูกลบแล้ว กดปุ่มบันทึกเพื่อคำนวณ TMI ใหม่",
       });
     } catch (error: any) {
       console.error('Error deleting dreamline:', error);
@@ -216,11 +219,11 @@ export const useDreamlines = () => {
 
       if (error) throw error;
 
-      await calculateTMI();
+      // ไม่เรียก calculateTMI ทันที ให้ user กดปุ่มบันทึกแทน
       
       toast({
         title: "อัปเดตสำเร็จ",
-        description: "ค่าใช้จ่ายรายเดือนถูกอัปเดตแล้ว",
+        description: "ค่าใช้จ่ายรายเดือนถูกอัปเดตแล้ว กดปุ่มบันทึกเพื่อคำนวณ TMI",
       });
     } catch (error: any) {
       console.error('Error updating monthly expenses:', error);
@@ -249,13 +252,14 @@ export const useDreamlines = () => {
   };
 
   const saveAllData = async () => {
-    if (!user) return;
+    if (!user || loading) return; // ป้องกันการเรียกซ้ำ
 
+    setLoading(true);
     try {
       await calculateTMI();
       toast({
         title: "บันทึกสำเร็จ",
-        description: "ข้อมูลทั้งหมดถูกบันทึกแล้ว",
+        description: "ข้อมูลทั้งหมดถูกบันทึกและคำนวณ TMI แล้ว",
       });
     } catch (error: any) {
       console.error('Error saving data:', error);
@@ -264,6 +268,8 @@ export const useDreamlines = () => {
         description: "ไม่สามารถบันทึกข้อมูลได้",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
