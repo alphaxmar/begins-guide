@@ -123,6 +123,7 @@ export const useNewsletterSubscription = () => {
     email,
     setEmail,
     isSubscribing,
+    subscribeToNewsletter,
     handleSubscribe,
     handleUnsubscribe,
     isSubscribed: !!checkSubscription.data,

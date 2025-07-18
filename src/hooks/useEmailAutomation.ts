@@ -191,4 +191,4 @@ const simulateEmailSending = async (
   }
 };
 
-export default useEmailAutomation;
+export { useEmailAutomation };

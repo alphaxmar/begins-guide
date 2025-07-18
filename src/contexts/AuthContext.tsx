@@ -21,8 +21,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   
-  const { sendWelcomeSequence } = useEmailAutomation();
-  const { subscribeToNewsletter } = useNewsletterSubscription();
+  const emailAutomation = useEmailAutomation();
+  const newsletterSubscription = useNewsletterSubscription();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const minutesDiff = timeDiff / (1000 * 60);
             
             if (minutesDiff < 5) {
-              sendWelcomeSequence.mutate({
+              emailAutomation.sendWelcomeSequence?.mutate?.({
                 email: session.user.email!,
                 name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
                 type: 'signup'
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, [sendWelcomeSequence]);
+  }, [emailAutomation.sendWelcomeSequence]);
 
   const signIn = async (email: string, acceptNewsletter?: boolean) => {
     setLoading(true);
@@ -107,11 +107,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.user) {
         // Subscribe to newsletter if user opted in
         if (acceptNewsletter) {
-          subscribeToNewsletter.mutate({ email });
+          newsletterSubscription.subscribeToNewsletter?.mutate?.({ email });
         }
         
         // Send welcome email sequence
-        sendWelcomeSequence.mutate({
+        emailAutomation.sendWelcomeSequence?.mutate?.({
           email,
           name: '',
           type: 'signup'

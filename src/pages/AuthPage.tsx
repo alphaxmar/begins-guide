@@ -79,7 +79,7 @@ const AuthPage = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-primary mb-2">begins.Guide</h1>
+            <h1 className="text-3xl font-bold text-primary mb-2">Begins.Guide</h1>
           </Link>
           <p className="text-gray-600">เข้าสู่ระบบหรือสร้างบัญชีใหม่</p>
         </div>
@@ -124,7 +124,7 @@ const AuthPage = () => {
                       htmlFor="login-newsletter"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      รับข่าวสารและเคล็ดลับจาก begins.Guide
+                      รับข่าวสารและเคล็ดลับจาก Begins.Guide
                     </label>
                   </div>
                   <Button 
@@ -180,7 +180,7 @@ const AuthPage = () => {
                       htmlFor="signup-newsletter"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      รับข่าวสารและเคล็ดลับจาก begins.Guide
+                      รับข่าวสารและเคล็ดลับจาก Begins.Guide
                     </label>
                   </div>
                   <Button 
