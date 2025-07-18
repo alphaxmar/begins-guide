@@ -14,7 +14,7 @@ const EmailTestPage = () => {
   const [testName, setTestName] = useState('');
   
   const { sendWelcomeSequence, sendNewsletterConfirmation, sendEngagementFollowup } = useEmailAutomation();
-  const { subscribeToNewsletter, getSubscribers } = useNewsletterSubscription();
+  const { subscribeToNewsletter } = useNewsletterSubscription();
 
   const testWelcomeEmail = () => {
     if (!testEmail) {
@@ -25,7 +25,7 @@ const EmailTestPage = () => {
     sendWelcomeSequence.mutate({
       email: testEmail,
       name: testName || 'ผู้ใช้ทดสอบ',
-      type: 'signup'
+      type: 'welcome'
     });
   };
 
@@ -62,7 +62,7 @@ const EmailTestPage = () => {
     
     subscribeToNewsletter.mutate({
       email: testEmail,
-      name: testName
+      source: 'email_test'
     });
   };
 

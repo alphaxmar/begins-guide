@@ -53,7 +53,7 @@ const PricingPage = () => {
     }
     
     try {
-      await signUp(email, acceptNewsletter);
+      await signUp(email, acceptNewsletter ? 'true' : 'false');
       toast.success('ส่งลิงก์ยืนยันตัวตนไปยังอีเมลของคุณแล้ว', {
         description: 'กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อเข้าสู่ระบบ'
       });

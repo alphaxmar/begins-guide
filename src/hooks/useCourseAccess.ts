@@ -8,7 +8,7 @@ const checkPurchase = async (userId: string, type?: string): Promise<{ hasBookAc
   
   const { data: purchases, error } = await supabase
     .from("user_purchases")
-    .select("product_id, product:products(type)")
+    .select("product_id, product:products(product_type)")
     .eq("user_id", userId);
 
   if (error) {
@@ -16,8 +16,8 @@ const checkPurchase = async (userId: string, type?: string): Promise<{ hasBookAc
     return { hasBookAccess: false, hasCourseAccess: false };
   }
   
-  const hasBookAccess = purchases?.some(p => p.product?.type === 'book') ?? false;
-  const hasCourseAccess = purchases?.some(p => p.product?.type === 'course') ?? false;
+  const hasBookAccess = purchases?.some(p => p.product?.product_type === 'ebook') ?? false;
+  const hasCourseAccess = purchases?.some(p => p.product?.product_type === 'course') ?? false;
   
   console.log("Purchase check result - Book:", hasBookAccess, "Course:", hasCourseAccess);
   return { hasBookAccess, hasCourseAccess };
