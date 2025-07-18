@@ -9,8 +9,8 @@ import { cleanupAuthState } from '@/utils/authCleanup';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, acceptNewsletter?: boolean) => Promise<void>;
-  signUp: (email: string, acceptNewsletter?: boolean) => Promise<void>;
+  signIn: (email: string, password: string, acceptNewsletter?: boolean) => Promise<void>;
+  signUp: (email: string, password: string, acceptNewsletter?: boolean) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               emailAutomation.sendWelcomeSequence?.mutate?.({
                 email: session.user.email!,
                 name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
-                type: 'signup'
+                type: 'welcome'
               });
             }
           }
@@ -68,32 +68,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, [emailAutomation.sendWelcomeSequence]);
 
-  const signIn = async (email: string, acceptNewsletter?: boolean) => {
+  const signIn = async (email: string, password: string, acceptNewsletter?: boolean) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ 
-        email, 
-        options: { 
-          shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            newsletter_subscription: acceptNewsletter || false
-          }
-        } 
+      const { error } = await supabase.auth.signInWithPassword({ 
+        email,
+        password
       });
 
       if (error) throw error;
+      
+      // Subscribe to newsletter if user opted in and it's provided
+      if (acceptNewsletter) {
+        newsletterSubscription.subscribeToNewsletter?.mutate?.({ email });
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const signUp = async (email: string, acceptNewsletter?: boolean) => {
+  const signUp = async (email: string, password: string, acceptNewsletter?: boolean) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password: Math.random().toString(36).slice(-8), // Random password for OTP flow
+        email,
+        password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
@@ -114,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         emailAutomation.sendWelcomeSequence?.mutate?.({
           email,
           name: '',
-          type: 'signup'
+          type: 'welcome'
         });
       }
       

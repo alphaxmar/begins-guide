@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, Mail } from 'lucide-react';
+import { Loader2, Mail, Lock } from 'lucide-react';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [acceptNewsletter, setAcceptNewsletter] = useState(true);
   const { user, signIn, signUp } = useAuth();
@@ -31,18 +32,20 @@ const AuthPage = () => {
       toast.error('กรุณากรอกอีเมล');
       return;
     }
+    if (!password.trim()) {
+      toast.error('กรุณากรอกรหัสผ่าน');
+      return;
+    }
 
     setLoading(true);
     
     try {
-      await signIn(email, acceptNewsletter);
-      toast.success('ส่งลิงก์เข้าสู่ระบบไปยังอีเมลของคุณแล้ว!', {
-        description: 'กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อเข้าสู่ระบบ'
-      });
+      await signIn(email, password, acceptNewsletter);
+      toast.success('เข้าสู่ระบบสำเร็จ!');
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error('เกิดข้อผิดพลาดในการส่งลิงก์เข้าสู่ระบบ', {
-        description: 'กรุณาลองใหม่อีกครั้ง'
+      toast.error('เข้าสู่ระบบไม่สำเร็จ', {
+        description: error.message || 'กรุณาตรวจสอบอีเมลและรหัสผ่าน'
       });
     } finally {
       setLoading(false);
@@ -55,18 +58,25 @@ const AuthPage = () => {
       toast.error('กรุณากรอกอีเมล');
       return;
     }
+    if (!password.trim()) {
+      toast.error('กรุณากรอกรหัสผ่าน');
+      return;
+    }
+    if (password.length < 6) {
+      toast.error('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+      return;
+    }
 
     setLoading(true);
     
     try {
-      await signUp(email, acceptNewsletter);
-      toast.success('ส่งลิงก์ยืนยันตัวตนไปยังอีเมลของคุณแล้ว!', {
-        description: 'กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อยืนยันและเข้าสู่ระบบ'
+      await signUp(email, password, acceptNewsletter);
+      toast.success('สมัครสมาชิกสำเร็จ!', {
+        description: 'ยินดีต้อนรับสู่ BeginS Guide'
       });
-      setEmail('');
     } catch (error: any) {
       console.error('Signup error:', error);
-      toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก', {
+      toast.error('สมัครสมาชิกไม่สำเร็จ', {
         description: error.message || 'กรุณาลองใหม่อีกครั้ง'
       });
     } finally {
@@ -114,6 +124,17 @@ const AuthPage = () => {
                       required
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">รหัสผ่าน</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      placeholder="รหัสผ่าน"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="login-newsletter"
@@ -135,10 +156,10 @@ const AuthPage = () => {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        กำลังส่งลิงก์...
+                        กำลังเข้าสู่ระบบ...
                       </>
                     ) : (
-                      'ส่งลิงก์เข้าสู่ระบบ'
+                      'เข้าสู่ระบบ'
                     )}
                   </Button>
                 </form>
@@ -168,6 +189,18 @@ const AuthPage = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">รหัสผ่าน</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
                     />
                   </div>
                   <div className="flex items-center space-x-2">

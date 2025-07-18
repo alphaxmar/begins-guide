@@ -8,6 +8,7 @@ interface DreamlineDB {
   title: string;
   category: string;
   cost: number;
+  time_period?: string;
   created_at: string;
   updated_at: string;
   user_id: string;
@@ -18,6 +19,7 @@ export interface Dreamline {
   title: string;
   category: 'having' | 'being' | 'doing';
   cost: number;
+  time_period?: '1_year' | '3_years' | '5_years' | '10_years' | 'lifetime';
 }
 
 export interface DreamlineSummary {
@@ -59,6 +61,7 @@ export const useDreamlines = () => {
         title: item.title,
         category: item.category as 'having' | 'being' | 'doing',
         cost: item.cost,
+        time_period: item.time_period as '1_year' | '3_years' | '5_years' | '10_years' | 'lifetime' | undefined,
       }));
       
       setDreamlines(dreamlinesData);
@@ -115,6 +118,7 @@ export const useDreamlines = () => {
         title: (data as DreamlineDB).title,
         category: (data as DreamlineDB).category as 'having' | 'being' | 'doing',
         cost: (data as DreamlineDB).cost,
+        time_period: (data as DreamlineDB).time_period as '1_year' | '3_years' | '5_years' | '10_years' | 'lifetime' | undefined,
       };
       setDreamlines(prev => [...prev, newDreamline]);
       
@@ -153,6 +157,7 @@ export const useDreamlines = () => {
         title: (data as DreamlineDB).title,
         category: (data as DreamlineDB).category as 'having' | 'being' | 'doing',
         cost: (data as DreamlineDB).cost,
+        time_period: (data as DreamlineDB).time_period as '1_year' | '3_years' | '5_years' | '10_years' | 'lifetime' | undefined,
       };
       
       setDreamlines(prev => prev.map(item => 
