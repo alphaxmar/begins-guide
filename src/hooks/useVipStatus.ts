@@ -7,7 +7,7 @@ const checkVipStatus = async (userId: string): Promise<boolean> => {
   try {
     console.log('Checking VIP status for user:', userId);
     
-    // First check profile role
+    // First check profile role with explicit Accept header
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("role")
@@ -26,6 +26,13 @@ const checkVipStatus = async (userId: string): Promise<boolean> => {
         if (insertError) {
           console.error('Error creating profile:', insertError);
         }
+        return false; // Return false for new users
+      }
+      
+      // If it's a 406 error, log it specifically
+      if (profileError.code === 'PGRST301' || (profileError as any).status === 406) {
+        console.error('406 Not Acceptable error in profile check:', profileError);
+        throw new Error('API format not acceptable - please check Accept headers');
       }
     }
 
@@ -35,7 +42,7 @@ const checkVipStatus = async (userId: string): Promise<boolean> => {
       return true;
     }
 
-    // Also check VIP membership table
+    // Also check VIP membership table with explicit Accept header
     const { data: vipData, error: vipError } = await supabase
       .from("vip_memberships")
       .select("id, is_active, end_date")
@@ -45,6 +52,14 @@ const checkVipStatus = async (userId: string): Promise<boolean> => {
 
     if (vipError && vipError.code !== 'PGRST116') {
       console.error("Error checking VIP membership:", vipError);
+      
+      // If it's a 406 error, log it specifically
+      if (vipError.code === 'PGRST301' || (vipError as any).status === 406) {
+        console.error('406 Not Acceptable error in VIP membership check:', vipError);
+        throw new Error('API format not acceptable - please check Accept headers');
+      }
+      
+      throw vipError;
     }
 
     if (vipData) {
@@ -59,7 +74,7 @@ const checkVipStatus = async (userId: string): Promise<boolean> => {
     return false;
   } catch (error) {
     console.error("VIP status check error:", error);
-    return false;
+    throw error;
   }
 };
 
@@ -71,7 +86,15 @@ export const useVipStatus = () => {
     queryFn: () => checkVipStatus(user!.id),
     enabled: !!user,
     staleTime: 30 * 1000, // Cache for 30 seconds
-    retry: 1,
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    retry: (failureCount, error) => {
+      // Don't retry on 406 errors - they indicate a permanent issue
+      if (error && (error as any).code === 'PGRST301' || (error as any).status === 406) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
   });
 
   if (error) {

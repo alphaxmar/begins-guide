@@ -10,7 +10,18 @@ import App from './App.tsx'
 import './index.css'
 import { Toaster } from '@/components/ui/sonner'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30 * 1000, // 30 seconds
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+})
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
