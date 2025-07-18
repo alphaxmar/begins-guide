@@ -6,21 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Star, Zap, Calculator, BookOpen } from 'lucide-react';
 
-interface PricingPlan {
-  id: string;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  period: string;
-  description: string;
-  features: string[];
-  buttonText: string;
-  current: boolean;
-  popular: boolean;
-  icon: React.ReactNode;
-  buttonAction: () => void;
-}
-
 const PricingPage = () => {
   const { user } = useAuth();
   const { isVip } = useVipStatus();
@@ -49,7 +34,6 @@ const PricingPage = () => {
       id: "reader", 
       name: "Reader",
       price: "450",
-      originalPrice: "990",
       period: "/ครั้งเดียว",
       description: "พิมพ์เขียวฉบับเต็มพร้อมเครื่องมือเสริม",
       features: [
@@ -69,7 +53,6 @@ const PricingPage = () => {
       id: "pro",
       name: "Pro Member", 
       price: "2,990",
-      originalPrice: "5,900",
       period: "/ปี",
       description: "หลักสูตรปฏิบัติการและเครื่องมือ AI ครบชุด",
       features: [
@@ -89,8 +72,7 @@ const PricingPage = () => {
     {
       id: "circle",
       name: "Circle Member",
-      price: "9,990",
-      originalPrice: "59,000", 
+      price: "9,990", 
       period: "/ปี",
       description: "The Architects' Circle - ชุมชนระดับสูงสุด",
       features: [
@@ -120,15 +102,9 @@ const PricingPage = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
             จาก Dreamer สู่ Architect - เลือกระดับที่เหมาะกับการเดินทางของคุณ
           </p>
-          <div className="space-y-3 mb-4">
-            <div className="inline-flex items-center gap-2 bg-red-100 text-red-800 px-4 py-2 rounded-full text-sm">
-              <span className="animate-pulse">🔥</span>
-              <span className="font-semibold">ราคาโปรโมชั่นพิเศษ - ปรับขึ้นทุกเดือน!</span>
-            </div>
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm">
-              <Star className="h-4 w-4" />
-              <span>เริ่มฟรี → ปรับเปลี่ยนได้ตลอดเวลา</span>
-            </div>
+          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm">
+            <Star className="h-4 w-4" />
+            <span>เริ่มฟรี → ปรับเปลี่ยนได้ตลอดเวลา</span>
           </div>
         </div>
 
@@ -167,38 +143,17 @@ const PricingPage = () => {
                 </div>
                 <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                 <div className="mt-4">
-                  {plan.originalPrice ? (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-2xl line-through text-gray-400">
-                          ฿{plan.originalPrice}
-                        </span>
-                        <Badge variant="destructive" className="text-xs">
-                          ลด {Math.round((1 - parseInt(plan.price.replace(/,/g, '')) / parseInt(plan.originalPrice.replace(/,/g, ''))) * 100)}%
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-3xl font-bold text-red-600">
-                          ฿{plan.price}
-                        </span>
-                        <span className="text-gray-600">{plan.period}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <span className="text-3xl font-bold text-gray-900">
-                        {plan.price === "ฟรี" ? plan.price : `฿${plan.price}`}
-                      </span>
-                      <span className="text-gray-600">{plan.period}</span>
-                    </div>
-                  )}
+                  <span className="text-3xl font-bold text-gray-900">
+                    {plan.price === "ฟรี" ? plan.price : `฿${plan.price}`}
+                  </span>
+                  <span className="text-gray-600">{plan.period}</span>
                 </div>
                 <CardDescription className="mt-2">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-4">
+                            <CardContent className="space-y-4">
                 <ul className="space-y-3">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-center space-x-3">
@@ -296,21 +251,6 @@ const PricingPage = () => {
           <h2 className="text-3xl font-bold text-center mb-12">คำถามที่พบบ่อย</h2>
           
           <div className="space-y-6">
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <span className="animate-pulse">🔥</span>
-                  ราคาโปรโมชั่นนี้จะเปลี่ยนแปลงเมื่อไหร่?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700">
-                  <strong>ราคาจะปรับขึ้นทุกเดือน!</strong> ตอนนี้คุณได้รับส่วนลดสูงสุด Reader ลด 55%, Pro Member ลด 49%, Circle Member ลด 83% จากราคาปกติ 
-                  หากคุณสมัครตอนนี้ จะล็อกราคาโปรโมชั่นไว้ตลอดการใช้งาน
-                </p>
-              </CardContent>
-            </Card>
-            
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">สามารถอัปเกรดหรือดาวน์เกรดได้ไหม?</CardTitle>
@@ -348,18 +288,11 @@ const PricingPage = () => {
 
         {/* Final CTA */}
         <div className="mt-20 text-center">
-          <Card className="max-w-2xl mx-auto border-2 border-red-200 shadow-2xl">
+          <Card className="max-w-2xl mx-auto">
             <CardContent className="p-12">
-              <div className="inline-flex items-center gap-2 bg-red-100 text-red-800 px-4 py-2 rounded-full text-sm mb-6">
-                <span className="animate-pulse">⚡</span>
-                <span className="font-semibold">ราคาโปรโมชั่นสิ้นสุดเร็วๆ นี้!</span>
-              </div>
               <h3 className="text-2xl font-bold mb-4">เริ่มต้นการเดินทางของคุณวันนี้</h3>
-              <p className="text-gray-600 mb-2">
+              <p className="text-gray-600 mb-8">
                 ไม่ว่าคุณจะเป็นผู้เริ่มต้นหรือผู้ประกอบการมืออาชีพ เรามีเครื่องมือที่เหมาะกับคุณ
-              </p>
-              <p className="text-red-600 font-semibold mb-8 text-sm">
-                🔥 จองราคาพิเศษก่อนปรับขึ้นเดือนหน้า - ลดสูงสุด 83%
               </p>
               <div className="space-x-4">
                 <Button 
@@ -379,6 +312,38 @@ const PricingPage = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PricingPage;
+            </Card>
+          ))}
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-20 max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">คำถามที่พบบ่อย</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="font-semibold text-lg mb-2">สามารถเปลี่ยนแพลนได้ไหม?</h3>
+              <p className="text-gray-600">ได้ครับ คุณสามารถอัปเกรดหรือดาวน์เกรดแพลนได้ตลอดเวลา</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">มีการคืนเงินไหม?</h3>
+              <p className="text-gray-600">มีการรับประกันคืนเงิน 30 วัน หากไม่พอใจ</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">การชำระเงินปลอดภัยไหม?</h3>
+              <p className="text-gray-600">ใช่ครับ เราใช้ระบบการชำระเงินที่ปลอดภัยและเชื่อถือได้</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">ได้รับการสนับสนุนอย่างไร?</h3>
+              <p className="text-gray-600">มีทีมงานคอยให้ความช่วยเหลือผ่านหลายช่องทาง</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

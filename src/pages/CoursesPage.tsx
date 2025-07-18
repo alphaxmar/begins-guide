@@ -7,7 +7,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { PageHeader } from "@/components/ui/page-header";
 import { GraduationCap } from "lucide-react";
-import { ProMemberNav } from '@/components/ProMemberNav';
 
 const fetchCourses = async (): Promise<Tables<'products'>[]> => {
   const { data, error } = await supabase
@@ -32,7 +31,6 @@ const CoursesPage = () => {
   return (
     <ErrorBoundary>
       <div className="py-12 px-4 max-w-6xl mx-auto">
-        <ProMemberNav />
         <PageHeader
           title="คอร์สออนไลน์ทั้งหมด"
           description="เรียนรู้จากผู้เชี่ยวชาญและพัฒนาทักษะการทำธุรกิจของคุณ"

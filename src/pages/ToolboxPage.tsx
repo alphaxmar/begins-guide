@@ -6,8 +6,7 @@ import { useVipStatus } from '@/hooks/useVipStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ProMemberNav } from '@/components/ProMemberNav';
-import { Brain, Target, TrendingUp, CheckCircle, Lock, ExternalLink, Lightbulb, Users, BarChart3 } from 'lucide-react';
+import { Brain, Target, TrendingUp, CheckCircle, Lock, ExternalLink, Lightbulb, Users, BarChart3, Calculator } from 'lucide-react';
 
 interface Tool {
   id: number;
@@ -16,11 +15,21 @@ interface Tool {
   link: string;
   icon: React.ReactNode;
   category: string;
-  requiredAccess: 'book' | 'course' | 'vip';
+  requiredAccess: 'free' | 'book' | 'course' | 'vip';
   features: string[];
 }
 
 const tools: Tool[] = [
+  {
+    id: 0,
+    name: "Dreamlining Calculator",
+    description: "คำนวณ 'ตัวเลขแห่งอิสรภาพ' ของคุณ - เครื่องมือพื้นฐานสำหรับเริ่มต้นการวางแผนทางการเงิน",
+    link: "/dreamlining-calculator",
+    icon: <Calculator className="h-8 w-8" />,
+    category: "เครื่องมือพื้นฐาน",
+    requiredAccess: 'free',
+    features: ["คำนวณความต้องการรายได้", "วางแผนการเงินเบื้องต้น", "บันทึกเป้าหมายส่วนตัว"]
+  },
   {
     id: 1,
     name: "Begins.Guide AI ช่วยคิดไอเดีย",
@@ -75,9 +84,10 @@ const tools: Tool[] = [
 
 const getAccessBadge = (requiredAccess: string) => {
   const badges = {
-    book: { label: "สมาชิกหนังสือ", variant: "default" as const },
-    course: { label: "สมาชิกคอร์ส", variant: "secondary" as const },
-    vip: { label: "Pro Member", variant: "destructive" as const }
+    free: { label: "Beginner", variant: "outline" as const },
+    book: { label: "Reader", variant: "default" as const },
+    course: { label: "Pro Member", variant: "secondary" as const },
+    vip: { label: "Circle Member", variant: "destructive" as const }
   };
   return badges[requiredAccess as keyof typeof badges] || badges.book;
 };
@@ -89,24 +99,33 @@ export default function ToolboxPage() {
   const { isVip } = useVipStatus();
 
   const canAccessTool = (requiredAccess: string) => {
+    // Circle Member (VIP) can access everything
     if (isVip) return true;
-    if (hasCourseAccess && (requiredAccess === 'course' || requiredAccess === 'book')) return true;
-    if (hasBookAccess && requiredAccess === 'book') return true;
+    // Pro Member can access pro, book, and free tools
+    if (hasCourseAccess && (requiredAccess === 'course' || requiredAccess === 'book' || requiredAccess === 'free')) return true;
+    // Reader can access book and free tools
+    if (hasBookAccess && (requiredAccess === 'book' || requiredAccess === 'free')) return true;
+    // Everyone can access free tools
+    if (requiredAccess === 'free') return true;
     return false;
   };
 
-  if (!hasBookAccess && !hasCourseAccess && !isVip) {
+  // Show access denied only if user has no access at all (including free tools)
+  if (!hasBookAccess && !hasCourseAccess && !isVip && !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
         <div className="max-w-md mx-auto text-center">
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">ไม่มีสิทธิ์เข้าถึง</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">สร้างบัญชีฟรี</h1>
             <p className="text-gray-600 mb-6">
-              คุณต้องซื้อหนังสือ คอร์ส หรือเป็นสมาชิก Pro เพื่อเข้าถึงเครื่องมือ AI
+              สร้างบัญชี Beginner ฟรีเพื่อเข้าถึงเครื่องมือพื้นฐานและเริ่มต้นการเดินทางสู่อิสรภาพทางการเงิน
             </p>
-            <Button onClick={() => navigate('/products')} className="w-full">
-              ดูแพ็คเกจสมาชิก
+            <Button onClick={() => navigate('/auth')} className="w-full mb-4">
+              สร้างบัญชีฟรี
+            </Button>
+            <Button onClick={() => navigate('/pricing')} variant="outline" className="w-full">
+              ดูแพ็คเกจทั้งหมด
             </Button>
           </div>
         </div>
@@ -119,8 +138,6 @@ export default function ToolboxPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <div className="container mx-auto px-4 py-8">
-        <ProMemberNav />
-
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
@@ -198,7 +215,7 @@ export default function ToolboxPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => navigate('/products')}
+                                onClick={() => navigate('/pricing')}
                                 className="w-full text-xs"
                               >
                                 ดูแพ็คเกจ
@@ -222,18 +239,18 @@ export default function ToolboxPage() {
         <div className="mt-16 text-center">
           <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              พร้อมที่จะปลดล็อคศักยภาพธุรกิจของคุณแล้วหรือยัง?
+              พร้อมที่จะก้าวสู่ระดับ "Architect" แล้วหรือยัง?
             </h3>
             <p className="text-gray-600 mb-6 text-lg">
-              เข้าถึงเครื่องมือ AI ทั้งหมดและคอนเทนต์พิเศษอื่นๆ ด้วยการเป็น Pro Member
+              เข้าร่วม The Architects' Circle และเข้าถึงเครื่องมือ AI ทั้งหมด พร้อมการสนับสนุนอย่างต่อเนื่อง
             </p>
             {!isVip && (
               <Button 
                 size="lg" 
-                onClick={() => navigate('/products')}
+                onClick={() => navigate('/pricing')}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8"
               >
-                อัพเกรดเป็น Pro Member
+                อัปเกรดสู่ The Architects' Circle
                 <TrendingUp className="ml-2 h-5 w-5" />
               </Button>
             )}

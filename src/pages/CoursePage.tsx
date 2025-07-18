@@ -8,7 +8,6 @@ import EnhancedLessonContent from "@/components/learn/EnhancedLessonContent";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, ShoppingCart } from "lucide-react";
-import { ProMemberNav } from '@/components/ProMemberNav';
 
 const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();

@@ -76,6 +76,7 @@ import PricingPage from '@/pages/PricingPage';
 import AIToolsPage from '@/pages/AIToolsPage';
 import VipCoursesPage from '@/pages/VipCoursesPage';
 import VipTemplatesPage from '@/pages/VipTemplatesPage';
+import DreamlineCalculatorPage from '@/pages/DreamlineCalculatorPage';
 
 function App() {
   const { user } = useAuth();
@@ -189,6 +190,7 @@ function App() {
       
       {/* Toolbox Routes */}
       <Route path="/toolbox" element={<UserProtectedRoute><DefaultLayout><ToolboxPage /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/dreamlining-calculator" element={<DefaultLayout><DreamlineCalculatorPage /></DefaultLayout>} />
       <Route path="/ai-tools" element={<UserProtectedRoute><DefaultLayout><AIToolsPage /></DefaultLayout></UserProtectedRoute>} />
 
       <Route path="*" element={<DefaultLayout><NotFound /></DefaultLayout>} />

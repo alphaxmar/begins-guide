@@ -6,7 +6,6 @@ import { useVipStatus } from '@/hooks/useVipStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ProMemberNav } from '@/components/ProMemberNav';
 import { 
   Crown, 
   Wrench, 
@@ -115,8 +114,6 @@ const ProPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-8">
-        <ProMemberNav />
-
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-100 to-orange-100 px-6 py-3 rounded-full mb-6">

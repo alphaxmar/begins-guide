@@ -13,7 +13,6 @@ import ProfileForm from "@/components/profile/ProfileForm";
 import PurchasedItemsList from "@/components/profile/PurchasedItemsList";
 import VipStatusCard from "@/components/profile/VipStatusCard";
 import { useVipStatus } from "@/hooks/useVipStatus";
-import { ProMemberNav } from '@/components/ProMemberNav';
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -78,8 +77,6 @@ const ProfilePage = () => {
 
   return (
     <div className="py-12 max-w-6xl mx-auto px-4">
-      <ProMemberNav />
-      
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -176,14 +173,14 @@ const ProfilePage = () => {
                   <CardContent className="space-y-4">
                     <div className="grid gap-4 md:grid-cols-2">
                       <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-yellow-300">
-                        <Link to="/vip/courses">
+                        <Link to="/vip-courses">
                           <BookOpen className="h-6 w-6 mb-2 text-amber-600" />
                           <span className="font-medium">คอร์สทั้งหมด</span>
                           <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="h-20 flex-col bg-gradient-to-br from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-yellow-300">
-                        <Link to="/vip/templates">
+                        <Link to="/vip-templates">
                           <FileText className="h-6 w-6 mb-2 text-amber-600" />
                           <span className="font-medium">เทมเพลตทั้งหมด</span>
                           <span className="text-xs text-muted-foreground">สำหรับ VIP</span>
