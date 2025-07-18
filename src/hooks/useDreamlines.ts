@@ -35,16 +35,40 @@ export const useDreamlines = () => {
   const [dreamlines, setDreamlines] = useState<Dreamline[]>([]);
   const [summary, setSummary] = useState<DreamlineSummary | null>(null);
   const [loading, setLoading] = useState(false);
+  const [lastFetch, setLastFetch] = useState<number>(0);
+  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Rate limiting: ไม่ให้ fetch บ่อยกว่า 2 วินาที
+  const RATE_LIMIT_MS = 2000;
+
+  // ตรวจสอบสถานะการเชื่อมต่อ
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
-    if (user) {
-      fetchDreamlines();
-      fetchSummary();
+    if (user && isOnline) {
+      const now = Date.now();
+      if (now - lastFetch > RATE_LIMIT_MS) {
+        fetchDreamlines();
+        fetchSummary();
+        setLastFetch(now);
+      }
     }
-  }, [user]);
+  }, [user, isOnline]);
 
   const fetchDreamlines = async () => {
-    if (!user) return;
+    if (!user || loading) return;
 
     setLoading(true);
     try {
@@ -67,11 +91,14 @@ export const useDreamlines = () => {
       setDreamlines(dreamlinesData);
     } catch (error: any) {
       console.error('Error fetching dreamlines:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลความฝันได้",
-        variant: "destructive",
-      });
+      // ลด frequency ของ toast เมื่อเกิด error
+      if (error.message !== 'Failed to fetch') {
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลความฝันได้",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -139,7 +166,10 @@ export const useDreamlines = () => {
   };
 
   const updateDreamline = async (id: string, updates: Partial<Dreamline>) => {
-    if (!user) return;
+    if (!user || pendingUpdates.has(id)) return;
+
+    // เพิ่ม id เข้าไปใน pending updates เพื่อป้องกันการเรียกซ้ำ
+    setPendingUpdates(prev => new Set([...prev, id]));
 
     try {
       const { data, error } = await supabase
@@ -167,10 +197,20 @@ export const useDreamlines = () => {
       // ไม่เรียก calculateTMI ทันที ให้ user กดปุ่มบันทึกแทน
     } catch (error: any) {
       console.error('Error updating dreamline:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถอัปเดตข้อมูลได้",
-        variant: "destructive",
+      // ลด frequency ของ toast เมื่อเกิด error
+      if (error.message !== 'Failed to fetch') {
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถอัปเดตข้อมูลได้",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      // ลบ id ออกจาก pending updates
+      setPendingUpdates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
       });
     }
   };
@@ -261,7 +301,24 @@ export const useDreamlines = () => {
 
     setLoading(true);
     try {
-      await calculateTMI();
+      // เพิ่ม retry mechanism
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          await calculateTMI();
+          break; // สำเร็จแล้วออกจาก loop
+        } catch (error: any) {
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            throw error; // หมดจำนวน retry แล้ว
+          }
+          // รอสักครู่ก่อน retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        }
+      }
+      
       toast({
         title: "บันทึกสำเร็จ",
         description: "ข้อมูลทั้งหมดถูกบันทึกและคำนวณ TMI แล้ว",
@@ -270,7 +327,9 @@ export const useDreamlines = () => {
       console.error('Error saving data:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถบันทึกข้อมูลได้",
+        description: error.message?.includes('Failed to fetch') 
+          ? "การเชื่อมต่อไม่เสถียร กรุณาลองใหม่อีกครั้ง"
+          : "ไม่สามารถบันทึกข้อมูลได้",
         variant: "destructive",
       });
     } finally {
@@ -288,5 +347,7 @@ export const useDreamlines = () => {
     updateMonthlyExpenses,
     saveAllData,
     calculateTMI,
+    isOnline,
+    pendingUpdates: pendingUpdates.size > 0,
   };
 };

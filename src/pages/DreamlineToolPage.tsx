@@ -23,6 +23,7 @@ const DreamlineRow: React.FC<DreamlineRowProps> = ({ dreamline, onUpdate, onDele
   const [cost, setCost] = useState(dreamline.cost.toString());
   const [timePeriod, setTimePeriod] = useState(dreamline.time_period || '1_year');
   const [hasChanges, setHasChanges] = useState(false);
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Use local state และ debounce การอัปเดต
   useEffect(() => {
@@ -31,6 +32,15 @@ const DreamlineRow: React.FC<DreamlineRowProps> = ({ dreamline, onUpdate, onDele
     setTimePeriod(dreamline.time_period || '1_year');
     setHasChanges(false);
   }, [dreamline.title, dreamline.cost, dreamline.time_period]);
+
+  // Clean up debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -47,17 +57,29 @@ const DreamlineRow: React.FC<DreamlineRowProps> = ({ dreamline, onUpdate, onDele
     setHasChanges(true);
   };
 
-  const handleBlur = () => {
-    // อัปเดต database เฉพาะเมื่อมีการเปลี่ยนแปลงจริงๆ
-    if (dreamline.id && hasChanges) {
-      const numValue = parseFloat(cost) || 0;
-      onUpdate(dreamline.id, { 
-        title: title.trim(),
-        cost: numValue,
-        time_period: timePeriod as any
-      });
-      setHasChanges(false);
+  const debouncedUpdate = () => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
     }
+    
+    const timer = setTimeout(() => {
+      if (dreamline.id && hasChanges) {
+        const numValue = parseFloat(cost) || 0;
+        onUpdate(dreamline.id, { 
+          title: title.trim(),
+          cost: numValue,
+          time_period: timePeriod as any
+        });
+        setHasChanges(false);
+      }
+    }, 1000); // Debounce 1 วินาที
+    
+    setDebounceTimer(timer);
+  };
+
+  const handleBlur = () => {
+    // เรียกใช้ debounced update
+    debouncedUpdate();
   };
 
   const getTimePeriodLabel = (period: string) => {
@@ -260,6 +282,21 @@ const DreamlineToolPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // ตรวจสอบสถานะการเชื่อมต่อ
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -529,6 +566,13 @@ const DreamlineToolPage = () => {
 
         {/* Action Buttons */}
         <div className="text-center mb-4">
+          {!isOnline && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-800 mb-4">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span className="text-sm font-medium">ไม่มีการเชื่อมต่ออินเทอร์เน็ต</span>
+            </div>
+          )}
+          
           {hasUnsavedChanges && (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 border border-orange-300 rounded-lg text-orange-800 mb-4">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
@@ -547,9 +591,11 @@ const DreamlineToolPage = () => {
 
           <div className="mb-4">
             <p className="text-sm text-muted-foreground">
-              {hasUnsavedChanges 
-                ? '⚠️ กดปุ่ม "บันทึกการเปลี่ยนแปลง" เพื่อบันทึกข้อมูลและคำนวณ TMI ใหม่'
-                : '💡 กดปุ่ม "คำนวณ TMI ใหม่" เพื่ออัปเดตการคำนวณตามข้อมูลปัจจุบัน'
+              {!isOnline 
+                ? '⚠️ ไม่สามารถบันทึกข้อมูลได้ขณะนี้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'
+                : hasUnsavedChanges 
+                  ? '⚠️ กดปุ่ม "บันทึกการเปลี่ยนแปลง" เพื่อบันทึกข้อมูลและคำนวณ TMI ใหม่'
+                  : '💡 กดปุ่ม "คำนวณ TMI ใหม่" เพื่ออัปเดตการคำนวณตามข้อมูลปัจจุบัน'
               }
             </p>
           </div>
@@ -559,22 +605,22 @@ const DreamlineToolPage = () => {
           {hasUnsavedChanges ? (
             <Button
               onClick={handleSaveAllData}
-              disabled={loading || isCalculating}
+              disabled={loading || isCalculating || !isOnline}
               size="lg"
-              className="bg-orange-600 hover:bg-orange-700 text-white transition-colors duration-300"
+              className="bg-orange-600 hover:bg-orange-700 text-white transition-colors duration-300 disabled:opacity-50"
             >
               <Save className="w-4 h-4 mr-2" />
-              {(loading || isCalculating) ? 'กำลังบันทึกและคำนวณ...' : 'บันทึกการเปลี่ยนแปลง'}
+              {!isOnline ? 'ไม่มีการเชื่อมต่อ' : (loading || isCalculating) ? 'กำลังบันทึกและคำนวณ...' : 'บันทึกการเปลี่ยนแปลง'}
             </Button>
           ) : (
             <Button
               onClick={handleRecalculateTMI}
-              disabled={loading || isCalculating}
+              disabled={loading || isCalculating || !isOnline}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white transition-colors duration-300"
+              className="bg-primary hover:bg-primary/90 text-white transition-colors duration-300 disabled:opacity-50"
             >
               <Calculator className="w-4 h-4 mr-2" />
-              {(loading || isCalculating) ? 'กำลังคำนวณ...' : 'คำนวณ TMI ใหม่'}
+              {!isOnline ? 'ไม่มีการเชื่อมต่อ' : (loading || isCalculating) ? 'กำลังคำนวณ...' : 'คำนวณ TMI ใหม่'}
             </Button>
           )}
           
