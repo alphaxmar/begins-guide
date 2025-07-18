@@ -19,6 +19,7 @@ import ProfilePage from '@/pages/ProfilePage';
 import AffiliatePage from '@/pages/AffiliatePage';
 import CohortPage from '@/pages/CohortPage';
 import NotFound from '@/pages/NotFound';
+import EmailTestPage from '@/pages/EmailTestPage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import UserProtectedRoute from '@/components/UserProtectedRoute';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -47,6 +48,9 @@ import HowToBuildCoursePlatformArticle from '@/pages/HowToBuildCoursePlatformArt
 import AdminAffiliatesPage from '@/pages/admin/AdminAffiliatesPage';
 import ProMembershipsPage from '@/pages/admin/ProMembershipsPage';
 import ProPackagesPage from '@/pages/admin/ProPackagesPage';
+import ReaderPackagesPage from '@/pages/admin/ReaderPackagesPage';
+import CircleMembershipsPage from '@/pages/admin/CircleMembershipsPage';
+import CirclePackagesPage from '@/pages/admin/CirclePackagesPage';
 import VipManagementPage from '@/pages/admin/VipManagementPage';
 import VipPackagesPage from '@/pages/admin/VipPackagesPage';
 import CreateProductPage from '@/pages/admin/CreateProductPage';
@@ -101,6 +105,7 @@ function App() {
     <Routes>
       {/* Full screen pages */}
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/email-test" element={<EmailTestPage />} />
       
       {/* Pages with default layout */}
       <Route path="/" element={<Index />} />
@@ -190,10 +195,13 @@ function App() {
         <Route path="discount-codes" element={<DiscountCodesPage />} />
         <Route path="affiliates" element={<AdminAffiliatesPage />} />
         <Route path="reader-memberships" element={<ReaderMembershipsPage />} />
+        <Route path="reader-packages" element={<ReaderPackagesPage />} />
         <Route path="pro-memberships" element={<ProMembershipsPage />} />
         <Route path="pro-packages" element={<ProPackagesPage />} />
         <Route path="vip-management" element={<VipManagementPage />} />
         <Route path="vip-packages" element={<VipPackagesPage />} />
+        <Route path="circle-memberships" element={<CircleMembershipsPage />} />
+        <Route path="circle-packages" element={<CirclePackagesPage />} />
         <Route path="value-ladder" element={<ValueLadderDashboardPage />} />
         <Route path="beginner-analytics" element={<BeginnerAnalyticsPage />} />
         <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
@@ -206,6 +214,7 @@ function App() {
       <Route path="/toolbox" element={<UserProtectedRoute><DefaultLayout><ToolboxPage /></DefaultLayout></UserProtectedRoute>} />
       <Route path="/dreamlining-calculator" element={<DefaultLayout><DreamlineCalculatorPage /></DefaultLayout>} />
       <Route path="/ai-tools" element={<UserProtectedRoute><DefaultLayout><AIToolsPage /></DefaultLayout></UserProtectedRoute>} />
+      <Route path="/email-test" element={<EmailTestPage />} />
 
       <Route path="*" element={<DefaultLayout><NotFound /></DefaultLayout>} />
     </Routes>

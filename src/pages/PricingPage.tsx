@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVipStatus } from '@/hooks/useVipStatus';
 import { useCourseAccess } from '@/hooks/useCourseAccess';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, Star, Zap, Calculator, BookOpen, ShoppingCart, Users, Video, Headphones } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Check, Crown, Star, Zap, Calculator, BookOpen, ShoppingCart, Users, Video, Headphones, Chrome, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface PricingPlan {
   id: string;
@@ -24,17 +28,42 @@ interface PricingPlan {
 }
 
 const PricingPage = () => {
-  const { user } = useAuth();
+  const { user, signUp } = useAuth();
   const { isVip } = useVipStatus();
   const { hasBookAccess, hasCourseAccess } = useCourseAccess();
   const navigate = useNavigate();
+  
+  const [email, setEmail] = useState('');
+  const [acceptNewsletter, setAcceptNewsletter] = useState(true);
+  const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
 
   // Handle signup and navigation actions
   const handleSignup = () => {
     if (!user) {
-      navigate('/auth');
+      setIsSignupDialogOpen(true);
     } else {
       navigate('/dashboard');
+    }
+  };
+
+  const handleEmailSignup = async () => {
+    if (!email.trim()) {
+      toast.error('กรุณาระบุอีเมล');
+      return;
+    }
+    
+    try {
+      await signUp(email, acceptNewsletter);
+      toast.success('ส่งลิงก์ยืนยันตัวตนไปยังอีเมลของคุณแล้ว', {
+        description: 'กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อเข้าสู่ระบบ'
+      });
+      setIsSignupDialogOpen(false);
+      setEmail('');
+    } catch (error: any) {
+      console.error('Email signup error:', error);
+      toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก', {
+        description: error.message || 'กรุณาลองใหม่อีกครั้ง'
+      });
     }
   };
 
@@ -73,7 +102,7 @@ const PricingPage = () => {
       current: user && !hasBookAccess && !hasCourseAccess && !isVip,
       popular: false,
       icon: <Calculator className="w-6 h-6" />,
-      buttonAction: handleSignup
+      buttonAction: user ? () => navigate('/dashboard') : handleSignup
     },
     {
       id: "reader", 
@@ -671,21 +700,77 @@ const PricingPage = () => {
               <p className="text-red-600 font-semibold mb-8 text-sm">
                 🔥 จองราคาพิเศษก่อนปรับขึ้นเดือนหน้า - ลดสูงสุด 83%
               </p>
-              <div className="space-x-4">
-                <Button 
-                  size="lg"
-                  onClick={() => navigate('/dreamlining-calculator')}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                >
-                  เริ่มฟรีเลย
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  onClick={() => navigate('/toolbox')}
-                >
-                  ดูเครื่องมือทั้งหมด
-                </Button>
+              <div className="space-y-4">
+                {!user && (
+                  <div className="max-w-sm mx-auto">
+                    <Dialog open={isSignupDialogOpen} onOpenChange={setIsSignupDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="lg"
+                          className="w-full bg-primary hover:bg-primary/90 text-white mb-3"
+                        >
+                          <Mail className="mr-2 h-5 w-5" />
+                          เริ่มต้นใช้งานฟรี
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>สมัครสมาชิกฟรี</DialogTitle>
+                          <DialogDescription>
+                            กรอกอีเมลเพื่อเริ่มต้นเรียนรู้กับ begins.Guide
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Input
+                              type="email"
+                              placeholder="อีเมลของคุณ"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleEmailSignup();
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="newsletter"
+                              checked={acceptNewsletter}
+                              onCheckedChange={(checked) => setAcceptNewsletter(checked as boolean)}
+                            />
+                            <label
+                              htmlFor="newsletter"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              รับข่าวสารและเคล็ดลับจาก begins.Guide
+                            </label>
+                          </div>
+                          <Button onClick={handleEmailSignup} className="w-full">
+                            ส่งลิงก์ยืนยันตัวตน
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                )}
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Button 
+                    size="lg"
+                    onClick={() => navigate('/dreamlining-calculator')}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  >
+                    เริ่มฟรีเลย
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    onClick={() => navigate('/toolbox')}
+                  >
+                    ดูเครื่องมือทั้งหมด
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

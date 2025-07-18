@@ -17,6 +17,8 @@ import {
   Receipt,
   BookOpen,
   Target,
+  Star,
+  Trophy,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -53,10 +55,13 @@ const AdminSidebar: React.FC = () => {
 
   const membershipItems: MenuItem[] = [
     { icon: BookOpen, label: "สมาชิก Reader", path: "/admin/reader-memberships" },
+    { icon: Package, label: "แพ็กเกจ Reader", path: "/admin/reader-packages" },
     { icon: Crown, label: "สมาชิก PRO", path: "/admin/pro-memberships" },
     { icon: Gift, label: "แพ็กเกจ PRO", path: "/admin/pro-packages" },
     { icon: Gem, label: "สมาชิก VIP", path: "/admin/vip-management" },
     { icon: Package2, label: "แพ็กเกจ VIP", path: "/admin/vip-packages" },
+    { icon: Star, label: "สมาชิก Circle", path: "/admin/circle-memberships" },
+    { icon: Trophy, label: "แพ็กเกจ Circle", path: "/admin/circle-packages" },
   ];
 
   const systemItems: MenuItem[] = [

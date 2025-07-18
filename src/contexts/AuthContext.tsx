@@ -2,14 +2,15 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useWelcomeEmail } from '@/hooks/useWelcomeEmail';
+import { useEmailAutomation } from '@/hooks/useEmailAutomation';
+import { useNewsletterSubscription } from '@/hooks/useNewsletterSubscription';
 import { cleanupAuthState } from '@/utils/authCleanup';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password?: string) => Promise<void>;
-  signUp: (email: string, password?: string) => Promise<void>;
+  signIn: (email: string, acceptNewsletter?: boolean) => Promise<void>;
+  signUp: (email: string, acceptNewsletter?: boolean) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -17,8 +18,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { mutate: sendWelcomeEmail } = useWelcomeEmail();
+  
+  const { sendWelcomeSequence } = useEmailAutomation();
+  const { subscribeToNewsletter } = useNewsletterSubscription();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -38,9 +42,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const minutesDiff = timeDiff / (1000 * 60);
             
             if (minutesDiff < 5) {
-              sendWelcomeEmail({
-                userEmail: session.user.email!,
-                userName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || undefined
+              sendWelcomeSequence.mutate({
+                email: session.user.email!,
+                name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+                type: 'signup'
               });
             }
           }
@@ -61,20 +66,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, [sendWelcomeEmail]);
+  }, [sendWelcomeSequence]);
 
-  const signIn = async (email: string, password?: string) => {
+  const signIn = async (email: string, acceptNewsletter?: boolean) => {
     setLoading(true);
     try {
-      const { error } = password
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signInWithOtp({ 
-            email, 
-            options: { 
-              shouldCreateUser: false,
-              emailRedirectTo: `${window.location.origin}/`
-            } 
-          });
+      const { error } = await supabase.auth.signInWithOtp({ 
+        email, 
+        options: { 
+          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            newsletter_subscription: acceptNewsletter || false
+          }
+        } 
+      });
 
       if (error) throw error;
     } finally {
@@ -82,17 +88,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password?: string) => {
+  const signUp = async (email: string, acceptNewsletter?: boolean) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({ 
+      const { data, error } = await supabase.auth.signUp({ 
         email, 
-        password: password || '',
+        password: Math.random().toString(36).slice(-8), // Random password for OTP flow
         options: {
-          emailRedirectTo: `${window.location.origin}/`
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            newsletter_subscription: acceptNewsletter || false
+          }
         }
       });
+      
       if (error) throw error;
+      
+      if (data.user) {
+        // Subscribe to newsletter if user opted in
+        if (acceptNewsletter) {
+          subscribeToNewsletter.mutate({ email });
+        }
+        
+        // Send welcome email sequence
+        sendWelcomeSequence.mutate({
+          email,
+          name: '',
+          type: 'signup'
+        });
+      }
+      
     } finally {
       setLoading(false);
     }

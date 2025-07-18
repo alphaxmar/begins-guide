@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,15 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
-import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
+import { Loader2, Mail } from 'lucide-react';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [acceptNewsletter, setAcceptNewsletter] = useState(true);
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,25 +27,23 @@ const AuthPage = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password) {
-      toast.error('กรุณากรอกอีเมลและรหัสผ่าน');
+    if (!email.trim()) {
+      toast.error('กรุณากรอกอีเมล');
       return;
     }
 
     setLoading(true);
     
     try {
-      await signIn(email, password);
-      toast.success('เข้าสู่ระบบสำเร็จ!');
+      await signIn(email, acceptNewsletter);
+      toast.success('ส่งลิงก์เข้าสู่ระบบไปยังอีเมลของคุณแล้ว!', {
+        description: 'กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อเข้าสู่ระบบ'
+      });
     } catch (error: any) {
       console.error('Login error:', error);
-      if (error.message.includes('Invalid login credentials')) {
-        toast.error('อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง');
-      } else if (error.message.includes('Email not confirmed')) {
-        toast.error('กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ ตรวจสอบกล่องจดหมายของคุณ');
-      } else {
-        toast.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง');
-      }
+      toast.error('เกิดข้อผิดพลาดในการส่งลิงก์เข้าสู่ระบบ', {
+        description: 'กรุณาลองใหม่อีกครั้ง'
+      });
     } finally {
       setLoading(false);
     }
@@ -54,175 +51,171 @@ const AuthPage = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password) {
-      toast.error('กรุณากรอกอีเมลและรหัสผ่าน');
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+    if (!email.trim()) {
+      toast.error('กรุณากรอกอีเมล');
       return;
     }
 
     setLoading(true);
     
     try {
-      await signUp(email, password);
-      toast.success('สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยัน');
+      await signUp(email, acceptNewsletter);
+      toast.success('ส่งลิงก์ยืนยันตัวตนไปยังอีเมลของคุณแล้ว!', {
+        description: 'กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อยืนยันและเข้าสู่ระบบ'
+      });
       setEmail('');
-      setPassword('');
     } catch (error: any) {
       console.error('Signup error:', error);
-      if (error.message.includes('User already registered')) {
-        toast.error('อีเมลนี้ได้ลงทะเบียนแล้ว กรุณาเข้าสู่ระบบหรือใช้อีเมลอื่น');
-      } else if (error.message.includes('Password should be at least 6 characters')) {
-        toast.error('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
-      } else {
-        toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองใหม่อีกครั้ง');
-      }
+      toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก', {
+        description: error.message || 'กรุณาลองใหม่อีกครั้ง'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const redirectTo = location.state?.from?.pathname || '/';
-
   return (
-    <div className="flex justify-center items-center py-12">
-      <Tabs defaultValue="login" className="w-[400px]">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">เข้าสู่ระบบ</TabsTrigger>
-          <TabsTrigger value="signup">สมัครสมาชิก</TabsTrigger>
-        </TabsList>
-        <TabsContent value="login">
-          <Card>
-            <CardHeader>
-              <CardTitle>เข้าสู่ระบบ</CardTitle>
-              <CardDescription>กรอกข้อมูลเพื่อเข้าสู่บัญชีของคุณ</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin}>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">อีเมล</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="m@example.com" 
-                      required 
-                      value={email} 
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-block">
+            <h1 className="text-3xl font-bold text-primary mb-2">begins.Guide</h1>
+          </Link>
+          <p className="text-gray-600">เข้าสู่ระบบหรือสร้างบัญชีใหม่</p>
+        </div>
+
+        <Tabs defaultValue="login" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">เข้าสู่ระบบ</TabsTrigger>
+            <TabsTrigger value="signup">สมัครสมาชิก</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="login">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  เข้าสู่ระบบ
+                </CardTitle>
+                <CardDescription>
+                  ใส่อีเมลเพื่อรับลิงก์เข้าสู่ระบบ
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email">อีเมล</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading}
+                      required
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="password">รหัสผ่าน</Label>
-                      <Link
-                        to="/reset-password"
-                        className="ml-auto inline-block text-sm underline"
-                      >
-                        ลืมรหัสผ่าน?
-                      </Link>
-                    </div>
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      required 
-                      value={password} 
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={loading}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="login-newsletter"
+                      checked={acceptNewsletter}
+                      onCheckedChange={(checked) => setAcceptNewsletter(checked as boolean)}
                     />
+                    <label
+                      htmlFor="login-newsletter"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      รับข่าวสารและเคล็ดลับจาก begins.Guide
+                    </label>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={loading}
+                  >
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        กำลังเข้าสู่ระบบ...
+                        กำลังส่งลิงก์...
                       </>
                     ) : (
-                      'เข้าสู่ระบบ'
+                      'ส่งลิงก์เข้าสู่ระบบ'
                     )}
                   </Button>
-                </div>
-              </form>
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    หรือเข้าสู่ระบบด้วย
-                  </span>
-                </div>
-              </div>
-              <SocialLoginButtons redirectTo={redirectTo} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="signup">
-          <Card>
-            <CardHeader>
-              <CardTitle>สมัครสมาชิก</CardTitle>
-              <CardDescription>สร้างบัญชีใหม่เพื่อเริ่มต้นใช้งาน</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSignup}>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="signup">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  สมัครสมาชิก
+                </CardTitle>
+                <CardDescription>
+                  สร้างบัญชีใหม่เพื่อเริ่มต้นเรียนรู้
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
                     <Label htmlFor="signup-email">อีเมล</Label>
-                    <Input 
-                      id="signup-email" 
-                      type="email" 
-                      placeholder="m@example.com" 
-                      required 
-                      value={email} 
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading}
+                      required
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="signup-password">รหัสผ่าน</Label>
-                    <Input 
-                      id="signup-password" 
-                      type="password" 
-                      required 
-                      value={password} 
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={loading}
-                      minLength={6}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="signup-newsletter"
+                      checked={acceptNewsletter}
+                      onCheckedChange={(checked) => setAcceptNewsletter(checked as boolean)}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร
-                    </p>
+                    <label
+                      htmlFor="signup-newsletter"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      รับข่าวสารและเคล็ดลับจาก begins.Guide
+                    </label>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={loading}
+                  >
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        กำลังสร้างบัญชี...
+                        กำลังสมัครสมาชิก...
                       </>
                     ) : (
-                      'สร้างบัญชี'
+                      'สมัครสมาชิกฟรี'
                     )}
                   </Button>
-                </div>
-              </form>
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    หรือสมัครด้วย
-                  </span>
-                </div>
-              </div>
-              <SocialLoginButtons redirectTo={redirectTo} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            เมื่อคุณสมัครสมาชิก คุณยอมรับ{' '}
+            <Link to="/privacy" className="text-primary hover:underline">
+              นโยบายความเป็นส่วนตัว
+            </Link>{' '}
+            และ{' '}
+            <Link to="/terms" className="text-primary hover:underline">
+              เงื่อนไขการใช้งาน
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
