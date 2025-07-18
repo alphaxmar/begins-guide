@@ -12,7 +12,7 @@ import { useState } from 'react';
 const AIToolsPage = () => {
   const { user } = useAuth();
   const { hasBookAccess, hasCourseAccess } = useCourseAccess();
-  const { isProMember } = useVipStatus();
+  const { isVip } = useVipStatus();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Redirect non-authenticated users to login
@@ -21,7 +21,7 @@ const AIToolsPage = () => {
   }
 
   // Block users without any access
-  if (!hasBookAccess && !hasCourseAccess && !isProMember) {
+  if (!hasBookAccess && !hasCourseAccess && !isVip) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container mx-auto px-4">
@@ -77,9 +77,9 @@ const AIToolsPage = () => {
             <CardHeader>
               <CardTitle>เครื่องมือที่คุณสามารถเข้าถึงได้</CardTitle>
               <CardDescription>
-                {isProMember && "คุณเป็น Pro Member สามารถเข้าถึงเครื่องมือทั้งหมดได้"}
-                {!isProMember && hasCourseAccess && "คุณซื้อคอร์ส สามารถเข้าถึงเครื่องมือได้ 4 เครื่องมือ"}
-                {!isProMember && !hasCourseAccess && hasBookAccess && "คุณซื้อหนังสือ สามารถเข้าถึงเครื่องมือได้ 1 เครื่องมือ"}
+                {isVip && "คุณเป็น Pro Member สามารถเข้าถึงเครื่องมือทั้งหมดได้"}
+                {!isVip && hasCourseAccess && "คุณซื้อคอร์ส สามารถเข้าถึงเครื่องมือได้ 4 เครื่องมือ"}
+                {!isVip && !hasCourseAccess && hasBookAccess && "คุณซื้อหนังสือ สามารถเข้าถึงเครื่องมือได้ 1 เครื่องมือ"}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -115,7 +115,7 @@ const AIToolsPage = () => {
                       <p className="text-sm text-gray-600">สร้าง Buyer Persona และวิเคราะห์พฤติกรรมลูกค้า</p>
                     </div>
                   </li>
-                  {(hasCourseAccess || isProMember) && (
+                  {(hasCourseAccess || isVip) && (
                     <>
                       <li className="flex items-start">
                         <FileText className="h-5 w-5 mr-3 mt-0.5 text-primary" />
@@ -133,7 +133,7 @@ const AIToolsPage = () => {
                       </li>
                     </>
                   )}
-                  {isProMember && (
+                  {isVip && (
                     <li className="flex items-start">
                       <Sparkles className="h-5 w-5 mr-3 mt-0.5 text-primary" />
                       <div>

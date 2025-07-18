@@ -632,9 +632,10 @@ const DreamlineToolPage = () => {
           />
           
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => navigate('/dashboard')}
             size="lg"
+            className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium"
           >
             ไปยังแดชบอร์ด
           </Button>

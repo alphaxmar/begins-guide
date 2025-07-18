@@ -47,7 +47,7 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
     subscribeToNewsletter.mutate(
       { 
         email: email.trim(), 
-        name: showName ? name.trim() : undefined 
+        source: 'newsletter_signup'
       },
       {
         onSuccess: () => {
