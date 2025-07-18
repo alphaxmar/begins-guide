@@ -15,6 +15,8 @@ import {
   Gem,
   Package2,
   Receipt,
+  BookOpen,
+  Target,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -42,6 +44,7 @@ const AdminSidebar: React.FC = () => {
 
   const menuItems: MenuItem[] = [
     { icon: BarChart3, label: "แดชบอร์ด", path: "/admin/dashboard" },
+    { icon: Target, label: "Value Ladder Analytics", path: "/admin/value-ladder" },
     { icon: Users, label: "ผู้ใช้งาน", path: "/admin/users" },
     { icon: ShoppingCart, label: "คำสั่งซื้อ", path: "/admin/orders" },
     { icon: Package, label: "สินค้า", path: "/admin/products" },
@@ -49,6 +52,7 @@ const AdminSidebar: React.FC = () => {
   ];
 
   const membershipItems: MenuItem[] = [
+    { icon: BookOpen, label: "สมาชิก Reader", path: "/admin/reader-memberships" },
     { icon: Crown, label: "สมาชิก PRO", path: "/admin/pro-memberships" },
     { icon: Gift, label: "แพ็กเกจ PRO", path: "/admin/pro-packages" },
     { icon: Gem, label: "สมาชิก VIP", path: "/admin/vip-management" },
@@ -56,6 +60,7 @@ const AdminSidebar: React.FC = () => {
   ];
 
   const systemItems: MenuItem[] = [
+    { icon: Target, label: "Beginner Analytics", path: "/admin/beginner-analytics" },
     { icon: UserCheck, label: "Affiliates", path: "/admin/affiliates" },
     { icon: Percent, label: "โค้ดส่วนลด", path: "/admin/discount-codes" },
     { icon: CreditCard, label: "การชำระเงิน", path: "/admin/payment-settings" },

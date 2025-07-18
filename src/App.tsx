@@ -77,6 +77,9 @@ import AIToolsPage from '@/pages/AIToolsPage';
 import VipCoursesPage from '@/pages/VipCoursesPage';
 import VipTemplatesPage from '@/pages/VipTemplatesPage';
 import DreamlineCalculatorPage from '@/pages/DreamlineCalculatorPage';
+import ValueLadderDashboardPage from '@/pages/admin/ValueLadderDashboardPage';
+import ReaderMembershipsPage from '@/pages/admin/ReaderMembershipsPage';
+import BeginnerAnalyticsPage from '@/pages/admin/BeginnerAnalyticsPage';
 import ValueLadderDashboard from '@/pages/ValueLadderDashboard';
 import ReaderDashboard from '@/pages/ReaderDashboard';
 import ProMemberDashboard from '@/pages/ProMemberDashboard';
@@ -186,10 +189,13 @@ function App() {
         <Route path="articles/:id/edit" element={<EditArticle />} />
         <Route path="discount-codes" element={<DiscountCodesPage />} />
         <Route path="affiliates" element={<AdminAffiliatesPage />} />
+        <Route path="reader-memberships" element={<ReaderMembershipsPage />} />
         <Route path="pro-memberships" element={<ProMembershipsPage />} />
         <Route path="pro-packages" element={<ProPackagesPage />} />
         <Route path="vip-management" element={<VipManagementPage />} />
         <Route path="vip-packages" element={<VipPackagesPage />} />
+        <Route path="value-ladder" element={<ValueLadderDashboardPage />} />
+        <Route path="beginner-analytics" element={<BeginnerAnalyticsPage />} />
         <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
         <Route path="payment-slips" element={<AdminPaymentSlipsPage />} />
         <Route path="email-templates" element={<AdminEmailPage />} />
